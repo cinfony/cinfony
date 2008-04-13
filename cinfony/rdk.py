@@ -1,10 +1,24 @@
 import os
+import cinfony
+
 from Chem import AllChem as rdkit
 from Chem.AvailDescriptors import descDict as descriptors
 import Chem.MACCSkeys
 import Chem.AtomPairs.Pairs
 import Chem.AtomPairs.Torsions
 import DataStructs
+
+fps = ['Daylight', 'MACCS', 'atompairs', 'torsions']
+
+_formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
+            'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
+informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
+outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
+
+_bondtypes = {1: rdkit.BondType.SINGLE,
+              2: rdkit.BondType.DOUBLE,
+              3: rdkit.BondType.TRIPLE}
+_revbondtypes = dict([(y,x) for (x,y) in _bondtypes.iteritems()])
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.
@@ -63,13 +77,11 @@ def readstring(format, string):
         raise ValueError,"%s is not a recognised OpenBabel format" % format
        
 
-class Molecule(object):
-    """Represent a Pybel molecule.
+class Molecule(cinfony.Molecule):
+    """Represent an RDKit molecule.
 
-    Optional parameters:
-       OBMol -- an Open Babel molecule (default is None)
-    
-    An empty Molecule is created if an Open Babel molecule is not provided.
+    Required parameter:
+       Mol -- an RDKit Mol or any cinfony Molecule
     
     Attributes:
        atoms, charge, data, dim, energy, exactmass, flags, formula, 
@@ -79,15 +91,14 @@ class Molecule(object):
     Methods:
        write(), calcfp(), calcdesc()
       
-    The original Open Babel molecule can be accessed using the attribute:
-       OBMol
+    The underlying RDKit Mol can be accessed using the attribute:
+       Mol
     """
 
     def __init__(self, Mol):
-        if hasattr(Mol, "_myname"):
+        if hasattr(Mol, "atoms") and hasattr(Mol, "_bonds"):
             Mol = self._buildMol(Mol)
         self.Mol = Mol
-        self._myname = True
    
     def _buildMol(self, molecule):
         rdmol = rdkit.Mol()
@@ -97,13 +108,11 @@ class Molecule(object):
             if hasattr(atom, "formalcharge"):
                 rdatom.SetFormalCharge(atom.formalcharge)
             rdedmol.AddAtom(rdatom)
-        bondtypes = {1: rdkit.BondType.SINGLE,
-                     2: rdkit.BondType.DOUBLE,
-                     3: rdkit.BondType.TRIPLE}
+        
         for bond in molecule._bonds:
             rdedmol.AddBond(bond[0],
                             bond[1],
-                            bondtypes[bond[2]])
+                            _bondtypes[bond[2]])
         rdmol = rdedmol.GetMol()
         rdkit.SanitizeMol(rdmol)
         return rdmol        
@@ -121,21 +130,18 @@ class Molecule(object):
             return MoleculeData(self.Mol)
         elif attr == "molwt":
             return descriptors['MolWt'](self.Mol)
+        elif attr == "_bonds":
+            rdkit.Kekulize(self.Mol)
+            ans = [(x.GetBeginAtomIdx(), x.GetEndAtomIdx(),
+                    _revbondtypes[x.GetBondType()])
+                   for x in self.Mol.GetBonds()]
+            rdkit.SanitizeMol(self.Mol)
+            return ans
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
     def addh(self):
         self.Mol = rdkit.AddHs(self.Mol)
-
-    def __iter__(self):
-        """Iterate over the Atoms of the Molecule.
-        
-        This allows constructions such as the following:
-           for atom in mymol:
-               print atom
-        """
-        for atom in self.atoms:
-            yield Atom(atom)
 
     def write(self, format="SMI", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
@@ -167,9 +173,6 @@ class Molecule(object):
         else:
             return result
 
-    def __str__(self):
-        return self.write("smi")
-
     def calcdesc(self, descnames=[]):
         """Calculate descriptor values.
 
@@ -186,7 +189,7 @@ class Molecule(object):
             try:
                 desc = descriptors[descname]
             except KeyError:
-                raise ValueError, "%s is not a recognised Open Babel descriptor type" % descname
+                raise ValueError, "%s is not a recognised RDKit descriptor type" % descname
             ans[descname] = desc(self.Mol)
         return ans
 
@@ -212,7 +215,7 @@ class Molecule(object):
             # Going to leave as-is.
             fp = Chem.AtomPairs.Torsions.GetTopologicalTorsionFingerprintAsIntVect(self.Mol)
         else:
-            raise ValueError, "%s is not a recognised RDKit Fingerprint type" % fptype            
+            raise ValueError, "%s is not a recognised RDKit Fingerprint type" % fptype
         return fp
 
 class Atom(object):
@@ -470,12 +473,6 @@ def _compressbits(bitvector, wordsize=32):
             
 
 if __name__=="__main__": #pragma: no cover
-    # import doctest
-    # doctest.testmod()
-    
-    mol = readstring("smi", "CCCC")
-    # print sorted(descriptors.keys())
-    fp = mol.calcfp("torsions")
-    print fp
-    
+    import doctest
+    doctest.testmod()
     
