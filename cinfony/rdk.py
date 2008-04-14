@@ -19,6 +19,12 @@ _bondtypes = {1: rdkit.BondType.SINGLE,
               2: rdkit.BondType.DOUBLE,
               3: rdkit.BondType.TRIPLE}
 _revbondtypes = dict([(y,x) for (x,y) in _bondtypes.iteritems()])
+_chiralities = {0: rdkit.ChiralType.CHI_UNSPECIFIED,
+                1: rdkit.ChiralType.CHI_TETRAHEDRAL_CCW,
+                2: rdkit.ChiralType.CHI_TETRAHEDRAL_CW
+                }
+_revchiralities = dict([(y,x) for (x,y) in _chiralities.iteritems()])
+
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.
@@ -96,17 +102,16 @@ class Molecule(cinfony.Molecule):
     """
 
     def __init__(self, Mol):
-        if hasattr(Mol, "atoms") and hasattr(Mol, "_bonds"):
+        if hasattr(Mol, "_atoms") and hasattr(Mol, "_bonds"):
             Mol = self._buildMol(Mol)
         self.Mol = Mol
    
     def _buildMol(self, molecule):
         rdmol = rdkit.Mol()
         rdedmol = rdkit.EditableMol(rdmol)
-        for atom in molecule.atoms:
-            rdatom = rdkit.Atom(atom.atomicnum)
-            if hasattr(atom, "formalcharge"):
-                rdatom.SetFormalCharge(atom.formalcharge)
+        for atomnum, coords, chirality in molecule._atoms:
+            rdatom = rdkit.Atom(atomnum)
+            rdatom.SetChiralTag(_chiralities[chirality])
             rdedmol.AddAtom(rdatom)
         
         for bond in molecule._bonds:
@@ -137,6 +142,16 @@ class Molecule(cinfony.Molecule):
                    for x in self.Mol.GetBonds()]
             rdkit.SanitizeMol(self.Mol)
             return ans
+        elif attr == "_atoms":
+            atoms = []
+            for atom in self.atoms:
+                try:
+                    coords = atom.coords
+                except AttributeError:
+                    coords = None
+                atoms.append((atom.atomicnum, coords,
+                              _revchiralities[atom.Atom.GetChiralTag()]))
+            return atoms
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -221,12 +236,9 @@ class Molecule(cinfony.Molecule):
 class Atom(object):
     """Represent a Pybel atom.
 
-    Optional parameters:
-       OBAtom -- an Open Babel Atom (default is None)
-       index -- the index of the atom in the molecule (default is None)
+    Required parameters:
+       Atom -- an RDKit Atom
      
-    An empty Atom is created if an Open Babel atom is not provided.
-    
     Attributes:
        atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
@@ -235,8 +247,8 @@ class Atom(object):
 
     (refer to the Open Babel library documentation for more info).
     
-    The original Open Babel atom can be accessed using the attribute:
-       OBAtom
+    The original RDKit Atom can be accessed using the attribute:
+       Atom
     """
     
     _getmethods = {
@@ -260,17 +272,19 @@ class Atom(object):
         #'vector':'GetVector',
         }
 
-    def __init__(self, RDKatom):
-        self.RDKatom = RDKatom
+    def __init__(self, Atom):
+        self.Atom = Atom
         
     def __getattr__(self, attr):
         if attr == "coords":
-            idx = self.RDKatom.GetIdx()
-            conformer = self.RDKatom.GetOwningMol().GetConformer()
-            atomcoords = conformer.GetAtomPosition(idx)
+            owningmol = self.Atom.GetOwningMol()
+            if owningmol.GetNumConformers() == 0:
+                raise AttributeError, "Atom has no coordinates (0D structure)"
+            idx = self.Atom.GetIdx()
+            atomcoords = owningmol.GetConformer().GetAtomPosition(idx)
             return (atomcoords[0], atomcoords[1], atomcoords[2])
         elif attr in self._getmethods:
-            return getattr(self.RDKatom, self._getmethods[attr])()        
+            return getattr(self.Atom, self._getmethods[attr])()        
         else:
             raise AttributeError, "Atom has no attribute %s" % attr
 
@@ -281,9 +295,11 @@ class Atom(object):
         >>> print a
         Atom: 0 (0.0, 0.0, 0.0)
         """
-        return "Atom: %d (%.4f, %.4f, %.4f)" % (self.atomicnum, self.coords[0],
-                                                self.coords[1], self.coords[2])
-
+        if hasattr(self, "coords"):
+            return "Atom: %d (%.4f, %.4f, %.4f)" % (self.atomicnum, self.coords[0],
+                                                    self.coords[1], self.coords[2])
+        else:
+            return "Atom: %d (no coords)" % (self.atomicnum)
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
