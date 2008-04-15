@@ -1,30 +1,44 @@
 import os
 import cinfony
 
-from Chem import AllChem as rdkit
-from Chem.AvailDescriptors import descDict as descriptors
+from Chem import AllChem
+from Chem.Draw import MolDrawing
+from Chem.AvailDescriptors import descDict
+from sping.PIL.pidPIL import PILCanvas as Canvas
+
+import DataStructs
 import Chem.MACCSkeys
 import Chem.AtomPairs.Pairs
 import Chem.AtomPairs.Torsions
-import DataStructs
+
+# PIL and Tkinter
+try:
+    import Tkinter as tk
+    import ImageTk as piltk
+except:
+    piltk = None
 
 fps = ['Daylight', 'MACCS', 'atompairs', 'torsions']
+descs = descDict.keys()
 
 _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
             'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
 informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
 outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
 
-_bondtypes = {1: rdkit.BondType.SINGLE,
-              2: rdkit.BondType.DOUBLE,
-              3: rdkit.BondType.TRIPLE}
+_bondtypes = {1: Chem.BondType.SINGLE,
+              2: Chem.BondType.DOUBLE,
+              3: Chem.BondType.TRIPLE}
 _revbondtypes = dict([(y,x) for (x,y) in _bondtypes.iteritems()])
-_chiralities = {0: rdkit.ChiralType.CHI_UNSPECIFIED,
-                1: rdkit.ChiralType.CHI_TETRAHEDRAL_CCW,
-                2: rdkit.ChiralType.CHI_TETRAHEDRAL_CW
+_chiralities = {0: Chem.ChiralType.CHI_UNSPECIFIED,
+                1: Chem.ChiralType.CHI_TETRAHEDRAL_CCW,
+                2: Chem.ChiralType.CHI_TETRAHEDRAL_CW
                 }
 _revchiralities = dict([(y,x) for (x,y) in _chiralities.iteritems()])
-
+_bondstereo = {0: Chem.rdchem.BondStereo.STEREONONE,
+               1: Chem.rdchem.BondStereo.STEREOE,
+               2: Chem.rdchem.BondStereo.STEREOZ}
+_revbondstereo = dict([(y,x) for (x,y) in _bondstereo.iteritems()])
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.
@@ -54,11 +68,11 @@ def readfile(format, filename):
         raise IOError, "No such file: '%s'" % filename    
     format = format.lower()    
     if format=="sdf":
-        iterator = rdkit.SDMolSupplier(filename)
+        iterator = Chem.SDMolSupplier(filename)
         for mol in iterator:
             yield Molecule(mol)
     elif format=="mol":
-        yield Molecule(rdkit.MolFromMolFile(filename))
+        yield Molecule(Chem.MolFromMolFile(filename))
     else:
         raise ValueError,"%s is not a recognised OpenBabel format" % format
 
@@ -76,12 +90,11 @@ def readstring(format, string):
     """
     format = format.lower()    
     if format=="mol":
-        return Molecule(rdkit.MolFromMolBlock(string))
+        return Molecule(Chem.MolFromMolBlock(string))
     elif format=="smi":
-        return Molecule(rdkit.MolFromSmiles(string))
+        return Molecule(Chem.MolFromSmiles(string))
     else:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
-       
+        raise ValueError,"%s is not a recognised OpenBabel format" % format    
 
 class Molecule(cinfony.Molecule):
     """Represent an RDKit molecule.
@@ -107,19 +120,25 @@ class Molecule(cinfony.Molecule):
         self.Mol = Mol
    
     def _buildMol(self, molecule):
-        rdmol = rdkit.Mol()
-        rdedmol = rdkit.EditableMol(rdmol)
-        for atomnum, coords, chirality in molecule._atoms:
-            rdatom = rdkit.Atom(atomnum)
-            rdatom.SetChiralTag(_chiralities[chirality])
+        rdmol = Chem.Mol()
+        rdedmol = Chem.EditableMol(rdmol)
+        for atom in molecule._atoms:
+            rdatom = Chem.Atom(atom[0])
+            if len(atom) > 2:
+                rdatom.SetChiralTag(_chiralities[atom[2]])
             rdedmol.AddAtom(rdatom)
-        
-        for bond in molecule._bonds:
+        bonds = molecule._bonds
+        for bond in bonds:
             rdedmol.AddBond(bond[0],
                             bond[1],
                             _bondtypes[bond[2]])
+
         rdmol = rdedmol.GetMol()
-        rdkit.SanitizeMol(rdmol)
+        if len(bonds[0]) > 3: # Includes stereochemical information
+            for bond, newbond in zip(molecule._bonds, rdmol.GetBonds()):
+                newbond.SetStereo(_bondstereo[bond[3]])
+
+        Chem.SanitizeMol(rdmol)
         return rdmol        
 
     def __getattr__(self, attr):
@@ -134,14 +153,15 @@ class Molecule(cinfony.Molecule):
         elif attr == "data":
             return MoleculeData(self.Mol)
         elif attr == "molwt":
-            return descriptors['MolWt'](self.Mol)
+            return descDict['MolWt'](self.Mol)
         elif attr == "_bonds":
-            rdkit.Kekulize(self.Mol)
-            ans = [(x.GetBeginAtomIdx(), x.GetEndAtomIdx(),
-                    _revbondtypes[x.GetBondType()])
-                   for x in self.Mol.GetBonds()]
-            rdkit.SanitizeMol(self.Mol)
-            return ans
+            Chem.Kekulize(self.Mol)
+            bonds = [(x.GetBeginAtomIdx(), x.GetEndAtomIdx(),
+                      _revbondtypes[x.GetBondType()],
+                      _revbondstereo[x.GetStereo()])
+                     for x in self.Mol.GetBonds()]
+            Chem.SanitizeMol(self.Mol)
+            return bonds
         elif attr == "_atoms":
             atoms = []
             for atom in self.atoms:
@@ -156,8 +176,11 @@ class Molecule(cinfony.Molecule):
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
     def addh(self):
-        self.Mol = rdkit.AddHs(self.Mol)
-
+        self.Mol = Chem.AddHs(self.Mol)
+        
+    def removeh(self):
+        self.Mol = Chem.RemoveHs(self.Mol)
+        
     def write(self, format="SMI", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
         
@@ -176,9 +199,9 @@ class Molecule(cinfony.Molecule):
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
         if format=="smi":
-            result = rdkit.MolToSmiles(self.Mol)
+            result = Chem.MolToSmiles(self.Mol)
         elif format=="iso":
-            result = rdkit.MolToSmiles(self.Mol, isomericSmiles=True)
+            result = Chem.MolToSmiles(self.Mol, isomericSmiles=True)
         elif format=="mol":
             result = rdk.MolToMolBlock(self.Mol)
         else:
@@ -198,11 +221,11 @@ class Molecule(cinfony.Molecule):
         descriptors is calculated: LogP, PSA and MR.
         """
         if not descnames:
-            descnames = descriptors.keys()
+            descnames = descs
         ans = {}
         for descname in descnames:
             try:
-                desc = descriptors[descname]
+                desc = descDict[descname]
             except KeyError:
                 raise ValueError, "%s is not a recognised RDKit descriptor type" % descname
             ans[descname] = desc(self.Mol)
@@ -220,7 +243,7 @@ class Molecule(cinfony.Molecule):
         """
         fptype = fptype.lower()
         if fptype=="daylight":
-            fp = Fingerprint(rdkit.DaylightFingerprint(self.Mol))
+            fp = Fingerprint(Chem.DaylightFingerprint(self.Mol))
         elif fptype=="maccs":
             fp = Fingerprint(Chem.MACCSkeys.GenMACCSKeys(self.Mol))
         elif fptype=="atompairs":
@@ -233,6 +256,30 @@ class Molecule(cinfony.Molecule):
             raise ValueError, "%s is not a recognised RDKit Fingerprint type" % fptype
         return fp
 
+    def draw(self, show=True, filename=None, update=False):
+        if update:
+            AllChem.Compute2DCoords(self.Mol)
+        else:
+            AllChem.Compute2DCoords(self.Mol, clearConfs = False)
+        if show or filename:
+            Chem.Kekulize(self.Mol)
+            canvas = Canvas(size=(200,200))
+            drawer = MolDrawing.MolDrawing(canvas=canvas)
+            drawer.AddMol(self.Mol)
+            if filename: # Allow overwrite?
+                canvas.save(filename)
+            if show:
+                image = canvas.getImage()
+                root = tk.Tk()
+                root.title((hasattr(self, "title") and self.title)
+                           or self.__str__().rstrip())
+                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+                imagedata = piltk.PhotoImage(image)
+                label = tk.Label(frame, image=imagedata).pack()
+                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+                root.mainloop()
+            Chem.SanitizeMol(self.Mol)
+        
 class Atom(object):
     """Represent a Pybel atom.
 
@@ -324,9 +371,9 @@ class Outputfile(object):
         if not overwrite and os.path.isfile(self.filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
         if format=="sdf":
-            self._writer = rdkit.SDWriter(self.filename)
+            self._writer = Chem.SDWriter(self.filename)
         elif format=="smi":
-            self._writer = rdkit.SmilesWriter(self.filename)
+            self._writer = Chem.SmilesWriter(self.filename)
         else:
             raise ValueError,"%s is not a recognised OpenBabel format" % format
         self.total = 0 # The total number of molecules written to the file
@@ -366,7 +413,7 @@ class Smarts(object):
     """
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
-        self.rdksmarts = rdkit.MolFromSmarts(smartspattern)
+        self.rdksmarts = Chem.MolFromSmarts(smartspattern)
 
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.

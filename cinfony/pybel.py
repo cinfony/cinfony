@@ -1,8 +1,22 @@
 import math
 import os.path
+import tempfile
 import openbabel as ob
 
 import cinfony
+
+try:
+    import oasa
+    import oasa.cairo_out
+except ImportError:
+    oasa = None
+
+try:
+    import Tkinter as tk
+    import Image as PIL
+    import ImageTk as piltk
+except ImportError:
+    tk = None
 
 def _formatstodict(list):
     broken = [x.replace("[Read-only]", "").replace("[Write-only]","").split(" -- ") for x in list]
@@ -189,8 +203,9 @@ class Molecule(cinfony.Molecule):
                 return ob.toUnitCell(unitcell)
             else:
                 raise AttributeError, "Molecule has no attribute 'unitcell'"
+        elif attr == "_atoms":
+            return [(x.GetAtomicNum(),) for x in ob.OBMolAtomIter(self.OBMol)]
         elif attr == "_bonds":
-            print [x.GetBO() for x in ob.OBMolBondIter(self.OBMol)]
             return [(x.GetBeginAtomIdx()-1, x.GetEndAtomIdx()-1, x.GetBO())
                     for x in ob.OBMolBondIter(self.OBMol)]
         elif attr in self._getmethods:
@@ -329,6 +344,42 @@ class Molecule(cinfony.Molecule):
     def __str__(self):
         return self.write()
 
+    def draw(self, show=True, filename=None, update=False):
+        etab = ob.OBElementTable()
+        mol = oasa.molecule()
+        for atom in self._atoms:
+            v = mol.create_vertex()
+            v.symbol = etab.GetSymbol(atom[0])
+            mol.add_vertex(v)
+        for bond in self._bonds:
+            e = mol.create_edge()
+            e.order = bond[2]
+            mol.add_edge(bond[0], bond[1], e)
+        oasa.coords_generator.calculate_coords(mol, bond_length=30)
+        if update:
+            newcoords = [(v.x / 30., v.y / 30., 0.0) for v in mol.vertices]
+            for atom, newcoord in zip(ob.OBMolAtomIter(self.OBMol), newcoords):
+                atom.SetVector(*newcoord)
+        if filename or show:
+            if filename:
+                filedes = None
+            else:
+                filedes, filename = tempfile.mkstemp()
+            
+            oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
+            if show:
+                root = tk.Tk()
+                root.title((hasattr(self, "title") and self.title)
+                           or self.__str__().rstrip())
+                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+                image = PIL.open(filename)
+                imagedata = piltk.PhotoImage(image)
+                label = tk.Label(frame, image=imagedata).pack()
+                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+                root.mainloop()
+            if filedes:
+                os.close(filedes)
+                os.remove(filename)
 
 class Atom(object):
     """Represent a Pybel atom.
