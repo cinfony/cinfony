@@ -89,7 +89,10 @@ def readstring(format, string):
     if not formatok:
         raise ValueError,"%s is not a recognised OpenBabel format" % format
 
-    obconversion.ReadString(obmol, string)
+    success = obconversion.ReadString(obmol, string)
+    if not success:
+        raise IOError, "Failed to convert '%s' to format '%s'" % (
+            string, format)
     return Molecule(obmol)
 
 class Outputfile(object):
@@ -177,12 +180,12 @@ class Molecule(cinfony.Molecule):
         'spin':'GetTotalSpinMultiplicity'
     }
     
-    def __init__(self, OBMol=None):
-
+    def __init__(self, OBMol):
+        
+        if hasattr(OBMol, "_xchange"):
+            OBMol = readstring("smi", OBMol._xchange).OBMol
         self.OBMol = OBMol
-        if not self.OBMol:
-            self.OBMol = ob.OBMol()
-
+ 
     def __getattr__(self, attr):
         """Return the value of an attribute
 
@@ -211,6 +214,8 @@ class Molecule(cinfony.Molecule):
         elif attr in self._getmethods:
             # Call the OB Method to find the attribute value
             return getattr(self.OBMol, self._getmethods[attr])()
+        elif attr == "_xchange":
+            return self.write("can").split("\t")[0]
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -275,7 +280,6 @@ class Molecule(cinfony.Molecule):
         The overwrite flag is ignored if a filename is not specified.
         It controls whether to overwrite an existing file.
         """
-
         obconversion = ob.OBConversion()
         formatok = obconversion.SetOutFormat(format)
         if not formatok:

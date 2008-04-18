@@ -1,11 +1,40 @@
 import os
+import tempfile
+import cinfony
+
 from jpype import *
 
 jvm = os.environ['JPYPE_JVM']
 cp = os.environ['CLASSPATH']
 startJVM(jvm, "-Djava.class.path=" + cp)
 
+try:
+    import oasa
+    import oasa.cairo_out
+except ImportError:
+    oasa = None
+
+try:
+    import Tkinter as tk
+    import Image as PIL
+    import ImageTk as piltk
+except ImportError:
+    tk = None
+
 cdk = JPackage("org").openscience.cdk
+
+def _getdescdict():
+    de = cdk.qsar.DescriptorEngine(cdk.qsar.DescriptorEngine.MOLECULAR)
+    descdict = {}
+    for desc in de.getDescriptorInstances():
+        spec = desc.getSpecification()
+        descclass = de.getDictionaryClass(spec)
+        if "proteinDescriptor" not in descclass:
+            name = spec.getSpecificationReference().split("#")[-1]
+            descdict[name] = desc
+    return descdict
+_descdict = _getdescdict()
+descriptors = _descdict.keys()
 
 #from org.openscience.cdk.io.iterator import IteratingMDLReader
 #from org.openscience.cdk.io import ReaderFactory, WriterFactory, SMILESWriter
@@ -111,6 +140,12 @@ cdk = JPackage("org").openscience.cdk
 ##outformats = dict([(x,y) for (x,y) in _formatlookup.iteritems()
 ##                  if y in _outformats])
 
+_isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
+
+_bondtypes = {1: cdk.CDKConstants.BONDORDER_SINGLE,
+              2: cdk.CDKConstants.BONDORDER_DOUBLE,
+              3: cdk.CDKConstants.BONDORDER_TRIPLE}
+_revbondtypes = dict([(y,x) for (x,y) in _bondtypes.iteritems()])
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.
@@ -181,7 +216,7 @@ def readstring(format, string):
     else:
         raise ValueError,"%s is not a recognised OpenBabel format" % format
     
-class Molecule(object):
+class Molecule(cinfony.Molecule):
     """Represent a Pybel molecule.
 
     Optional parameters:
@@ -219,7 +254,9 @@ class Molecule(object):
     }
     
     def __init__(self, CDKMol):
-
+        
+        if hasattr(CDKMol, "_xchange"):
+            CDKMol = readstring("smi", CDKMol._xchange).CDKMol
         self.CDKMol = CDKMol
         
     def __getattr__(self, attr):
@@ -229,19 +266,32 @@ class Molecule(object):
         a variable if you repeatedly access the same attribute.
         """
         if attr == "atoms":
-            return [Atom(self.CDKMol.getAtom(i)) for i in range(self.CDKMol.getAtomCount()) ]
+            return [Atom(self.CDKMol.getAtom(i)) for i in range(self.CDKMol.getAtomCount())]
+        elif attr == "_atoms":
+            ans = []
+            for i in range(self.CDKMol.getAtomCount()):
+                atom = self.CDKMol.getAtom(i)
+                _isofact.configure(atom)
+                ans.append( (atom.getAtomicNumber(),) )
+            return ans
         elif attr == 'exactmass':
             # I have probably confused exact, canonical and natural masses
-            return cdk.formula.MolecularFormulaManipulator.getMolecularFormula(self.CDKMol).getCanonicalMass()
+            return cdk.tools.MFAnalyser(self.CDKMol).getMass()
+        elif attr == "data":
+            return MoleculeData(self.CDKMol)
         elif attr == 'molwt':
             # I have probably confused exact, canonical and natural masses
-            return cdk.formula.MolecularFormulaManipulator.getTotalExactMass(
-                cdk.formula.MolecularFormulaManipulator.getMolecularFormula(
-                    self.CDKMol))
+            return cdk.tools.MFAnalyser(self.CDKMol).getCanonicalMass()
         elif attr == 'formula':
-            return cdk.formula.MolecularFormulaManipulator.getString(
-                cdk.formula.MolecularFormulaManipulator.getMolecularFormula(
-                    self.CDKMol))
+            return cdk.tools.MFAnalyser(self.CDKMol).getMolecularFormula()
+        elif attr == "_bonds":
+            ans = []
+            for i in range(self.CDKMol.getBondCount()):
+                bond = self.CDKMol.getBond(i)
+                bo = bond.getOrder()
+                atoms = [self.CDKMol.getAtomNumber(x) for x in bond.atoms()]
+                ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
+            return ans
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -264,11 +314,124 @@ class Molecule(object):
     #    ha.addExplicitHydrogensToSatisfyValency(self.CDKMol)        
 
     def calcfp(self, fp="daylight"):
-        if fp == "substructure":
-            fingerprint = cdk.fingerprint.SubstructureFingerprinter
+        # if fp == "substructure":
+        #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
+        #        cdk.fingerprint.StandardSubstructureSets.getFunctionalGroupSubstructureSet()
+        #        )
+        if fp == "graph":
+            fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
         else:
-            fingerprinter = cdk.fingerprint.Fingerprinter
-        return fingerprinter.getFingerprint(self.CDKMol)
+            fingerprinter = cdk.fingerprint.Fingerprinter()
+        return Fingerprint(fingerprinter.getFingerprint(self.CDKMol))
+
+    def calcdesc(self, descnames=[]):
+        """Calculate descriptor values.
+
+        Optional parameter:
+           descnames -- a list of names of descriptors
+
+        If descnames is not specified, the full list of Open Babel
+        descriptors is calculated: LogP, PSA and MR.
+        """
+        if not descnames:
+            descnames = descriptors
+        ans = {}
+        for descname in descnames:
+            for descname in descnames:
+                try:
+                    desc = _descdict[descname]
+                except KeyError:
+                    raise ValueError, "%s is not a recognised CDK descriptor type" % descname
+                try:
+                    value = desc.calculate(self.CDKMol).getValue()
+                    if hasattr(value, "array"):
+                        for i, x in enumerate(value.array):
+                            ans[descname + ".%d" % i] = x.value
+                    else:
+                        ans[descname] = value.value
+                except JavaException, ex:
+                    # Can happen if molecule has no 3D coordinates
+                    pass
+        return ans    
+
+    def draw(self, show=True, filename=None, update=False):
+        # Do the SDG
+        sdg = cdk.layout.StructureDiagramGenerator()
+        sdg.setMolecule(self.CDKMol)
+        sdg.generateExperimentalCoordinates()
+        newmol = Molecule(sdg.getMolecule())
+        if update:
+            for atom, newatom in zip(self.atoms, newmol.atoms):
+                coords = newatom.Atom.getPoint2d()
+                atom.Atom.setPoint3d(javax.vecmath.Point3d(
+                                     coords.x, coords.y, 0.0))
+        
+        if filename or show:
+            # Create OASA molecule
+            mol = oasa.molecule()
+            for atom, newatom in zip(self._atoms, newmol.atoms):
+                coords = newatom.Atom.getPoint2d()
+                v = mol.create_vertex()
+                v.symbol = _isofact.getElement(atom[0]).getSymbol()
+                mol.add_vertex(v)
+                v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
+            for bond in self._bonds:
+                e = mol.create_edge()
+                e.order = bond[2]
+                mol.add_edge(bond[0], bond[1], e)            
+
+            if filename:
+                filedes = None
+            else:
+                filedes, filename = tempfile.mkstemp()
+            
+            oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
+            if show:
+                root = tk.Tk()
+                root.title((hasattr(self, "title") and self.title)
+                           or self.__str__().rstrip())
+                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+                image = PIL.open(filename)
+                imagedata = piltk.PhotoImage(image)
+                label = tk.Label(frame, image=imagedata).pack()
+                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+                root.mainloop()
+            if filedes:
+                os.close(filedes)
+                os.remove(filename)
+
+class Fingerprint(object):
+    """A Molecular Fingerprint.
+    
+    Required parameters:
+       obFingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+
+    Attributes:
+       fp -- the original obFingerprint
+       bits -- a list of bits set in the Fingerprint
+
+    Methods:
+       The "|" operator can be used to calculate the Tanimoto coeff. For example,
+       given two Fingerprints 'a', and 'b', the Tanimoto coefficient is given by:
+          tanimoto = a | b
+    """
+    def __init__(self, fingerprint):
+        self.fp = fingerprint
+    def __or__(self, other):
+        return cdk.similarity.Tanimoto.calculate(self.fp, other.fp)
+    def __getattr__(self, attr):
+        if attr == "bits":
+            # Create a bits attribute on-the-fly
+            bits = []
+            idx = self.fp.nextSetBit(0)
+            while idx >= 0:
+                bits.append(idx)
+                idx = self.fp.nextSetBit(idx + 1)
+            return bits
+        else:
+            raise AttributeError, "Fingerprint has no attribute %s" % attr
+    def __str__(self):
+        return self.fp.toString()
 
 class Atom(object):
     """Represent a Pybel atom.
@@ -325,7 +488,7 @@ class Atom(object):
         elif attr in self._getmethods:
             return getattr(self.OBAtom, self._getmethods[attr])()
         else:
-            raise AttributeError, "Molecule has no attribute %s" % attr
+            raise AttributeError, "Atom has no attribute %s" % attr
 
     def __str__(self):
         """Create a string representation of the atom.
@@ -364,19 +527,103 @@ class Smarts(object):
         match = self.smarts.matches(molecule.CDKMol)
         return list(self.smarts.getUniqueMatchingAtoms())
 
+class MoleculeData(object):
+    """Store molecule data in a dictionary-type object
+    
+    Required parameters:
+      obmol -- an Open Babel OBMol 
+
+    Methods and accessor methods are like those of a dictionary except
+    that the data is retrieved on-the-fly from the underlying OBMol.
+
+    Example:
+    >>> mol = readfile("sdf", 'head.sdf').next()
+    >>> data = mol.data
+    >>> print data
+    {'Comment': 'CORINA 2.61 0041  25.10.2001', 'NSC': '1'}
+    >>> print len(data), data.keys(), data.has_key("NSC")
+    2 ['Comment', 'NSC'] True
+    >>> print data['Comment']
+    CORINA 2.61 0041  25.10.2001
+    >>> data['Comment'] = 'This is a new comment'
+    >>> for k,v in data.iteritems():
+    ...    print k, "-->", v
+    Comment --> This is a new comment
+    NSC --> 1
+    >>> del data['NSC']
+    >>> print len(data), data.keys(), data.has_key("NSC")
+    1 ['Comment'] False
+    """
+    def __init__(self, mol):
+        self._mol = mol
+    def _data(self):
+        return self._mol.getProperties()
+    def _testforkey(self, key):
+        if not key in self:
+            raise KeyError, "'%s'" % key
+    def keys(self):
+        return list(self._data().keys())
+    def values(self):
+        return list(self._data().values())
+    def items(self):
+        return [(k, self[k]) for k in self._data().keys()]
+    def __iter__(self):
+        return self.keys()
+    def iteritems(self):
+        return iter(self.items())
+    def __len__(self):
+        return len(self._data())
+    def __contains__(self, key):
+        return key in self._data()
+    def __delitem__(self, key):
+        self._testforkey(key)
+        self._mol.removeProperty(key)
+    def clear(self):
+        for key in self:
+            del self[key]
+    def has_key(self, key):
+        return key in self
+    def update(self, dictionary):
+        for k, v in dictionary.iteritems():
+            self[k] = v
+    def __getitem__(self, key):
+        self._testforkey(key)
+        return self._mol.getProperty(key)
+    def __setitem__(self, key, value):
+        self._mol.setProperty(key, str(value))
+    def __repr__(self):
+        return dict(self.iteritems()).__repr__()
+
+##>>> readstring("smi", "CCC").calcfp().bits
+##[542, 637, 742]
+##>>> readstring("smi", "CCC").calcfp("graph").bits
+##[595, 742, 927]
+##>>> readstring("smi", "CC=C").calcfp().bits
+##[500, 588, 637, 742]
+##>>> readstring("smi", "CC=C").calcfp("graph").bits
+##[595, 742, 927]
+##>>> readstring("smi", "C").calcfp().bits
+##[742]
+##>>> readstring("smi", "CC").calcfp().bits
+##[637, 742]
+
+# >>> readstring("smi", "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+# CCCCCCCCCCCCCC").calcdesc(["lipinskifailures"])
+# {'lipinskifailures': 1}
+
 if __name__=="__main__": #pragma: no cover
     mol = readstring("smi", "CCCC")
     print mol
 
     for mol in readfile("sdf", "head.sdf"):
-        print mol.formula, mol.write("smi")
+        pass
+    #mol = readstring("smi","CCN(CC)CC") # triethylamine
+    #smarts = Smarts("[#6][#6]")
+    # print smarts.findall(mol)
+    mol = readstring("smi", "CC=O")
+    # d = mol.calcdesc()
 
-    mol = readstring("smi","CCN(CC)CC") # triethylamine
-    smarts = Smarts("[#6][#6]")
-    print smarts.findall(mol)
-
-
+                
+                
     
-    
-
     

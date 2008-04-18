@@ -115,8 +115,8 @@ class Molecule(cinfony.Molecule):
     """
 
     def __init__(self, Mol):
-        if hasattr(Mol, "_atoms") and hasattr(Mol, "_bonds"):
-            Mol = self._buildMol(Mol)
+        if hasattr(Mol, "_xchange"):
+            Mol = readstring("smi", Mol._xchange).Mol
         self.Mol = Mol
    
     def _buildMol(self, molecule):
