@@ -220,7 +220,7 @@ class Molecule(cinfony.Molecule):
     """Represent a Pybel molecule.
 
     Optional parameters:
-       CDKMol -- an Open Babel molecule (default is None)
+       Molecule -- a CDK Molecule (default is None)
     
     An empty Molecule is created if an Open Babel molecule is not provided.
     
@@ -232,8 +232,8 @@ class Molecule(cinfony.Molecule):
     Methods:
        write(), calcfp(), calcdesc()
       
-    The original Open Babel molecule can be accessed using the attribute:
-       CDKMol
+    The original CDK Molecule can be accessed using the attribute:
+       Molecule
     """
     _getmethods = {
         'conformers':'GetConformers',
@@ -253,11 +253,11 @@ class Molecule(cinfony.Molecule):
         'spin':'GetTotalSpinMultiplicity'
     }
     
-    def __init__(self, CDKMol):
+    def __init__(self, Molecule):
         
-        if hasattr(CDKMol, "_xchange"):
-            CDKMol = readstring("smi", CDKMol._xchange).CDKMol
-        self.CDKMol = CDKMol
+        if hasattr(Molecule, "_xchange"):
+            Molecule = readstring("smi", Molecule._xchange).Molecule
+        self.Molecule = Molecule
         
     def __getattr__(self, attr):
         """Return the value of an attribute
@@ -266,30 +266,30 @@ class Molecule(cinfony.Molecule):
         a variable if you repeatedly access the same attribute.
         """
         if attr == "atoms":
-            return [Atom(self.CDKMol.getAtom(i)) for i in range(self.CDKMol.getAtomCount())]
+            return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
         elif attr == "_atoms":
             ans = []
-            for i in range(self.CDKMol.getAtomCount()):
-                atom = self.CDKMol.getAtom(i)
+            for i in range(self.Molecule.getAtomCount()):
+                atom = self.Molecule.getAtom(i)
                 _isofact.configure(atom)
                 ans.append( (atom.getAtomicNumber(),) )
             return ans
         elif attr == 'exactmass':
             # I have probably confused exact, canonical and natural masses
-            return cdk.tools.MFAnalyser(self.CDKMol).getMass()
+            return cdk.tools.MFAnalyser(self.Molecule).getMass()
         elif attr == "data":
-            return MoleculeData(self.CDKMol)
+            return MoleculeData(self.Molecule)
         elif attr == 'molwt':
             # I have probably confused exact, canonical and natural masses
-            return cdk.tools.MFAnalyser(self.CDKMol).getCanonicalMass()
+            return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
         elif attr == 'formula':
-            return cdk.tools.MFAnalyser(self.CDKMol).getMolecularFormula()
+            return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
         elif attr == "_bonds":
             ans = []
-            for i in range(self.CDKMol.getBondCount()):
-                bond = self.CDKMol.getBond(i)
+            for i in range(self.Molecule.getBondCount()):
+                bond = self.Molecule.getBond(i)
                 bo = bond.getOrder()
-                atoms = [self.CDKMol.getAtomNumber(x) for x in bond.atoms()]
+                atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms()]
                 ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
             return ans
         else:
@@ -299,9 +299,9 @@ class Molecule(cinfony.Molecule):
         if filename==None:
             if format=="smi":
                 sg = cdk.smiles.SmilesGenerator()
-                return sg.createSMILES(self.CDKMol)
+                return sg.createSMILES(self.Molecule)
         else:
-            cdk.io.SMILESWriter(open(filename, "w")).writeMolecule(self.CDKMol)
+            cdk.io.SMILESWriter(open(filename, "w")).writeMolecule(self.Molecule)
 
     def __iter__(self):
         return iter(self.__getattr__("atoms"))
@@ -311,7 +311,7 @@ class Molecule(cinfony.Molecule):
 
     # def addh(self):
     #    ha = cdk.tools.HydrogenAdder()
-    #    ha.addExplicitHydrogensToSatisfyValency(self.CDKMol)        
+    #    ha.addExplicitHydrogensToSatisfyValency(self.Molecule)        
 
     def calcfp(self, fp="daylight"):
         # if fp == "substructure":
@@ -322,7 +322,7 @@ class Molecule(cinfony.Molecule):
             fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
         else:
             fingerprinter = cdk.fingerprint.Fingerprinter()
-        return Fingerprint(fingerprinter.getFingerprint(self.CDKMol))
+        return Fingerprint(fingerprinter.getFingerprint(self.Molecule))
 
     def calcdesc(self, descnames=[]):
         """Calculate descriptor values.
@@ -343,7 +343,7 @@ class Molecule(cinfony.Molecule):
                 except KeyError:
                     raise ValueError, "%s is not a recognised CDK descriptor type" % descname
                 try:
-                    value = desc.calculate(self.CDKMol).getValue()
+                    value = desc.calculate(self.Molecule).getValue()
                     if hasattr(value, "array"):
                         for i, x in enumerate(value.array):
                             ans[descname + ".%d" % i] = x.value
@@ -357,7 +357,7 @@ class Molecule(cinfony.Molecule):
     def draw(self, show=True, filename=None, update=False):
         # Do the SDG
         sdg = cdk.layout.StructureDiagramGenerator()
-        sdg.setMolecule(self.CDKMol)
+        sdg.setMolecule(self.Molecule)
         sdg.generateExperimentalCoordinates()
         newmol = Molecule(sdg.getMolecule())
         if update:
@@ -524,7 +524,7 @@ class Smarts(object):
         Required parameters:
            molecule
         """
-        match = self.smarts.matches(molecule.CDKMol)
+        match = self.smarts.matches(molecule.Molecule)
         return list(self.smarts.getUniqueMatchingAtoms())
 
 class MoleculeData(object):

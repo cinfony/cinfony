@@ -6,7 +6,7 @@ import openbabel as ob
 import cinfony
 
 try:
-    import oasa
+    import oasaa
     import oasa.cairo_out
 except ImportError:
     oasa = None
@@ -29,10 +29,15 @@ outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
-descriptors = _getplugins(ob.OBDescriptor.FindType, ['LogP', 'MR', 'TPSA'])
-fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, ['FP2', 'FP3', 'FP4'])
-forcefields = _getplugins(ob.OBForceField.FindType, ['UFF', 'MMFF94', 'Ghemical'])
-operations = _getplugins(ob.OBOp.FindType, ['Gen3D'])
+
+descriptors = ['LogP', 'MR', 'TPSA']
+_descdict = _getplugins(ob.OBDescriptor.FindType, descriptors)
+fps = ['FP2', 'FP3', 'FP4']
+_fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
+forcefields = ['UFF', 'MMFF94', 'Ghemical']
+_forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
+operations = ['Gen3D']
+_operations = _getplugins(ob.OBOp.FindType, operations)
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.
@@ -195,7 +200,7 @@ class Molecule(cinfony.Molecule):
         # This function is not accessed in the case of OBMol
         if attr == "atoms":
             # Create an atoms attribute on-the-fly
-            return [ Atom(self.OBMol.GetAtom(i+1),i+1) for i in range(self.OBMol.NumAtoms()) ]
+            return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
         elif attr == "data":
             # Create a data attribute on-the-fly
             return MoleculeData(self.OBMol)
@@ -239,11 +244,11 @@ class Molecule(cinfony.Molecule):
         descriptors is calculated: LogP, PSA and MR.
         """
         if not descnames:
-            descnames = descriptors.keys()
+            descnames = descriptors
         ans = {}
         for descname in descnames:
             try:
-                desc = descriptors[descname]
+                desc = _descdict[descname]
             except KeyError:
                 raise ValueError, "%s is not a recognised Open Babel descriptor type" % descname
             ans[descname] = desc.Predict(self.OBMol)
@@ -261,7 +266,7 @@ class Molecule(cinfony.Molecule):
         """
         fp = ob.vectorUnsignedInt()
         try:
-            fingerprinter = fingerprinters[fptype]
+            fingerprinter = _fingerprinters[fptype]
         except KeyError:
             raise ValueError, "%s is not a recognised Open Babel Fingerprint type" % fptype
         fingerprinter.GetFingerprint(self.OBMol, fp)
@@ -306,7 +311,7 @@ class Molecule(cinfony.Molecule):
         
         if not (self.OBMol.Has2D() or self.OBMol.Has3D()):
             self.make3D()
-        ff = forcefields[forcefield]
+        ff = _forcefields[forcefield]
         ff.Setup(self.OBMol)
         if steps > 250:
             ff.SteepestDescent(250)
@@ -319,7 +324,7 @@ class Molecule(cinfony.Molecule):
         if not (self.OBMol.Has2D() or self.OBMol.Has3D()):
             self.make3D()
         self.localopt(forcefield, 250)
-        ff = forcefields[forcefield]
+        ff = _forcefields[forcefield]
         numrots = self.OBMol.NumRotors()
         if numrots > 0:
             ff.WeightedRotorSearch(numrots, int(math.log(numrots + 1) * steps))
@@ -337,7 +342,7 @@ class Molecule(cinfony.Molecule):
         MMFF94 forcefield. Call localopt() or globalopt() if you want
         to improve the coordinates further.
         """
-        operations['Gen3D'].Do(self.OBMol)
+        _operations['Gen3D'].Do(self.OBMol)
         self.addh()
         self.localopt(forcefield, steps)
 
@@ -345,11 +350,21 @@ class Molecule(cinfony.Molecule):
         """Add hydrogens."""
         self.OBMol.AddHydrogens()
 
+    def removeh(self):
+        """Remove hydrogens."""
+        self.OBMol.DeleteHydrogens()
+        
     def __str__(self):
         return self.write()
 
     def draw(self, show=True, filename=None, update=False):
         etab = ob.OBElementTable()
+
+        if not oasa:
+            errormessage = """OASA not found, but is required for 2D structure
+generation and display. OASA is part of BKChem. See
+installation instructions for more information."""
+            raise ImportError, errormessage
         mol = oasa.molecule()
         for atom in self._atoms:
             v = mol.create_vertex()
@@ -427,13 +442,10 @@ class Atom(object):
         'vector':'GetVector',
         }
 
-    def __init__(self, OBAtom=None, index=None):
+    def __init__(self, OBAtom=None):
         if not OBAtom:
             OBAtom = ob.OBAtom()
         self.OBAtom = OBAtom
-        # For the moment, I will remember the index of the atom in the molecule...
-        # I'm not sure if this is useful, though.
-        self.index = index
         
     def __getattr__(self, attr):
         if attr == "coords":
@@ -496,7 +508,7 @@ class Fingerprint(object):
             # Create a bits attribute on-the-fly
             return findbits(self.fp, ob.OBFingerprint.Getbitsperint())
         else:
-            raise AttributeError, "Molecule has no attribute %s" % attr
+            raise AttributeError, "Fingerprint has no attribute %s" % attr
     def __str__(self):
         return ", ".join([str(x) for x in self.fp])
 
