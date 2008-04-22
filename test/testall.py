@@ -18,7 +18,7 @@ class TestToolkit(unittest.TestCase):
         self.mols = [self.toolkit.readstring("smi", "CCCC"),
                      self.toolkit.readstring("smi", "CCCN")]
         self.head = list(self.toolkit.readfile("sdf", "head.sdf"))
-        self.atom = self.head[0].atoms[0]
+        self.atom = self.head[0].atoms[1]
 
     def FPaccesstest(self):
         # Should raise AttributeError
@@ -68,9 +68,9 @@ class TestToolkit(unittest.TestCase):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
-    def testRSconversion(self):
-        """Convert to mol2"""
-        as_mol2 = self.mols[0].write("mol2")
+    def testRSconversiontoMOL(self):
+        """Convert to mol"""
+        as_mol2 = self.mols[0].write("mol")
         test = """@<TRIPOS>MOLECULE
 *****
  4 3 0 0 0
@@ -154,7 +154,7 @@ Energy = 0
         # Should raise ValueError
         self.mols[0].calcdesc("BadDescName")
 
-    def testRFdesc(self):
+    def notestRFdesc(self):
         """Test the descriptors"""
         desc = self.mols[1].calcdesc()
         self.assertEqual(len(desc), self.Ndescs)
@@ -174,13 +174,13 @@ Energy = 0
         newvalues = {'hey':'there', 'yo':1}
         data.update(newvalues)
         self.assertEqual(data['yo'], '1')
-        self.assert_('there' in data.values())
+        self.assertTrue('there' in data.values())
 
     def testMDglobalaccess(self):
         """Check out the keys"""
         data = self.head[0].data
         # self.assert_(data.has_key('Comment'))
-        self.assert_(not data.has_key('Noel'))
+        self.assertFalse(data.has_key('Noel'))
         self.assertEqual(len(data), 2)
         for key in data:
             self.assertEqual(key in ['Comment', 'NSC'], True)
@@ -189,9 +189,9 @@ Energy = 0
     def testMDdelete(self):
         """Delete some keys"""
         data = self.head[0].data
-        self.assert_(data.has_key('NSC'))
+        self.assertTrue(data.has_key('NSC'))
         del data['NSC']
-        self.assert_(not data.has_key('NSC'))
+        self.assertFalse(data.has_key('NSC'))
         data.clear()
         self.assertEqual(len(data), 0)
 
@@ -207,11 +207,11 @@ Energy = 0
     def testAattributes(self):
         """Get the values of some properties"""
         self.assertRaises(AttributeError, self.Atomaccesstest)
-        self.assert_(abs(self.atom.coords[0]-0.0021) < 0.0001)
+        self.assertAlmostEqual(self.atom.coords[0], -0.0691, 4)
 
     def testAstringrepr(self):
         """Test the string representation of the Atom"""
-        test = "Atom: 8 (0.0020999999999999999, -0.0041000000000000003, 0.002)"
+        test = "Atom: 8 (-0.07 5.24 0.03)"
         self.assertEqual(str(self.atom), test)
 
     def testSMARTS(self):
@@ -248,6 +248,28 @@ class TestPybel(TestToolkit):
         data['Comment'] = 'New comment'
         self.assertEqual(data['Comment'], 'New comment')
 
+    def testRSconversiontoMOL2(self):
+        """Convert to mol2"""
+        as_mol2 = self.mols[0].write("mol2")
+        test = """@<TRIPOS>MOLECULE
+*****
+ 4 3 0 0 0
+SMALL
+GASTEIGER
+Energy = 0
+
+@<TRIPOS>ATOM
+      1 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
+      2 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
+      3 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
+      4 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
+@<TRIPOS>BOND
+     1     1     2    1
+     2     2     3    1
+     3     3     4    1
+"""
+        self.assertEqual(as_mol2, test)
+
 class TestRDKit(TestToolkit):
     toolkit = rdk
     tanimotoresult = 1/3.
@@ -270,7 +292,9 @@ class TestCDK(TestToolkit):
 
 if __name__=="__main__":
     testcases = [TestPybel, TestCDK, TestRDKit]
+    # testcases = [TestCDK]
     # testcases = [TestPybel]
+    testcases = [TestRDKit]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)

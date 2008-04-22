@@ -40,6 +40,7 @@ descriptors = _descdict.keys()
 informats = ['smi' ,'sdf']
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
+               'smi': cdk.io.SMILESWriter,
                'sdf': cdk.io.MDLWriter} # FIXME: Handle the one molecule case
 outformats = ['smi'] + _outformats.keys()
 
@@ -550,8 +551,9 @@ class Atom(object):
                 return (0., 0., 0.)
             else:
                 return (coords.x, coords.y, coords.z)
-        elif attr in self._getmethods:
-            return getattr(self.OBAtom, self._getmethods[attr])()
+        elif attr == "atomicnum":
+            _isofact.configure(self.Atom)
+            return self.Atom.getAtomicNumber()
         else:
             raise AttributeError, "Atom has no attribute %s" % attr
 
@@ -562,7 +564,8 @@ class Atom(object):
         >>> print a
         Atom: 0 (0.0, 0.0, 0.0)
         """
-        return "Atom: %d %s" % (self.atomicnum, self.coords.__str__())
+        c = self.coords
+        return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
 class Smarts(object):
     """A Smarts Pattern Matcher

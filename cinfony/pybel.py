@@ -6,7 +6,7 @@ import openbabel as ob
 import cinfony
 
 try:
-    import oasaa
+    import oasa
     import oasa.cairo_out
 except ImportError:
     oasa = None
@@ -462,7 +462,8 @@ class Atom(object):
         >>> print a
         Atom: 0 (0.0, 0.0, 0.0)
         """
-        return "Atom: %d %s" % (self.atomicnum, self.coords.__str__())
+        c = self.coords
+        return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
 def findbits(fp, bitsperint):
     """Find which bits are set in a list/vector.

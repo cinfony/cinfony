@@ -74,7 +74,7 @@ def readfile(format, filename):
     elif format=="mol":
         yield Molecule(Chem.MolFromMolFile(filename))
     else:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError,"%s is not a recognised RDKit format" % format
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -94,7 +94,7 @@ def readstring(format, string):
     elif format=="smi":
         return Molecule(Chem.MolFromSmiles(string))
     else:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format    
+        raise ValueError,"%s is not a recognised RDKit format" % format    
 
 class Molecule(cinfony.Molecule):
     """Represent an RDKit molecule.
@@ -203,9 +203,9 @@ class Molecule(cinfony.Molecule):
         elif format=="iso":
             result = Chem.MolToSmiles(self.Mol, isomericSmiles=True)
         elif format=="mol":
-            result = rdk.MolToMolBlock(self.Mol)
+            result = Chem.MolToMolBlock(self.Mol)
         else:
-            raise ValueError,"%s is not a recognised OpenBabel format" % format
+            raise ValueError,"%s is not a recognised RDKit format" % format
         if filename:
             print >> open(filename, "w"), result
         else:
@@ -343,7 +343,7 @@ class Atom(object):
         Atom: 0 (0.0, 0.0, 0.0)
         """
         if hasattr(self, "coords"):
-            return "Atom: %d (%.4f, %.4f, %.4f)" % (self.atomicnum, self.coords[0],
+            return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, self.coords[0],
                                                     self.coords[1], self.coords[2])
         else:
             return "Atom: %d (no coords)" % (self.atomicnum)
@@ -375,7 +375,7 @@ class Outputfile(object):
         elif format=="smi":
             self._writer = Chem.SmilesWriter(self.filename)
         else:
-            raise ValueError,"%s is not a recognised OpenBabel format" % format
+            raise ValueError,"%s is not a recognised RDKit format" % format
         self.total = 0 # The total number of molecules written to the file
     
     def write(self, molecule):
@@ -491,11 +491,11 @@ class MoleculeData(object):
 class Fingerprint(object):
     """A Molecular Fingerprint.
     
-    Required parameters:
-       obFingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+    Required parameters: # FIXME
+       fingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
 
     Attributes:
-       fp -- the original obFingerprint
+       fp -- the original fingerprint
        bits -- a list of bits set in the Fingerprint
 
     Methods:
@@ -503,8 +503,8 @@ class Fingerprint(object):
        given two Fingerprints 'a', and 'b', the Tanimoto coefficient is given by:
           tanimoto = a | b
     """
-    def __init__(self, obFingerprint):
-        self.fp = obFingerprint
+    def __init__(self, fingerprint):
+        self.fp = fingerprint
     def __or__(self, other):
         return DataStructs.FingerprintSimilarity(self.fp, other.fp)
     def __getattr__(self, attr):
@@ -512,7 +512,7 @@ class Fingerprint(object):
             # Create a bits attribute on-the-fly
             return list(self.fp.GetOnBits())
         else:
-            raise AttributeError, "Molecule has no attribute %s" % attr
+            raise AttributeError, "Fingerprint has no attribute %s" % attr
     def __str__(self):
         return ", ".join([str(x) for x in _compressbits(self.fp)])
 
