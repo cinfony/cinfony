@@ -1,5 +1,6 @@
 import os
 import tempfile
+import StringIO
 import cinfony
 
 from jpype import *
@@ -36,6 +37,14 @@ def _getdescdict():
 _descdict = _getdescdict()
 descriptors = _descdict.keys()
 
+informats = ['smi' ,'sdf']
+_outformats = {'mol': cdk.io.MDLWriter,
+               'mol2': cdk.io.Mol2Writer,
+               'sdf': cdk.io.MDLWriter} # FIXME: Handle the one molecule case
+outformats = ['smi'] + _outformats.keys()
+
+
+
 #from org.openscience.cdk.io.iterator import IteratingMDLReader
 #from org.openscience.cdk.io import ReaderFactory, WriterFactory, SMILESWriter
 #from org.openscience.cdk.smiles import SmilesParser, SmilesGenerator
@@ -69,7 +78,7 @@ descriptors = _descdict.keys()
 ##    "cif": "Crystallographic Interchange Format",
 ##    "dal": "Dalton",
 ##    "dmol": "DMol3",
-##    "dock": "Dock 5 Box",
+##    "dock": ock 5 Box",
 ##    "fh": "Fenske-Hall Z-Matrix",
 ##    "fpt": "Fingerprint",
 ##    "gam":    "GAMESS log file",
@@ -215,6 +224,52 @@ def readstring(format, string):
             ))
     else:
         raise ValueError,"%s is not a recognised OpenBabel format" % format
+
+class Outputfile(object):
+    """Represent a file to which *output* is to be sent.
+    
+    Although it's possible to write a single molecule to a file by
+    calling the write() method of a molecule, if multiple molecules
+    are to be written to the same file you should use the Outputfile
+    class.
+    
+    Required parameters:
+       format
+       filename
+    Optional parameters:
+       overwrite (default is False) -- if the output file already exists,
+                                       should it be overwritten?
+    Methods:
+       write(molecule)
+    """
+    def __init__(self, format, filename, overwrite=False):
+        self.format = format
+        self.filename = filename
+        if not overwrite and os.path.isfile(self.filename):
+            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
+        if not format in outformats:
+            raise ValueError,"%s is not a recognised CDK format" % format
+        self._writer = java.io.FileWriter(java.io.File(self.filename))
+        self._molwriter = _outformats[self.format](self._writer)
+        self.total = 0 # The total number of molecules written to the file
+    
+    def write(self, molecule):
+        """Write a molecule to the output file.
+        
+        Required parameters:
+           molecule
+        """
+        if not self.filename:
+            raise IOError, "Outputfile instance is closed."
+        self._molwriter.write(molecule.Molecule)
+        self.total += 1
+
+    def close(self):
+        """Close the Outputfile to further writing."""
+        self.filename = None
+        self._writer.close()
+        self._molwriter.close()
+
     
 class Molecule(cinfony.Molecule):
     """Represent a Pybel molecule.
@@ -295,13 +350,23 @@ class Molecule(cinfony.Molecule):
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
-    def write(self, format, filename=None):
-        if filename==None:
-            if format=="smi":
+    def write(self, format="smi", filename=None, overwrite=False):       
+        if format not in outformats:
+            raise ValueError,"%s is not a recognised CDK format" % format
+        if filename == None:
+            if format == "smi":
                 sg = cdk.smiles.SmilesGenerator()
                 return sg.createSMILES(self.Molecule)
+            else:
+                writer = java.io.StringWriter()
         else:
-            cdk.io.SMILESWriter(open(filename, "w")).writeMolecule(self.Molecule)
+            if not overwrite and os.path.isfile(filename):
+                raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename            
+            writer = java.io.FileWriter(java.io.File(filename))
+        _outformats[format](writer).writeMolecule(self.Molecule)
+        writer.close()
+        if filename == None:
+            return writer.toString()
 
     def __iter__(self):
         return iter(self.__getattr__("atoms"))
@@ -568,7 +633,7 @@ class MoleculeData(object):
     def items(self):
         return [(k, self[k]) for k in self._data().keys()]
     def __iter__(self):
-        return self.keys()
+        return iter(self.keys())
     def iteritems(self):
         return iter(self.items())
     def __len__(self):
