@@ -330,13 +330,13 @@ class Molecule(cinfony.Molecule):
                 _isofact.configure(atom)
                 ans.append( (atom.getAtomicNumber(),) )
             return ans
-        elif attr == 'exactmass':
-            # I have probably confused exact, canonical and natural masses
-            return cdk.tools.MFAnalyser(self.Molecule).getMass()
+##        elif attr == 'exactmass':
+              # Is supposed to use the most abundant isotope but
+              # actually uses the next most abundant
+##            return cdk.tools.MFAnalyser(self.Molecule).getMass()
         elif attr == "data":
             return MoleculeData(self.Molecule)
         elif attr == 'molwt':
-            # I have probably confused exact, canonical and natural masses
             return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
         elif attr == 'formula':
             return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
@@ -350,6 +350,14 @@ class Molecule(cinfony.Molecule):
             return ans
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
+
+    def addh(self):
+        hadder = cdk.tools.HydrogenAdder()
+        hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
+
+    def removeh(self):
+        atommanip = cdk.tools.manipulator.AtomContainerManipulator()
+        atommanip.removeHydrogens(self.Molecule)
 
     def write(self, format="smi", filename=None, overwrite=False):       
         if format not in outformats:
@@ -420,7 +428,7 @@ class Molecule(cinfony.Molecule):
                     pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False):
+    def draw(self, show=True, filename=None, update=False, web=False):
         # Do the SDG
         sdg = cdk.layout.StructureDiagramGenerator()
         sdg.setMolecule(self.Molecule)
@@ -433,25 +441,29 @@ class Molecule(cinfony.Molecule):
                                      coords.x, coords.y, 0.0))
         
         if filename or show:
-            # Create OASA molecule
-            mol = oasa.molecule()
-            for atom, newatom in zip(self._atoms, newmol.atoms):
-                coords = newatom.Atom.getPoint2d()
-                v = mol.create_vertex()
-                v.symbol = _isofact.getElement(atom[0]).getSymbol()
-                mol.add_vertex(v)
-                v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
-            for bond in self._bonds:
-                e = mol.create_edge()
-                e.order = bond[2]
-                mol.add_edge(bond[0], bond[1], e)            
-
             if filename:
                 filedes = None
             else:
                 filedes, filename = tempfile.mkstemp()
-            
-            oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
+            if not web:    
+                # Create OASA molecule
+                mol = oasa.molecule()
+                for atom, newatom in zip(self._atoms, newmol.atoms):
+                    coords = newatom.Atom.getPoint2d()
+                    v = mol.create_vertex()
+                    v.symbol = _isofact.getElement(atom[0]).getSymbol()
+                    mol.add_vertex(v)
+                    v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
+                for bond in self._bonds:
+                    e = mol.create_edge()
+                    e.order = bond[2]
+                    mol.add_edge(bond[0], bond[1], e)                        
+                oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
+            else:
+                imagedata = urllib.urlopen("http://www.chembiogrid.org/cheminfo/rest/depict/" +
+                                       self.write("smi")).read()
+                if filename:
+                    print >> open(filename, "b"), imagedata
             if show:
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)

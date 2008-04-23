@@ -55,40 +55,30 @@ class TestToolkit(unittest.TestCase):
     
     def testRSgetprops(self):
         """Get the values of the properties."""
-        test = { 'dim':0, 'spin':1, 'energy': 0.0,
-                 'charge':0, 'formula': 'C4H10',
-                 'mod':0 }
-        result = {}
-        for attr in self.mols[0]._getmethods:
-            result[attr] = getattr(self.mols[0], attr)
-            if attr in test:
-                assert result[attr] == test[attr]
-        assert abs(result['exactmass']-58.078) < 0.001
-        assert abs(result['molwt']-58.121) < 0.003
+        # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
+        # Only OpenBabel has a working exactmass
+        self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
     def testRSconversiontoMOL(self):
         """Convert to mol"""
-        as_mol2 = self.mols[0].write("mol")
-        test = """@<TRIPOS>MOLECULE
-*****
- 4 3 0 0 0
-SMALL
-GASTEIGER
-Energy = 0
+        as_mol = self.mols[0].write("mol")
+        test = """
+ OpenBabel04220815032D
 
-@<TRIPOS>ATOM
-      1 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-      2 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-      3 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-      4 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-@<TRIPOS>BOND
-     1     1     2    1
-     2     2     3    1
-     3     3     4    1
+  4  3  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0
+    0.0000    0.0000    0.0000 C   0  0  0  0  0
+    0.0000    0.0000    0.0000 C   0  0  0  0  0
+    0.0000    0.0000    0.0000 C   0  0  0  0  0
+  1  2  1  0  0  0
+  2  3  1  0  0  0
+  3  4  1  0  0  0
+M  END
 """
-        self.assertEqual(as_mol2, test)
+        for a,b in zip(test.split("\n")[2:], as_mol.split("\n")[2:]):
+            self.assertEqual(a,b)
 
     def testRSstringrepr(self):
         """Test the string representation of a molecule"""
@@ -136,19 +126,19 @@ Energy = 0
         os.remove("testoutput.txt")
         self.assertRaises(ValueError, mol.write, "noel", "testoutput.txt")
     
-    def testRFmultipletofile(self):
+    def testRFoutputfile(self):
         """Test the Outputfile class"""
         self.assertRaises(ValueError, self.toolkit.Outputfile, "noel", "testoutput.txt")
-        outputfile = self.toolkit.Outputfile("smi", "testoutput.txt")
-        for mol in self.mols:
+        outputfile = self.toolkit.Outputfile("sdf", "testoutput.txt")
+        for mol in self.head:
             outputfile.write(mol)
         outputfile.close()
         self.assertRaises(IOError, outputfile.write, mol)
-        self.assertRaises(IOError, self.toolkit.Outputfile, "smi", "testoutput.txt")
-        filecontents = [x.split("\t")[0] for x in open("testoutput.txt", "r").readlines()]
+        self.assertRaises(IOError, self.toolkit.Outputfile, "sdf", "testoutput.txt")
+        numdollar = len([x for x in open("testoutput.txt").readlines()
+                         if x.rstrip() == "$$$$"])
         os.remove("testoutput.txt")
-        test = ['CCCC', 'CCCN']
-        self.assertEqual(filecontents, test)
+        self.assertEqual(numdollar, 2)
 
     def RFdesctest(self):
         # Should raise ValueError
@@ -270,6 +260,13 @@ Energy = 0
 """
         self.assertEqual(as_mol2, test)
 
+    def testRSgetprops(self):
+        """Get the values of the properties."""
+        self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
+        self.assertAlmostEqual(self.mols[0].molwt, 58.122, 3)
+        self.assertEqual(len(self.mols[0].atoms), 4)
+        self.assertRaises(AttributeError, self.RSaccesstest)
+
 class TestRDKit(TestToolkit):
     toolkit = rdk
     tanimotoresult = 1/3.
@@ -277,7 +274,12 @@ class TestRDKit(TestToolkit):
     Natoms = 9
     tpsaname = "TPSA"
     Nbits = 12
-    
+
+    def testRSconversiontoMOL(self):
+        """No conversion to MOL file done"""
+        pass
+
+  
 class TestCDK(TestToolkit):
     toolkit = cdk
     tanimotoresult = 0.375
@@ -287,14 +289,14 @@ class TestCDK(TestToolkit):
     Nbits = 4
 
     def testSMARTS(self):
-        "No SMARTS testing done"
+        """No SMARTS testing done"""
         pass
 
 if __name__=="__main__":
     testcases = [TestPybel, TestCDK, TestRDKit]
     # testcases = [TestCDK]
     # testcases = [TestPybel]
-    testcases = [TestRDKit]
+    #testcases = [TestRDKit]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)
