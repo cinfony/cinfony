@@ -3,8 +3,9 @@ import cinfony
 
 from Chem import AllChem
 from Chem.Draw import MolDrawing
+import Chem.NewDraw.MolDrawing 
 from Chem.AvailDescriptors import descDict
-from sping.PIL.pidPIL import PILCanvas as Canvas
+from sping.PIL.pidPIL import PILCanvas
 
 import DataStructs
 import Chem.MACCSkeys
@@ -14,9 +15,16 @@ import Chem.AtomPairs.Torsions
 # PIL and Tkinter
 try:
     import Tkinter as tk
-    import ImageTk as piltk
+    import Image as PIL
+    import ImageTk as PILtk
 except:
-    piltk = None
+    PILtk = None
+
+# Aggdraw
+try:
+    import aggdraw
+except ImportError:
+    aggdraw = None
 
 fps = ['Daylight', 'MACCS', 'atompairs', 'torsions']
 descs = descDict.keys()
@@ -256,25 +264,46 @@ class Molecule(cinfony.Molecule):
             raise ValueError, "%s is not a recognised RDKit Fingerprint type" % fptype
         return fp
 
-    def draw(self, show=True, filename=None, update=False):
-        if update:
-            AllChem.Compute2DCoords(self.Mol)
+    def draw(self, show=True, filename=None, update=False, usecoords=False, newdraw=False):
+        if usecoords:
+            confId = 0
         else:
-            AllChem.Compute2DCoords(self.Mol, clearConfs = False)
+            if update:
+                AllChem.Compute2DCoords(self.Mol)
+                confId = 0
+            else:
+                AllChem.Compute2DCoords(self.Mol, clearConfs = False)
+                confId = 1
         if show or filename:
             Chem.Kekulize(self.Mol)
-            canvas = Canvas(size=(200,200))
-            drawer = MolDrawing.MolDrawing(canvas=canvas)
-            drawer.AddMol(self.Mol)
+            if newdraw: # Using NewDraw from devel branch
+                Chem.NewDraw.MolDrawing.registerCanvas('agg')
+                img = PIL.new("RGBA",(300,300),"white")
+                canvas = aggdraw.Draw(img)                
+                canvas.setantialias(True)
+                drawer = Chem.NewDraw.MolDrawing.MolDrawing(canvas)
+                drawer.AddMol(self.Mol, confId = confId)
+                canvas.flush()
+            else:
+                canvas = PILCanvas(size=(200,200))
+                drawer = MolDrawing.MolDrawing(canvas=canvas)
+                drawer.AddMol(self.Mol, confId = confId)
             if filename: # Allow overwrite?
-                canvas.save(filename)
+                if newdraw:
+                    img.save(filename)
+                else:
+                    canvas.save(filename)
             if show:
-                image = canvas.getImage()
+                if newdraw:
+                    image = img
+                else:
+                    image = canvas.getImage()
+                    
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
                 frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                imagedata = piltk.PhotoImage(image)
+                imagedata = PILtk.PhotoImage(image)
                 label = tk.Label(frame, image=imagedata).pack()
                 quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
                 root.mainloop()

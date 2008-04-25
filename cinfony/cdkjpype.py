@@ -1,6 +1,8 @@
 import os
+import urllib
 import tempfile
 import StringIO
+
 import cinfony
 
 from jpype import *
@@ -429,6 +431,8 @@ class Molecule(cinfony.Molecule):
         return ans    
 
     def draw(self, show=True, filename=None, update=False, web=False):
+        writetofile = filename is not None
+            
         # Do the SDG
         sdg = cdk.layout.StructureDiagramGenerator()
         sdg.setMolecule(self.Molecule)
@@ -439,9 +443,8 @@ class Molecule(cinfony.Molecule):
                 coords = newatom.Atom.getPoint2d()
                 atom.Atom.setPoint3d(javax.vecmath.Point3d(
                                      coords.x, coords.y, 0.0))
-        
-        if filename or show:
-            if filename:
+        if writetofile or show:
+            if writetofile:
                 filedes = None
             else:
                 filedes, filename = tempfile.mkstemp()
@@ -453,7 +456,7 @@ class Molecule(cinfony.Molecule):
                     v = mol.create_vertex()
                     v.symbol = _isofact.getElement(atom[0]).getSymbol()
                     mol.add_vertex(v)
-                    v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
+                    v.x, v.y, v.z = coords.x * 30., coords.y * -30., 0.0
                 for bond in self._bonds:
                     e = mol.create_edge()
                     e.order = bond[2]
@@ -462,14 +465,17 @@ class Molecule(cinfony.Molecule):
             else:
                 imagedata = urllib.urlopen("http://www.chembiogrid.org/cheminfo/rest/depict/" +
                                        self.write("smi")).read()
-                if filename:
-                    print >> open(filename, "b"), imagedata
+                if writetofile:
+                    print >> open(filename, "wb"), imagedata
             if show:
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
                 frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                image = PIL.open(filename)
+                if web:
+                    image = PIL.open(StringIO.StringIO(imagedata))
+                else:
+                    image = PIL.open(filename)
                 imagedata = piltk.PhotoImage(image)
                 label = tk.Label(frame, image=imagedata).pack()
                 quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
