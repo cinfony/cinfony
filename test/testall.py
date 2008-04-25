@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from cinfony import pybel, cdk, rdk
+from cinfony import pybel, cdk, rdkit
 
 # For compatability with Python2.3
 try:
@@ -268,7 +268,7 @@ Energy = 0
         self.assertRaises(AttributeError, self.RSaccesstest)
 
 class TestRDKit(TestToolkit):
-    toolkit = rdk
+    toolkit = rdkit
     tanimotoresult = 1/3.
     Ndescs = 176
     Natoms = 9
