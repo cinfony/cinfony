@@ -3,8 +3,6 @@ import os.path
 import tempfile
 import openbabel as ob
 
-import cinfony
-
 try:
     import oasa
     import oasa.cairo_out
@@ -148,7 +146,7 @@ class Outputfile(object):
         self.obConversion.CloseOutFile()
         self.filename = None
 
-class Molecule(cinfony.Molecule):
+class Molecule(object):
     """Represent a Pybel molecule.
 
     Optional parameters:
@@ -313,22 +311,18 @@ class Molecule(cinfony.Molecule):
             self.make3D()
         ff = _forcefields[forcefield]
         ff.Setup(self.OBMol)
-        if steps > 250:
-            ff.SteepestDescent(250)
-            ff.ConjugateGradients(steps - 250)
-        else:
-            ff.SteepestDescent(steps)
+        ff.SteepestDescent(steps)
         ff.GetCoordinates(self.OBMol)
     
-    def globalopt(self, forcefield="MMFF94", steps=1000):
-        if not (self.OBMol.Has2D() or self.OBMol.Has3D()):
-            self.make3D()
-        self.localopt(forcefield, 250)
-        ff = _forcefields[forcefield]
-        numrots = self.OBMol.NumRotors()
-        if numrots > 0:
-            ff.WeightedRotorSearch(numrots, int(math.log(numrots + 1) * steps))
-        ff.GetCoordinates(self.OBMol)
+##    def globalopt(self, forcefield="MMFF94", steps=1000):
+##        if not (self.OBMol.Has2D() or self.OBMol.Has3D()):
+##            self.make3D()
+##        self.localopt(forcefield, 250)
+##        ff = _forcefields[forcefield]
+##        numrots = self.OBMol.NumRotors()
+##        if numrots > 0:
+##            ff.WeightedRotorSearch(numrots, int(math.log(numrots + 1) * steps))
+##        ff.GetCoordinates(self.OBMol)
     
     def make3D(self, forcefield="MMFF94", steps=50):
         """Generate 3D coordinates.
@@ -339,7 +333,7 @@ class Molecule(cinfony.Molecule):
 
         Once coordinates are generated, hydrogens are added and a quick
         local optimization is carried out with 50 steps and the
-        MMFF94 forcefield. Call localopt() or globalopt() if you want
+        MMFF94 forcefield. Call localopt() if you want
         to improve the coordinates further.
         """
         _operations['Gen3D'].Do(self.OBMol)

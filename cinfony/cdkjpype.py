@@ -3,8 +3,6 @@ import urllib
 import tempfile
 import StringIO
 
-import cinfony
-
 from jpype import *
 
 jvm = os.environ['JPYPE_JVM']
@@ -274,7 +272,7 @@ class Outputfile(object):
         self._molwriter.close()
 
     
-class Molecule(cinfony.Molecule):
+class Molecule(object):
     """Represent a Pybel molecule.
 
     Optional parameters:
@@ -352,6 +350,19 @@ class Molecule(cinfony.Molecule):
             return ans
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
+
+    def __iter__(self):
+        """Iterate over the Atoms of the Molecule.
+        
+        This allows constructions such as the following:
+           for atom in mymol:
+               print atom
+        """
+        for atom in self.atoms:
+            yield atom
+
+    def __str__(self):
+        return self.write()
 
     def addh(self):
         hadder = cdk.tools.HydrogenAdder()

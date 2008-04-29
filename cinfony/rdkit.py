@@ -1,5 +1,4 @@
 import os
-import cinfony
 
 from Chem import AllChem
 from Chem.Draw import MolDrawing
@@ -104,7 +103,7 @@ def readstring(format, string):
     else:
         raise ValueError,"%s is not a recognised RDKit format" % format    
 
-class Molecule(cinfony.Molecule):
+class Molecule(object):
     """Represent an RDKit molecule.
 
     Required parameter:
@@ -218,6 +217,19 @@ class Molecule(cinfony.Molecule):
             print >> open(filename, "w"), result
         else:
             return result
+
+    def __iter__(self):
+        """Iterate over the Atoms of the Molecule.
+        
+        This allows constructions such as the following:
+           for atom in mymol:
+               print atom
+        """
+        for atom in self.atoms:
+            yield atom
+
+    def __str__(self):
+        return self.write()
 
     def calcdesc(self, descnames=[]):
         """Calculate descriptor values.
