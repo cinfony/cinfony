@@ -2,7 +2,10 @@ import os
 
 from Chem import AllChem
 from Chem.Draw import MolDrawing
-import Chem.NewDraw.MolDrawing 
+try: # Development version
+    from Chem.NewDraw import MolDrawing as NewMolDrawing
+except:
+    NewMolDrawing = None
 from Chem.AvailDescriptors import descDict
 from sping.PIL.pidPIL import PILCanvas
 
@@ -201,7 +204,7 @@ class Molecule(object):
         The overwrite flag is ignored if a filename is not specified.
         It controls whether to overwrite an existing file.
         """
-        
+        format = format.lower()
         if filename:
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
@@ -289,11 +292,11 @@ class Molecule(object):
         if show or filename:
             Chem.Kekulize(self.Mol)
             if newdraw: # Using NewDraw from devel branch
-                Chem.NewDraw.MolDrawing.registerCanvas('agg')
+                NewMolDrawing.registerCanvas('agg')
                 img = PIL.new("RGBA",(300,300),"white")
                 canvas = aggdraw.Draw(img)                
                 canvas.setantialias(True)
-                drawer = Chem.NewDraw.MolDrawing.MolDrawing(canvas)
+                drawer = NewMolDrawing.MolDrawing(canvas)
                 drawer.AddMol(self.Mol, confId = confId)
                 canvas.flush()
             else:

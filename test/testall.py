@@ -1,16 +1,22 @@
 import os
+import sys
 import unittest
 
-from cinfony import pybel, cdk, rdkit
+try:
+    from cinfony import pybel, rdkit, cdk
+except ImportError:
+    cinfony = None
+
+try:
+    import pybel as obpybel
+except ImportError:
+    obpybel = None
 
 # For compatability with Python2.3
 try:
     from sets import Set as set
 except ImportError:
     pass
-
-if os.path.isfile("testoutput.txt"):
-    os.remove("testoutput.txt")
 
 class TestToolkit(unittest.TestCase):
     
@@ -33,9 +39,10 @@ class TestToolkit(unittest.TestCase):
         """Test the string representation and corner cases."""
         self.assertRaises(ValueError, self.mols[0].calcfp, "Nosuchname")
         self.assertRaises(AttributeError, self.FPaccesstest)
-        self.assertEqual(str(self.mols[0].calcfp()),
-                         '0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1073741824, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0')
-
+        r = str(self.mols[0].calcfp())
+        t = r.split(", ")
+        self.assertEqual(len(t), self.Nfpbits)
+        
     def testFPbits(self):
         """Test whether the bits are set correctly."""
         bits = [x.calcfp().bits for x in self.mols]
@@ -52,11 +59,42 @@ class TestToolkit(unittest.TestCase):
     def testRSformaterror(self):
         """Test that invalid formats raise an error"""
         self.assertRaises(ValueError, self.toolkit.readstring, "noel", "jkjk")
-    
+        self.assertRaises(IOError, self.toolkit.readstring, "smi", "&*)(%)($)")
+
+    def testselfconversion(self):
+        """Test that the toolkit can eat its own dog-food."""
+        newmol = self.toolkit.Molecule(self.head[0])
+        self.assertEqual(newmol._exchange,
+                         self.head[0]._exchange)
+
+    def testLocalOpt(self):
+        """Test that local optimisation affects the coordinates"""
+        oldcoords = self.head[0].atoms[0].coords
+        self.head[0].localopt()
+        newcoords = self.head[0].atoms[0].coords
+        self.assertNotEqual(oldcoords, newcoords)
+
+    def testMake3D(self):
+        """Test that 3D coordinate generation does something"""
+        mol = self.mols[0]
+        mol.make3D()
+        self.assertNotEqual(mol.atoms[4].coords, (0., 0., 0.))
+
+    def testDraw(self):
+        """Create a 2D depiction"""
+        self.mols[0].draw(show=False,
+                          filename="%s.png" % self.toolkit.__name__)
+        self.mols[0].draw(show=False) # Just making sure that it doesn't raise an Error
+        self.mols[0].draw(show=False, update=True)
+        self.assertNotEqual(self.mols[0].atoms[0].coords, (0., 0., 0.))
+        self.mols[0].draw(show=False, usecoords=True,
+                          filename="%s_b.png" % self.toolkit.__name__)
+
     def testRSgetprops(self):
         """Get the values of the properties."""
         # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
         # Only OpenBabel has a working exactmass
+        # CDK doesn't include implicit Hs when calculating the molwt
         self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
@@ -77,8 +115,9 @@ class TestToolkit(unittest.TestCase):
   3  4  1  0  0  0
 M  END
 """
-        for a,b in zip(test.split("\n")[2:], as_mol.split("\n")[2:]):
-            self.assertEqual(a,b)
+        data, result = test.split("\n"), as_mol.split("\n")
+        self.assertEqual(len(data), len(result))
+        self.assertEqual(data[-2], result[-2].rstrip()) # M  END
 
     def testRSstringrepr(self):
         """Test the string representation of a molecule"""
@@ -111,7 +150,7 @@ M  END
 
     def testRFconversion(self):
         """Convert to smiles"""
-        as_smi = [mol.write("smi").split("\t")[0] for mol in self.mols]
+        as_smi = ["".join(sorted(mol.write("smi").split("\t")[0])) for mol in self.mols]
         test = ['CCCC', 'CCCN']
         self.assertEqual(as_smi, test)
 
@@ -120,7 +159,7 @@ M  END
         mol = self.mols[0]
         mol.write("smi", "testoutput.txt")
         test = 'CCCC'
-        filecontents = open("testoutput.txt", "r").readlines()[0].split("\t")[0]
+        filecontents = open("testoutput.txt", "r").readlines()[0].split("\t")[0].strip()
         self.assertEqual(filecontents, test)
         self.assertRaises(IOError, mol.write, "smi", "testoutput.txt")
         os.remove("testoutput.txt")
@@ -144,7 +183,7 @@ M  END
         # Should raise ValueError
         self.mols[0].calcdesc("BadDescName")
 
-    def notestRFdesc(self):
+    def testRFdesc(self):
         """Test the descriptors"""
         desc = self.mols[1].calcdesc()
         self.assertEqual(len(desc), self.Ndescs)
@@ -169,12 +208,12 @@ M  END
     def testMDglobalaccess(self):
         """Check out the keys"""
         data = self.head[0].data
-        # self.assert_(data.has_key('Comment'))
         self.assertFalse(data.has_key('Noel'))
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(data), len(self.datakeys))
         for key in data:
-            self.assertEqual(key in ['Comment', 'NSC'], True)
-        self.assertEqual(repr(data), "{'Comment': 'CORINA 2.61 0041  25.10.2001', 'NSC': '1'}")
+            self.assertEqual(key in self.datakeys, True)
+        r = repr(data)
+        self.assertTrue(r[0]=="{" and r[-2:]=="'}", r)
 
     def testMDdelete(self):
         """Delete some keys"""
@@ -218,6 +257,8 @@ class TestPybel(TestToolkit):
     Natoms = 15
     tpsaname = "TPSA"
     Nbits = 3
+    Nfpbits = 32
+    datakeys = ['NSC', 'Comment']
 
     def testFP_FP3(self):
         "Checking the results from FP3"
@@ -267,6 +308,9 @@ Energy = 0
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
+class TestOBPybel(TestPybel):
+    toolkit = obpybel
+
 class TestRDKit(TestToolkit):
     toolkit = rdkit
     tanimotoresult = 1/3.
@@ -274,6 +318,8 @@ class TestRDKit(TestToolkit):
     Natoms = 9
     tpsaname = "TPSA"
     Nbits = 12
+    Nfpbits = 64
+    datakeys = ['NSC']
 
     def testRSconversiontoMOL(self):
         """No conversion to MOL file done"""
@@ -287,16 +333,32 @@ class TestCDK(TestToolkit):
     Natoms = 15
     tpsaname = "tpsa"
     Nbits = 4
+    Nfpbits = 4 # The CDK uses a true java.util.Bitset
+    datakeys = ['NSC', 'Remark', 'Title']
 
     def testSMARTS(self):
         """No SMARTS testing done"""
         pass
 
+    def testRSgetprops(self):
+        """Get the values of the properties."""
+        # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
+        # Only OpenBabel has a working exactmass
+        # CDK doesn't include implicit Hs when calculating the molwt
+        self.mols[0].addh()
+        self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
+        self.assertEqual(len(self.mols[0].atoms), 14)
+        self.assertRaises(AttributeError, self.RSaccesstest)
+
 if __name__=="__main__":
+    # Tidy up
+    if os.path.isfile("testoutput.txt"):
+        os.remove("testoutput.txt")
+
     testcases = [TestPybel, TestCDK, TestRDKit]
-    # testcases = [TestCDK]
-    # testcases = [TestPybel]
-    #testcases = [TestRDKit]
+    # testcases = [TestCDK, TestOBPybel]
+    testcases = [TestPybel]
+    # testcases = [TestRDKit]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)

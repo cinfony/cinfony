@@ -185,8 +185,8 @@ class Molecule(object):
     
     def __init__(self, OBMol):
         
-        if hasattr(OBMol, "_xchange"):
-            OBMol = readstring("smi", OBMol._xchange).OBMol
+        if hasattr(OBMol, "_exchange"):
+            OBMol = readstring("smi", OBMol._exchange).OBMol
         self.OBMol = OBMol
  
     def __getattr__(self, attr):
@@ -209,15 +209,10 @@ class Molecule(object):
                 return ob.toUnitCell(unitcell)
             else:
                 raise AttributeError, "Molecule has no attribute 'unitcell'"
-        elif attr == "_atoms":
-            return [(x.GetAtomicNum(),) for x in ob.OBMolAtomIter(self.OBMol)]
-        elif attr == "_bonds":
-            return [(x.GetBeginAtomIdx()-1, x.GetEndAtomIdx()-1, x.GetBO())
-                    for x in ob.OBMolBondIter(self.OBMol)]
         elif attr in self._getmethods:
             # Call the OB Method to find the attribute value
             return getattr(self.OBMol, self._getmethods[attr])()
-        elif attr == "_xchange":
+        elif attr == "_exchange":
             return self.write("can").split("\t")[0]
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
@@ -366,7 +361,9 @@ installation instructions for more information."""
             if usecoords:
                 v.x, v.y, v.z = atom.coords[0] * 30., atom.coords[1] * -30., 0.0
             mol.add_vertex(v)
-        for bond in self._bonds:
+
+        for bond in [(x.GetBeginAtomIdx()-1, x.GetEndAtomIdx()-1, x.GetBO())
+                    for x in ob.OBMolBondIter(self.OBMol)]:
             e = mol.create_edge()
             e.order = bond[2]
             mol.add_edge(bond[0], bond[1], e)
@@ -439,9 +436,7 @@ class Atom(object):
         'vector':'GetVector',
         }
 
-    def __init__(self, OBAtom=None):
-        if not OBAtom:
-            OBAtom = ob.OBAtom()
+    def __init__(self, OBAtom):
         self.OBAtom = OBAtom
         
     def __getattr__(self, attr):
@@ -462,12 +457,12 @@ class Atom(object):
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
-def findbits(fp, bitsperint):
+def _findbits(fp, bitsperint):
     """Find which bits are set in a list/vector.
 
     This function is used by the Fingerprint class.
 
-    >>> findbits([13, 71], 8)
+    >>> _findbits([13, 71], 8)
     [1, 3, 4, 9, 10, 11, 15]
     """
     ans = []
@@ -504,7 +499,7 @@ class Fingerprint(object):
     def __getattr__(self, attr):
         if attr == "bits":
             # Create a bits attribute on-the-fly
-            return findbits(self.fp, ob.OBFingerprint.Getbitsperint())
+            return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())
         else:
             raise AttributeError, "Fingerprint has no attribute %s" % attr
     def __str__(self):

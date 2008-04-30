@@ -1,5 +1,7 @@
 import os
+import bz2
 import urllib
+import base64
 import tempfile
 import StringIO
 
@@ -43,8 +45,7 @@ _outformats = {'mol': cdk.io.MDLWriter,
                'smi': cdk.io.SMILESWriter,
                'sdf': cdk.io.MDLWriter} # FIXME: Handle the one molecule case
 outformats = ['smi'] + _outformats.keys()
-
-
+forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 
 #from org.openscience.cdk.io.iterator import IteratingMDLReader
 #from org.openscience.cdk.io import ReaderFactory, WriterFactory, SMILESWriter
@@ -365,7 +366,7 @@ class Molecule(object):
         return self.write()
 
     def addh(self):
-        hadder = cdk.tools.HydrogenAdder()
+        hAdder = cdk.tools.HydrogenAdder()
         hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
 
     def removeh(self):
@@ -405,10 +406,13 @@ class Molecule(object):
         #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
         #        cdk.fingerprint.StandardSubstructureSets.getFunctionalGroupSubstructureSet()
         #        )
+        fp = fp.lower()
         if fp == "graph":
             fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
-        else:
+        elif fp == "daylight":
             fingerprinter = cdk.fingerprint.Fingerprinter()
+        else:
+            raise ValueError, "%s is not a recognised CDK Fingerprint type" % fp
         return Fingerprint(fingerprinter.getFingerprint(self.Molecule))
 
     def calcdesc(self, descnames=[]):
@@ -474,8 +478,9 @@ class Molecule(object):
                     mol.add_edge(bond[0], bond[1], e)                        
                 oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
             else:
+                encodesmiles = base64.urlsafe_b64encode(bz2.compress(self.write("smi")))
                 imagedata = urllib.urlopen("http://www.chembiogrid.org/cheminfo/rest/depict/" +
-                                       self.write("smi")).read()
+                                       encodesmiles).read()
                 if writetofile:
                     print >> open(filename, "wb"), imagedata
             if show:
@@ -494,6 +499,32 @@ class Molecule(object):
             if filedes:
                 os.close(filedes)
                 os.remove(filename)
+
+    def make3D(self, forcefield="MMFF94", steps=50):
+        """Generate 3D coordinates.
+        
+        Optional parameters:
+           forcefield -- default is "MMFF94"
+           steps -- default is 50
+
+        Hydrogens are added, coordinates are generated and a quick
+        local optimization is carried out with 50 steps and the
+        MMFF94 forcefield. Call localopt() if you want
+        to improve the coordinates further.
+        """
+        forcefield = forcefield.lower()
+        if forcefield not in forcefields:
+            print "hey"
+            pass
+        self.addh()
+        mb3d = cdk.modeling.builder3d.ModelBuilder3D.getInstance()
+        mb3d.setTemplateHandler()
+        mb3d.setForceField(forcefield)
+        mb3d.setMolecule(self.Molecule, false)
+        mb3d.generate3DCoordinates()
+        self.Molecule = mb3d.getMolecule()
+  
+        self.localopt(forcefield, steps)
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
@@ -719,8 +750,3 @@ if __name__=="__main__": #pragma: no cover
     # print smarts.findall(mol)
     mol = readstring("smi", "CC=O")
     # d = mol.calcdesc()
-
-                
-                
-    
-    
