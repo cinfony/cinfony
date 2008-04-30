@@ -3,14 +3,18 @@ import sys
 import unittest
 
 try:
-    from cinfony import pybel, rdkit, cdk
-except ImportError:
-    cinfony = None
-
-try:
-    import pybel as obpybel
-except ImportError:
-    obpybel = None
+    test = os.write
+    try:
+        from cinfony import pybel, rdkit, cdk
+    except ImportError:
+        cinfony = None
+    try:
+        import pybel as obpybel
+    except ImportError:
+        obpybel = None
+except AttributeError:
+    from cinfony import cdk
+    pybel = rdkit = obpybel = None
 
 # For compatability with Python2.3
 try:
@@ -18,7 +22,28 @@ try:
 except ImportError:
     pass
 
-class TestToolkit(unittest.TestCase):
+class myTestCase(unittest.TestCase):
+    """Additional methods not present in Jython 2.2"""
+    # Taken from unittest.py in Python 2.5 distribution
+    def assertFalse(self, expr, msg=None):
+        "Fail the test if the expression is true."
+        if expr: raise self.failureException, msg
+    def assertTrue(self, expr, msg=None):
+        """Fail the test unless the expression is true."""
+        if not expr: raise self.failureException, msg
+    def assertAlmostEqual(self, first, second, places=7, msg=None):
+        """Fail if the two objects are unequal as determined by their
+           difference rounded to the given number of decimal places
+           (default 7) and comparing to zero.
+
+           Note that decimal places (from zero) are usually not the same
+           as significant digits (measured from the most signficant digit).
+        """
+        if round(second-first, places) != 0:
+            raise self.failureException, \
+                  (msg or '%r != %r within %r places' % (first, second, places))
+
+class TestToolkit(myTestCase):
     
     def setUp(self):
         self.mols = [self.toolkit.readstring("smi", "CCCC"),
@@ -150,9 +175,14 @@ M  END
 
     def testRFconversion(self):
         """Convert to smiles"""
-        as_smi = ["".join(sorted(mol.write("smi").split("\t")[0])) for mol in self.mols]
+        as_smi = [mol.write("smi").split("\t")[0] for mol in self.mols]
+        ans = []
+        for smi in as_smi:
+            t = list(smi)
+            t.sort()
+            ans.append("".join(t))
         test = ['CCCC', 'CCCN']
-        self.assertEqual(as_smi, test)
+        self.assertEqual(ans, test)
 
     def testRFsingletofile(self):
         """Test the molecule.write() method"""
@@ -355,9 +385,9 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    testcases = [TestPybel, TestCDK, TestRDKit]
-    # testcases = [TestCDK, TestOBPybel]
-    testcases = [TestPybel]
+    # testcases = [TestPybel, TestCDK, TestRDKit]
+    testcases = [TestCDK]
+    # testcases = [TestPybel]
     # testcases = [TestRDKit]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
