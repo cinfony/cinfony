@@ -36,7 +36,7 @@ def _getdescdict():
             name = spec.getSpecificationReference().split("#")[-1]
             descdict[name] = desc
     return descdict
-_descdict = _getdescdict()
+_descdict = descdict = _getdescdict()
 descriptors = _descdict.keys()
 
 _informats = {}
@@ -448,11 +448,13 @@ class Molecule(object):
                 raise ValueError, "%s is not a recognised CDK descriptor type" % descname
             try:
                 value = desc.calculate(cloneagain).getValue()
-                if hasattr(value, "array"):
-                    for i, x in enumerate(value.array):
-                        ans[descname + ".%d" % i] = x.value
+                if hasattr(value, "get"): # Instead of array
+                    for i in range(value.length()):
+                        ans[descname + ".%d" % i] = value.get(i)
+                elif hasattr(value, "doubleValue"):
+                    ans[descname] = value.doubleValue()
                 else:
-                    ans[descname] = value.value
+                    ans[descname] = value.intValue()
             except JavaException, ex:
                 # Can happen if molecule has no 3D coordinates
                 pass
