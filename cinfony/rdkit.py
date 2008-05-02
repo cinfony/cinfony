@@ -50,6 +50,9 @@ _bondstereo = {0: Chem.rdchem.BondStereo.STEREONONE,
                2: Chem.rdchem.BondStereo.STEREOZ}
 _revbondstereo = dict([(y,x) for (x,y) in _bondstereo.iteritems()])
 
+_forcefields = {'uff': AllChem.UFFOptimizeMolecule}
+forcefields = _forcefields.keys()
+
 def readfile(format, filename):
     """Iterate over the molecules in a file.
 
@@ -102,9 +105,14 @@ def readstring(format, string):
     if format=="mol":
         return Molecule(Chem.MolFromMolBlock(string))
     elif format=="smi":
-        return Molecule(Chem.MolFromSmiles(string))
+        mol = Chem.MolFromSmiles(string)        
     else:
-        raise ValueError,"%s is not a recognised RDKit format" % format    
+        raise ValueError,"%s is not a recognised RDKit format" % format
+    if mol:
+        return Molecule(mol)
+    else:
+        raise IOError, "Failed to convert '%s' to format '%s'" % (
+            string, format)
 
 class Molecule(object):
     """Represent an RDKit molecule.
@@ -125,8 +133,8 @@ class Molecule(object):
     """
 
     def __init__(self, Mol):
-        if hasattr(Mol, "_xchange"):
-            Mol = readstring("smi", Mol._xchange).Mol
+        if hasattr(Mol, "_exchange"):
+            Mol = readstring("smi", Mol._exchange).Mol
         self.Mol = Mol
    
     def _buildMol(self, molecule):
@@ -164,6 +172,8 @@ class Molecule(object):
             return MoleculeData(self.Mol)
         elif attr == "molwt":
             return descDict['MolWt'](self.Mol)
+        elif attr == "_exchange":
+            return self.write("iso")
         elif attr == "_bonds":
             Chem.Kekulize(self.Mol)
             bonds = [(x.GetBeginAtomIdx(), x.GetEndAtomIdx(),
@@ -287,8 +297,8 @@ class Molecule(object):
                 AllChem.Compute2DCoords(self.Mol)
                 confId = 0
             else:
+                confId = self.Mol.GetNumConformers()
                 AllChem.Compute2DCoords(self.Mol, clearConfs = False)
-                confId = 1
         if show or filename:
             Chem.Kekulize(self.Mol)
             if newdraw: # Using NewDraw from devel branch
@@ -323,6 +333,14 @@ class Molecule(object):
                 quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
                 root.mainloop()
             Chem.SanitizeMol(self.Mol)
+
+    def localopt(self, forcefield = "uff", steps = 50):
+        forcefield = forcefield.lower()
+        _forcefields[forcefield](self.Mol, maxIters = steps)
+
+    def make3D(self):
+        AllChem.EmbedMolecule(self.Mol)
+        self.localopt()
         
 class Atom(object):
     """Represent a Pybel atom.

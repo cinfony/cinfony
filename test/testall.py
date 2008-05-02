@@ -103,7 +103,7 @@ class TestToolkit(myTestCase):
         """Test that 3D coordinate generation does something"""
         mol = self.mols[0]
         mol.make3D()
-        self.assertNotEqual(mol.atoms[4].coords, (0., 0., 0.))
+        self.assertNotEqual(mol.atoms[3].coords, (0., 0., 0.))
 
     def testDraw(self):
         """Create a 2D depiction"""
@@ -190,7 +190,9 @@ M  END
         mol = self.mols[0]
         mol.write("smi", "testoutput.txt")
         test = 'CCCC'
-        filecontents = open("testoutput.txt", "r").readlines()[0].split("\t")[0].strip()
+        input = open("testoutput.txt", "r")
+        filecontents = input.readlines()[0].split("\t")[0].strip()
+        input.close()
         self.assertEqual(filecontents, test)
         self.assertRaises(IOError, mol.write, "smi", "testoutput.txt")
         os.remove("testoutput.txt")
@@ -205,8 +207,10 @@ M  END
         outputfile.close()
         self.assertRaises(IOError, outputfile.write, mol)
         self.assertRaises(IOError, self.toolkit.Outputfile, "sdf", "testoutput.txt")
-        numdollar = len([x for x in open("testoutput.txt").readlines()
+        input = open("testoutput.txt", "r")
+        numdollar = len([x for x in input.readlines()
                          if x.rstrip() == "$$$$"])
+        input.close()
         os.remove("testoutput.txt")
         self.assertEqual(numdollar, 2)
 
@@ -399,7 +403,7 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    # testcases = [TestPybel, TestCDK, TestRDKit]
+    testcases = [TestPybel, TestCDK, TestRDKit]
     testcases = [TestCDK]
     # testcases = [TestPybel]
     # testcases = [TestRDKit]

@@ -317,8 +317,8 @@ class Molecule(object):
     
     def __init__(self, Molecule):
         
-        if hasattr(Molecule, "_xchange"):
-            Molecule = readstring("smi", Molecule._xchange).Molecule
+        if hasattr(Molecule, "_exchange"):
+            Molecule = readstring("smi", Molecule._exchange).Molecule
         self.Molecule = Molecule
         
     def __getattr__(self, attr):

@@ -7,6 +7,17 @@ import StringIO
 
 import org.openscience.cdk as cdk
 import java
+import javax
+
+class displayStructure(java.swing.JPanel):
+    def __init__(self):
+       self.frame = java.swing.JFrame()
+       r2dm = Renderer2DModel()
+       renderer = Renderer2D(r2dm)
+       screenSize = Dimension(300, 300)
+       setPreferredSize(screenSize)
+ 
+    
 
 def _getdescdict():
     de = cdk.qsar.DescriptorEngine(cdk.qsar.DescriptorEngine.MOLECULAR)
@@ -299,8 +310,8 @@ class Molecule(object):
     
     def __init__(self, Molecule):
         
-        if hasattr(Molecule, "_xchange"):
-            Molecule = readstring("smi", Molecule._xchange).Molecule
+        if hasattr(Molecule, "_exchange"):
+            Molecule = readstring("smi", Molecule._exchange).Molecule
         self.Molecule = Molecule
         
     def __getattr__(self, attr):
