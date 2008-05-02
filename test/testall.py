@@ -111,7 +111,8 @@ class TestToolkit(myTestCase):
                           filename="%s.png" % self.toolkit.__name__)
         self.mols[0].draw(show=False) # Just making sure that it doesn't raise an Error
         self.mols[0].draw(show=False, update=True)
-        self.assertNotEqual(self.mols[0].atoms[0].coords, (0., 0., 0.))
+        coords = [x.coords for x in self.mols[0].atoms[0:2]]
+        self.assertNotEqual(coords, [(0., 0., 0.), (0., 0., 0.)])
         self.mols[0].draw(show=False, usecoords=True,
                           filename="%s_b.png" % self.toolkit.__name__)
 
@@ -215,6 +216,11 @@ M  END
 
     def testRFdesc(self):
         """Test the descriptors"""
+        if self.toolkit.__name__ == "cinfony.cdk":
+            # For the CDK, you need to call addh()
+            # or some descriptors will be incorrectly calculated
+            # (even those that are supposed to be immune like TPSA)
+            self.mols[1].addh()
         desc = self.mols[1].calcdesc()
         self.assertEqual(len(desc), self.Ndescs)
         self.assertAlmostEqual(desc[self.tpsaname], 26.02, 2)
@@ -368,6 +374,14 @@ class TestCDK(TestToolkit):
 
     def testSMARTS(self):
         """No SMARTS testing done"""
+        pass
+
+    def testLocalOpt(self):
+        """No local opt testing done"""
+        pass
+
+    def testMake3D(self):
+        """No 3D coordinate generation done"""
         pass
 
     def testRSgetprops(self):

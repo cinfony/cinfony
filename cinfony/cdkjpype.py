@@ -39,6 +39,7 @@ def _getdescdict():
 _descdict = _getdescdict()
 descriptors = _descdict.keys()
 
+_informats = {}
 informats = ['smi' ,'sdf']
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
@@ -201,7 +202,7 @@ def readfile(format, filename):
             builder
             ))])
     else:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError,"%s is not a recognised CDK format" % format
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -217,7 +218,11 @@ def readstring(format, string):
     """
     if format=="smi":
         sp = cdk.smiles.SmilesParser(cdk.DefaultChemObjectBuilder.getInstance())
-        return Molecule(sp.parseSmiles(string))
+        try:
+            ans = sp.parseSmiles(string)
+        except JavaException, ex:
+            raise IOError, ex.message()
+        return Molecule(ans)
     elif format in informats:
         reader = _informats[informats(format)]
         return Molecule(reader(
@@ -225,7 +230,7 @@ def readstring(format, string):
             cdk.DefaultChemObjectBuilder.getInstance()
             ))
     else:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError,"%s is not a recognised CDK format" % format
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
@@ -349,6 +354,8 @@ class Molecule(object):
                 atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms()]
                 ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
             return ans
+        elif attr == "_exchange":
+            return self.write("smi")
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -427,47 +434,61 @@ class Molecule(object):
         if not descnames:
             descnames = descriptors
         ans = {}
+        # Clone it to add hydrogens
+        clone = self.Molecule.clone()
+        Molecule(clone).addh()
         for descname in descnames:
-            for descname in descnames:
-                try:
-                    desc = _descdict[descname]
-                except KeyError:
-                    raise ValueError, "%s is not a recognised CDK descriptor type" % descname
-                try:
-                    value = desc.calculate(self.Molecule).getValue()
-                    if hasattr(value, "array"):
-                        for i, x in enumerate(value.array):
-                            ans[descname + ".%d" % i] = x.value
-                    else:
-                        ans[descname] = value.value
-                except JavaException, ex:
-                    # Can happen if molecule has no 3D coordinates
-                    pass
+            # Clone it to workaround CDK1.0.2 bug where
+            # different descriptor calculations are not
+            # independent (should be fixed for next release)
+            cloneagain = clone.clone()
+            try:
+                desc = _descdict[descname]
+            except KeyError:
+                raise ValueError, "%s is not a recognised CDK descriptor type" % descname
+            try:
+                value = desc.calculate(cloneagain).getValue()
+                if hasattr(value, "array"):
+                    for i, x in enumerate(value.array):
+                        ans[descname + ".%d" % i] = x.value
+                else:
+                    ans[descname] = value.value
+            except JavaException, ex:
+                # Can happen if molecule has no 3D coordinates
+                pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False, web=False):
+    def draw(self, show=True, filename=None, update=False, web=False,
+             usecoords=False):
         writetofile = filename is not None
+
+        if not usecoords:            
+            # Do the SDG
+            sdg = cdk.layout.StructureDiagramGenerator()
+            sdg.setMolecule(self.Molecule)
+            sdg.generateExperimentalCoordinates()
+            newmol = Molecule(sdg.getMolecule())
+            if update:
+                for atom, newatom in zip(self.atoms, newmol.atoms):
+                    coords = newatom.Atom.getPoint2d()
+                    atom.Atom.setPoint3d(javax.vecmath.Point3d(
+                                         coords.x, coords.y, 0.0))
+        else:
+            newmol = self
             
-        # Do the SDG
-        sdg = cdk.layout.StructureDiagramGenerator()
-        sdg.setMolecule(self.Molecule)
-        sdg.generateExperimentalCoordinates()
-        newmol = Molecule(sdg.getMolecule())
-        if update:
-            for atom, newatom in zip(self.atoms, newmol.atoms):
-                coords = newatom.Atom.getPoint2d()
-                atom.Atom.setPoint3d(javax.vecmath.Point3d(
-                                     coords.x, coords.y, 0.0))
         if writetofile or show:
             if writetofile:
                 filedes = None
             else:
                 filedes, filename = tempfile.mkstemp()
-            if not web:    
+            if not web:
                 # Create OASA molecule
                 mol = oasa.molecule()
                 for atom, newatom in zip(self._atoms, newmol.atoms):
-                    coords = newatom.Atom.getPoint2d()
+                    if not usecoords:
+                        coords = newatom.Atom.getPoint2d()
+                    else:
+                        coords = newatom.Atom.getPoint3d()
                     v = mol.create_vertex()
                     v.symbol = _isofact.getElement(atom[0]).getSymbol()
                     mol.add_vertex(v)
@@ -500,31 +521,42 @@ class Molecule(object):
                 os.close(filedes)
                 os.remove(filename)
 
-    def make3D(self, forcefield="MMFF94", steps=50):
-        """Generate 3D coordinates.
-        
-        Optional parameters:
-           forcefield -- default is "MMFF94"
-           steps -- default is 50
-
-        Hydrogens are added, coordinates are generated and a quick
-        local optimization is carried out with 50 steps and the
-        MMFF94 forcefield. Call localopt() if you want
-        to improve the coordinates further.
-        """
-        forcefield = forcefield.lower()
-        if forcefield not in forcefields:
-            print "hey"
-            pass
-        self.addh()
-        mb3d = cdk.modeling.builder3d.ModelBuilder3D.getInstance()
-        mb3d.setTemplateHandler()
-        mb3d.setForceField(forcefield)
-        mb3d.setMolecule(self.Molecule, false)
-        mb3d.generate3DCoordinates()
-        self.Molecule = mb3d.getMolecule()
-  
-        self.localopt(forcefield, steps)
+##    def localopt(self, forcefield="MMFF94", steps=100):
+##        forcefield = forcefield.lower()
+##        
+##        geoopt = cdk.modeling.forcefield.GeometricMinimizer()
+##        geoopt.setMolecule(self.Molecule, False)
+##        points = [t.Atom.point3d for t in self.atoms]
+##        coords = [(t.x, t.y, t.z) for t in points]
+##        print coords
+##        if forcefield == "MMFF94":
+##            ff = cdk.modeling.forcefield.MMFF94Energy(self.Molecule,
+##                                geoopt.getPotentialParameterSet())
+##        # geoopt.setMMFF94Tables()
+##        geoopt.steepestDescentsMinimization(coords, forcefield)
+##
+##    def make3D(self, forcefield="MMFF94", steps=50):
+##        """Generate 3D coordinates.
+##        
+##        Optional parameters:
+##           forcefield -- default is "MMFF94"
+##           steps -- default is 50
+##
+##        Hydrogens are added, coordinates are generated and a quick
+##        local optimization is carried out with 50 steps and the
+##        MMFF94 forcefield. Call localopt() if you want
+##        to improve the coordinates further.
+##        """
+##        forcefield = forcefield.lower()
+##        if forcefield not in forcefields:
+##            print "hey"
+##            pass
+##        self.addh()
+##        th3d = cdk.modeling.builder3d.TemplateHandler3D.getInstance()
+##        mb3d = cdk.modeling.builder3d.ModelBuilder3D.getInstance(
+##            th3d, forcefield)
+##        self.Molecule = mb3d.generate3DCoordinates(self.Molecule, False)
+##        self.localopt(forcefield, steps)
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
