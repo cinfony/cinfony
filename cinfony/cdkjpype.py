@@ -402,11 +402,7 @@ class Molecule(object):
         return iter(self.__getattr__("atoms"))
 
     def __str__(self):
-        return self.write("smi")
-
-    # def addh(self):
-    #    ha = cdk.tools.HydrogenAdder()
-    #    ha.addExplicitHydrogensToSatisfyValency(self.Molecule)        
+        return self.write("smi")      
 
     def calcfp(self, fp="daylight"):
         # if fp == "substructure":

@@ -9,15 +9,42 @@ import org.openscience.cdk as cdk
 import java
 import javax
 
-class displayStructure(java.swing.JPanel):
-    def __init__(self):
-       self.frame = java.swing.JFrame()
-       r2dm = Renderer2DModel()
-       renderer = Renderer2D(r2dm)
-       screenSize = Dimension(300, 300)
-       setPreferredSize(screenSize)
- 
-    
+class displayStructure(javax.swing.JPanel):
+    def __init__(self, mol):
+        self.mol = mol.clone()
+        Molecule(self.mol).removeh()
+        
+        self.frame = javax.swing.JFrame()
+        r2dm = cdk.renderer.Renderer2DModel()
+        renderer = cdk.renderer.Renderer2D(r2dm)
+        screenSize = java.awt.Dimension(300, 300)
+        self.setPreferredSize(screenSize)
+        r2dm.setBackgroundDimension(screenSize)
+        self.setBackground(r2dm.getBackColor())
+
+        r2dm.setDrawNumbers(False)
+        r2dm.setUseAntiAliasing(True)
+        r2dm.setColorAtomsByType(True)
+        r2dm.setShowImplicitHydrogens(True)
+        r2dm.setShowAromaticity(True)
+        r2dm.setShowReactionBoxes(False)
+        r2dm.setKekuleStructure(False)
+
+        scale = 0.9
+        gt = cdk.geometry.GeometryTools
+        gt.translateAllPositive(self.mol, r2dm.getRenderingCoordinates())
+        gt.scaleMolecule(self.mol, self.getPreferredSize(),
+                         scale, r2dm.getRenderingCoordinates())
+        gt.center(self.mol, self.getPreferredSize(),
+                  r2dm.getRenderingCoordinates())
+
+        self.frame.getContentPane().add(self)
+        self.frame.pack()
+
+    def paint(self, g):
+        # From http://www.jython.org/docs/subclassing.html
+        SuperClass.paint(self, g) 
+        renderer.paintMolecule(self.mol, g, False, True)
 
 def _getdescdict():
     de = cdk.qsar.DescriptorEngine(cdk.qsar.DescriptorEngine.MOLECULAR)
@@ -29,6 +56,7 @@ def _getdescdict():
             name = spec.getSpecificationReference().split("#")[-1]
             descdict[name] = desc
     return descdict
+
 _descdict = descdict = _getdescdict()
 descriptors = _descdict.keys()
 
