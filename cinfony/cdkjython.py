@@ -9,43 +9,6 @@ import org.openscience.cdk as cdk
 import java
 import javax
 
-class displayStructure(javax.swing.JPanel):
-    def __init__(self, mol):
-        self.mol = mol.clone()
-        Molecule(self.mol).removeh()
-        
-        self.frame = javax.swing.JFrame()
-        r2dm = cdk.renderer.Renderer2DModel()
-        renderer = cdk.renderer.Renderer2D(r2dm)
-        screenSize = java.awt.Dimension(300, 300)
-        self.setPreferredSize(screenSize)
-        r2dm.setBackgroundDimension(screenSize)
-        self.setBackground(r2dm.getBackColor())
-
-        r2dm.setDrawNumbers(False)
-        r2dm.setUseAntiAliasing(True)
-        r2dm.setColorAtomsByType(True)
-        r2dm.setShowImplicitHydrogens(True)
-        r2dm.setShowAromaticity(True)
-        r2dm.setShowReactionBoxes(False)
-        r2dm.setKekuleStructure(False)
-
-        scale = 0.9
-        gt = cdk.geometry.GeometryTools
-        gt.translateAllPositive(self.mol, r2dm.getRenderingCoordinates())
-        gt.scaleMolecule(self.mol, self.getPreferredSize(),
-                         scale, r2dm.getRenderingCoordinates())
-        gt.center(self.mol, self.getPreferredSize(),
-                  r2dm.getRenderingCoordinates())
-
-        self.frame.getContentPane().add(self)
-        self.frame.pack()
-
-    def paint(self, g):
-        # From http://www.jython.org/docs/subclassing.html
-        SuperClass.paint(self, g) 
-        renderer.paintMolecule(self.mol, g, False, True)
-
 def _getdescdict():
     de = cdk.qsar.DescriptorEngine(cdk.qsar.DescriptorEngine.MOLECULAR)
     descdict = {}
@@ -484,68 +447,41 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False, web=False,
-             usecoords=False):
-        writetofile = filename is not None
-
+    def draw(self, show=True, filename=None, update=False, usecoords=False):
+        mol = Molecule(self.Molecule.clone())
+        cdk.aromaticity.HueckelAromaticityDetector.detectAromaticity(mol.Molecule)
+        
         if not usecoords:            
             # Do the SDG
             sdg = cdk.layout.StructureDiagramGenerator()
-            sdg.setMolecule(self.Molecule)
-            sdg.generateExperimentalCoordinates()
-            newmol = Molecule(sdg.getMolecule())
+            sdg.setMolecule(mol.Molecule)
+            sdg.generateCoordinates()
+            mol = Molecule(sdg.getMolecule())
             if update:
-                for atom, newatom in zip(self.atoms, newmol.atoms):
+                for atom, newatom in zip(self.atoms, mol.atoms):
                     coords = newatom.Atom.getPoint2d()
                     atom.Atom.setPoint3d(javax.vecmath.Point3d(
                                          coords.x, coords.y, 0.0))
-        else:
-            newmol = self
             
-        if writetofile or show:
-            if writetofile:
-                filedes = None
-            else:
-                filedes, filename = tempfile.mkstemp()
-            if not web:
-                # Create OASA molecule
-                mol = oasa.molecule()
-                for atom, newatom in zip(self._atoms, newmol.atoms):
-                    if not usecoords:
-                        coords = newatom.Atom.getPoint2d()
-                    else:
-                        coords = newatom.Atom.getPoint3d()
-                    v = mol.create_vertex()
-                    v.symbol = _isofact.getElement(atom[0]).getSymbol()
-                    mol.add_vertex(v)
-                    v.x, v.y, v.z = coords.x * 30., coords.y * -30., 0.0
-                for bond in self._bonds:
-                    e = mol.create_edge()
-                    e.order = bond[2]
-                    mol.add_edge(bond[0], bond[1], e)                        
-                oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
-            else:
-                encodesmiles = base64.urlsafe_b64encode(bz2.compress(self.write("smi")))
-                imagedata = urllib.urlopen("http://www.chembiogrid.org/cheminfo/rest/depict/" +
-                                       encodesmiles).read()
-                if writetofile:
-                    print >> open(filename, "wb"), imagedata
-            if show:
-                root = tk.Tk()
-                root.title((hasattr(self, "title") and self.title)
-                           or self.__str__().rstrip())
-                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                if web:
-                    image = PIL.open(StringIO.StringIO(imagedata))
-                else:
-                    image = PIL.open(filename)
-                imagedata = piltk.PhotoImage(image)
-                label = tk.Label(frame, image=imagedata).pack()
-                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
-                root.mainloop()
-            if filedes:
-                os.close(filedes)
-                os.remove(filename)
+        else:
+            if self.atoms[0].Atom.getPoint2d() is None:
+                # Use the 3D coords to set the 2D coords
+                for atom, newatom in zip(self.atoms, mol.atoms):
+                    coords = atom.Atom.getPoint3d()
+                    newatom.Atom.setPoint2d(javax.vecmath.Point2d(
+                                    coords.x, coords.y))
+
+        atommanip = cdk.tools.manipulator.AtomContainerManipulator()      
+        atommanip.removeHydrogens(mol.Molecule)        
+        canvas = _Canvas(mol.Molecule)
+        
+        if filename:
+            canvas.writetofile(filename)
+        if show:
+            canvas.popup()
+        else:
+            canvas.frame.dispose()
+        
 
 ##    def localopt(self, forcefield="MMFF94", steps=100):
 ##        forcefield = forcefield.lower()
@@ -779,6 +715,51 @@ class MoleculeData(object):
         self._mol.setProperty(key, str(value))
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
+
+class _Canvas(javax.swing.JPanel):
+    def __init__(self, mol):
+        self.mol = mol
+        
+        self.frame = javax.swing.JFrame()
+        r2dm = cdk.renderer.Renderer2DModel()
+        self.renderer = cdk.renderer.Renderer2D(r2dm)
+        screenSize = java.awt.Dimension(300, 300)
+        self.setPreferredSize(screenSize)
+        r2dm.setBackgroundDimension(screenSize)
+        self.setBackground(r2dm.getBackColor())
+
+        r2dm.setDrawNumbers(False)
+        r2dm.setUseAntiAliasing(True)
+        r2dm.setColorAtomsByType(True)
+        r2dm.setShowImplicitHydrogens(True)
+        r2dm.setShowAromaticity(True)
+        r2dm.setShowReactionBoxes(False)
+        r2dm.setKekuleStructure(False)
+
+        scale = 0.9
+        gt = cdk.geometry.GeometryTools
+        gt.translateAllPositive(self.mol, r2dm.getRenderingCoordinates())
+        gt.scaleMolecule(self.mol, self.getPreferredSize(),
+                         scale, r2dm.getRenderingCoordinates())
+        gt.center(self.mol, self.getPreferredSize(),
+                  r2dm.getRenderingCoordinates())
+
+        self.frame.getContentPane().add(self)
+        self.frame.pack()
+
+    def paint(self, g):
+        # From http://www.jython.org/docs/subclassing.html
+        javax.swing.JPanel.paint(self, g) 
+        self.renderer.paintMolecule(self.mol, g, False, True)
+
+    def popup(self):
+        self.frame.visible = True
+
+    def writetofile(self, filename):
+        img = self.createImage(300, 300)
+        snapGraphics = img.getGraphics()
+        self.paint(snapGraphics)        
+        javax.imageio.ImageIO.write(img, "png", java.io.File(filename))
 
 ##>>> readstring("smi", "CCC").calcfp().bits
 ##[542, 637, 742]

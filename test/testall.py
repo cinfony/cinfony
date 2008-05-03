@@ -404,7 +404,7 @@ if __name__=="__main__":
         os.remove("testoutput.txt")
 
     testcases = [TestPybel, TestCDK, TestRDKit]
-    testcases = [TestCDK]
+    # testcases = [TestCDK]
     # testcases = [TestPybel]
     # testcases = [TestRDKit]
     for testcase in testcases:
