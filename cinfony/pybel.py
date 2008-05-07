@@ -347,11 +347,25 @@ class Molecule(object):
         return self.write()
 
     def draw(self, show=True, filename=None, update=False, usecoords=False):
+        """Create a 2D depiction of the molecule.
+
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
+
+        OASA is used for 2D coordinate generation and depiction. Tkinter and
+        Python Imaging Library are required for image display.
+        """
         etab = ob.OBElementTable()
 
         if not oasa:
             errormessage = """OASA not found, but is required for 2D structure
-generation and display. OASA is part of BKChem. See
+generation and depiction. OASA is part of BKChem. See
 installation instructions for more information."""
             raise ImportError, errormessage
         mol = oasa.molecule()
@@ -381,6 +395,10 @@ installation instructions for more information."""
             
             oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
             if show:
+                if not tk:
+                    errormessage = """Tkinter or Python Imaging Library not found, but is required for image
+display. See installation instructions for more information."""
+                    raise ImportError, errormessage
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
