@@ -376,11 +376,17 @@ installation instructions for more information."""
                 v.x, v.y, v.z = atom.coords[0] * 30., atom.coords[1] * -30., 0.0
             mol.add_vertex(v)
 
-        for bond in [(x.GetBeginAtomIdx()-1, x.GetEndAtomIdx()-1, x.GetBO())
-                    for x in ob.OBMolBondIter(self.OBMol)]:
+        for bond in ob.OBMolBondIter(self.OBMol):
             e = mol.create_edge()
-            e.order = bond[2]
-            mol.add_edge(bond[0], bond[1], e)
+            e.order = bond.GetBO()
+            if bond.IsHash():
+                e.type = "h"
+            elif bond.IsWedge():
+                e.type = "w"
+            mol.add_edge(bond.GetBeginAtomIdx() - 1,
+                         bond.GetEndAtomIdx() - 1,
+                         e)
+        mol.remove_all_hydrogens()
         if not usecoords:
             oasa.coords_generator.calculate_coords(mol, bond_length=30)
             if update:
@@ -388,12 +394,23 @@ installation instructions for more information."""
                 for atom, newcoord in zip(ob.OBMolAtomIter(self.OBMol), newcoords):
                     atom.SetVector(*newcoord)
         if filename or show:
+##            maxx = max([v.x for v in mol.vertices])
+##            minx = min([v.x for v in mol.vertices])
+##            maxy = max([v.y for v in mol.vertices])
+##            miny = min([v.y for v in mol.vertices])
+##            maxcoord = max(maxx - minx, maxy - miny)
+##            if maxcoord > 300:
+##                for v in mol.vertices:
+##                    v.x *= 300. / maxcoord
+##                    v.y *= 300. / maxcoord
             if filename:
                 filedes = None
             else:
                 filedes, filename = tempfile.mkstemp()
             
-            oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
+            canvas = oasa.cairo_out.cairo_out()
+            canvas.show_hydrogens_on_hetero = True
+            canvas.mol_to_cairo(mol, filename)
             if show:
                 if not tk:
                     errormessage = """Tkinter or Python Imaging Library not found, but is required for image
