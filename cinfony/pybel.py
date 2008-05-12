@@ -394,15 +394,21 @@ installation instructions for more information."""
                 for atom, newcoord in zip(ob.OBMolAtomIter(self.OBMol), newcoords):
                     atom.SetVector(*newcoord)
         if filename or show:
-##            maxx = max([v.x for v in mol.vertices])
-##            minx = min([v.x for v in mol.vertices])
-##            maxy = max([v.y for v in mol.vertices])
-##            miny = min([v.y for v in mol.vertices])
-##            maxcoord = max(maxx - minx, maxy - miny)
-##            if maxcoord > 300:
-##                for v in mol.vertices:
-##                    v.x *= 300. / maxcoord
-##                    v.y *= 300. / maxcoord
+            maxx = max([v.x for v in mol.vertices])
+            minx = min([v.x for v in mol.vertices])
+            maxy = max([v.y for v in mol.vertices])
+            miny = min([v.y for v in mol.vertices])
+            maxcoord = max(maxx - minx, maxy - miny)
+            fontsize = 16
+            bondwidth = 6
+            linewidth = 2
+            if maxcoord > 270: # 300  - margin * 2
+                for v in mol.vertices:
+                    v.x *= 270. / maxcoord
+                    v.y *= 270. / maxcoord
+                fontsize *= math.sqrt(270. / maxcoord)
+                bondwidth *= math.sqrt(270. / maxcoord)
+                linewidth *= math.sqrt(270. / maxcoord)
             if filename:
                 filedes = None
             else:
@@ -410,6 +416,9 @@ installation instructions for more information."""
             
             canvas = oasa.cairo_out.cairo_out()
             canvas.show_hydrogens_on_hetero = True
+            canvas.font_size = fontsize
+            canvas.bond_width = bondwidth
+            canvas.line_width = linewidth
             canvas.mol_to_cairo(mol, filename)
             if show:
                 if not tk:
