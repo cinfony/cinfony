@@ -362,7 +362,7 @@ class Molecule(object):
 
     def removeh(self):
         atommanip = cdk.tools.manipulator.AtomContainerManipulator()
-        atommanip.removeHydrogens(self.Molecule)
+        self.Molecule = atommanip.removeHydrogens(self.Molecule)
 
     def write(self, format="smi", filename=None, overwrite=False):       
         if format not in outformats:
@@ -471,8 +471,7 @@ class Molecule(object):
                     newatom.Atom.setPoint2d(javax.vecmath.Point2d(
                                     coords.x, coords.y))
 
-        atommanip = cdk.tools.manipulator.AtomContainerManipulator()      
-        atommanip.removeHydrogens(mol.Molecule)        
+        mol.removeh()        
         canvas = _Canvas(mol.Molecule)
         
         if filename:
@@ -731,7 +730,7 @@ class _Canvas(javax.swing.JPanel):
         r2dm.setDrawNumbers(False)
         r2dm.setUseAntiAliasing(True)
         r2dm.setColorAtomsByType(True)
-        r2dm.setShowImplicitHydrogens(True)
+        r2dm.setShowImplicitHydrogens(False)
         r2dm.setShowAromaticity(True)
         r2dm.setShowReactionBoxes(False)
         r2dm.setKekuleStructure(False)

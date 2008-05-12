@@ -470,7 +470,7 @@ class Molecule(object):
                 for atom, newatom in zip(self.atoms, newmol.atoms):
                     coords = newatom.Atom.getPoint2d()
                     atom.Atom.setPoint3d(javax.vecmath.Point3d(
-                                         coords.x, coords.y, 0.0))
+                                         coords.x, coords.y, 0.0))    
         else:
             newmol = self
             
@@ -494,8 +494,11 @@ class Molecule(object):
                 for bond in self._bonds:
                     e = mol.create_edge()
                     e.order = bond[2]
-                    mol.add_edge(bond[0], bond[1], e)                        
-                oasa.cairo_out.cairo_out().mol_to_cairo(mol, filename)
+                    mol.add_edge(bond[0], bond[1], e)
+                canvas = oasa.cairo_out.cairo_out()
+                canvas.show_hydrogens_on_hetero = True
+                mol.remove_all_hydrogens()
+                canvas.mol_to_cairo(mol, filename)
             else:
                 encodesmiles = base64.urlsafe_b64encode(bz2.compress(self.write("smi")))
                 imagedata = urllib.urlopen("http://www.chembiogrid.org/cheminfo/rest/depict/" +
