@@ -487,6 +487,8 @@ class Molecule(object):
                         coords = newatom.Atom.getPoint2d()
                     else:
                         coords = newatom.Atom.getPoint3d()
+                        if not coords:
+                            coords = newatom.Atom.getPoint2d()
                     v = mol.create_vertex()
                     v.symbol = _isofact.getElement(atom[0]).getSymbol()
                     mol.add_vertex(v)
