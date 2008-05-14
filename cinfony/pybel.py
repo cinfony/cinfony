@@ -6,14 +6,14 @@ import openbabel as ob
 try:
     import oasa
     import oasa.cairo_out
-except ImportError:
+except ImportError: #pragma: no cover
     oasa = None
 
 try:
     import Tkinter as tk
     import Image as PIL
     import ImageTk as piltk
-except ImportError:
+except ImportError: #pragma: no cover
     tk = None
 
 def _formatstodict(list):
@@ -364,9 +364,10 @@ class Molecule(object):
         etab = ob.OBElementTable()
 
         if not oasa:
-            errormessage = """OASA not found, but is required for 2D structure
-generation and depiction. OASA is part of BKChem. See
-installation instructions for more information."""
+            errormessage = ("OASA not found, but is required for 2D structure "
+                            "generation and depiction. OASA is part of BKChem. "
+                            "See installation instructions for more "
+                            "information.")
             raise ImportError, errormessage
         mol = oasa.molecule()
         for atom in self.atoms:
@@ -422,8 +423,10 @@ installation instructions for more information."""
             canvas.mol_to_cairo(mol, filename)
             if show:
                 if not tk:
-                    errormessage = """Tkinter or Python Imaging Library not found, but is required for image
-display. See installation instructions for more information."""
+                    errormessage = ("Tkinter or Python Imaging "
+                                    "Library not found, but is required for image "
+                                    "display. See installation instructions for "
+                                    "more information.")
                     raise ImportError, errormessage
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)

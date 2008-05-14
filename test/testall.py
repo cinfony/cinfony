@@ -290,6 +290,14 @@ M  END
         ans = smarts.findall(mol)
         self.assertEqual(len(ans), 3)
 
+    def testAddh(self):
+        """Adding and removing hydrogens"""
+        self.assertEqual(len(self.mols[0].atoms),4)
+        self.mols[0].addh()
+        self.assertEqual(len(self.mols[0].atoms),14)
+        self.mols[0].removeh()
+        self.assertEqual(len(self.mols[0].atoms),4)
+        
 class TestPybel(TestToolkit):
     toolkit = pybel
     tanimotoresult = 1/3.
@@ -318,6 +326,24 @@ class TestPybel(TestToolkit):
         self.assertEqual(data['Comment'], 'CORINA 2.61 0041  25.10.2001')
         data['Comment'] = 'New comment'
         self.assertEqual(data['Comment'], 'New comment')
+
+    def importtest(self):
+        self.mols[0].draw(show=True, usecoords=True)
+
+    def testDrawdependencies(self):
+        "Testing the draw dependencies"
+        t = self.toolkit.tk
+        self.toolkit.tk = None
+        self.mols[0].draw(show=False, usecoords=True,
+                          filename="%s_b.png" % self.toolkit.__name__)
+        self.assertRaises(ImportError,
+                          self.importtest)
+        self.toolkit.tk = t
+
+        t = self.toolkit.oasa
+        self.toolkit.oasa = None
+        self.assertRaises(ImportError,
+                          self.importtest)
 
     def testRSconversiontoMOL2(self):
         """Convert to mol2"""
@@ -405,8 +431,9 @@ if __name__=="__main__":
 
     testcases = [TestPybel, TestCDK, TestRDKit]
     # testcases = [TestCDK]
-    # testcases = [TestPybel]
+    #   testcases = [TestPybel]
     # testcases = [TestRDKit]
+    # testcases = [TestOBPybel]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)
