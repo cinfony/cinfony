@@ -2,10 +2,6 @@ import os
 
 from Chem import AllChem
 from Chem.Draw import MolDrawing
-try: # Development version
-    from Chem.NewDraw import MolDrawing as NewMolDrawing
-except:
-    NewMolDrawing = None
 from Chem.AvailDescriptors import descDict
 from sping.PIL.pidPIL import PILCanvas
 
@@ -289,7 +285,7 @@ class Molecule(object):
             raise ValueError, "%s is not a recognised RDKit Fingerprint type" % fptype
         return fp
 
-    def draw(self, show=True, filename=None, update=False, usecoords=False, newdraw=False):
+    def draw(self, show=True, filename=None, update=False, usecoords=False):
         if usecoords:
             confId = 0
         else:
@@ -301,34 +297,22 @@ class Molecule(object):
                 AllChem.Compute2DCoords(self.Mol, clearConfs = False)
         if show or filename:
             Chem.Kekulize(self.Mol)
-            if newdraw: # Using NewDraw from devel branch
-                NewMolDrawing.registerCanvas('agg')
-                img = PIL.new("RGBA",(300,300),"white")
-                canvas = aggdraw.Draw(img)                
-                canvas.setantialias(True)
-                drawer = NewMolDrawing.MolDrawing(canvas)
-                drawer.AddMol(self.Mol, confId = confId)
-                canvas.flush()
-            else:
-                canvas = PILCanvas(size=(200,200))
-                drawer = MolDrawing.MolDrawing(canvas=canvas)
-                drawer.AddMol(self.Mol, confId = confId)
-            if filename: # Allow overwrite?
-                if newdraw:
-                    img.save(filename)
-                else:
-                    canvas.save(filename)
+            MolDrawing.registerCanvas('agg')
+            img = PIL.new("RGBA",(300,300),"white")
+            canvas = aggdraw.Draw(img)                
+            canvas.setantialias(True)
+            drawer = MolDrawing.MolDrawing(canvas)
+            drawer.AddMol(self.Mol, confId = confId)
+            canvas.flush()
+        
+            if filename: # Allow overwrite?             
+                img.save(filename)
             if show:
-                if newdraw:
-                    image = img
-                else:
-                    image = canvas.getImage()
-                    
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
                 frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                imagedata = PILtk.PhotoImage(image)
+                imagedata = PILtk.PhotoImage(img)
                 label = tk.Label(frame, image=imagedata).pack()
                 quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
                 root.mainloop()
