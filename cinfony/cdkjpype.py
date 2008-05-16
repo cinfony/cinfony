@@ -377,8 +377,10 @@ class Molecule(object):
         hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
 
     def removeh(self):
-        atommanip = cdk.tools.manipulator.AtomContainerManipulator()
-        atommanip.removeHydrogens(self.Molecule)
+        # Don't create an instance of AtomContainerManipulator
+        # as accessing removeHydrogens exposes a bug in JPype (reported)
+        atommanip = cdk.tools.manipulator.AtomContainerManipulator
+        self.Molecule = atommanip.removeHydrogens(self.Molecule)
 
     def write(self, format="smi", filename=None, overwrite=False):       
         if format not in outformats:
