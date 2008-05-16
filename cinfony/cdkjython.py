@@ -170,21 +170,19 @@ def readfile(format, filename):
         raise IOError, "No such file: '%s'" % filename
     builder = cdk.DefaultChemObjectBuilder.getInstance()
     if format=="sdf":
-        return iter([Molecule(mol) for mol in cdk.io.iterator.IteratingMDLReader(
-            java.io.FileInputStream(java.io.File(filename)),
-            builder
-            )])
+##        for mol in cdk.io.iterator.IteratingMDLReader(
+##            java.io.FileInputStream(java.io.File(filename)), builder):
+##            yield Molecule(mol)
+        for mol in cdk.io.iterator.IteratingMDLReader(
+            open(filename, "r"), builder):
+            yield Molecule(mol)
     elif format=="smi":
-        return iter([Molecule(mol) for mol in cdk.io.iterator.IteratingSmilesReader(
-            java.io.FileInputStream(java.io.File(filename)),
-            builder
-            )])
+        for mol in cdk.io.iterator.IteratingSmilesReader(
+            java.io.FileInputStream(java.io.File(filename)), builder):
+            yield Molecule(mol)
     elif format in informats:
         reader = _informats[informats(format)]
-        return iter([Molecule(reader(
-            open(filename),
-            builder
-            ))])
+        yield Molecule(reader(open(filename), builder))
     else:
         raise ValueError,"%s is not a recognised CDK format" % format
 
