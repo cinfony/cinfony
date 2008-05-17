@@ -127,10 +127,14 @@ class Molecule(object):
     The underlying RDKit Mol can be accessed using the attribute:
        Mol
     """
-
+    _cinfony = True
     def __init__(self, Mol):
-        if hasattr(Mol, "_exchange"):
-            Mol = readstring("smi", Mol._exchange).Mol
+        if hasattr(Mol, "_cinfony"):
+            molfile, data = Mol._exchange
+            molecule = readstring("mol", molfile)
+            molecule.data.update(data)
+            Mol = molecule.Mol
+            
         self.Mol = Mol
    
     def _buildMol(self, molecule):
@@ -169,7 +173,7 @@ class Molecule(object):
         elif attr == "molwt":
             return descDict['MolWt'](self.Mol)
         elif attr == "_exchange":
-            return self.write("iso")
+            return self.write("mol"), self.data
         elif attr == "_bonds":
             Chem.Kekulize(self.Mol)
             bonds = [(x.GetBeginAtomIdx(), x.GetEndAtomIdx(),

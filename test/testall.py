@@ -432,7 +432,7 @@ if __name__=="__main__":
     testcases = [TestPybel, TestCDK, TestRDKit]
     # testcases = [TestCDK]
     #   testcases = [TestPybel]
-    testcases = [TestRDKit]
+    # testcases = [TestRDKit]
     # testcases = [TestOBPybel]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)

@@ -182,11 +182,16 @@ class Molecule(object):
         'charge':'GetTotalCharge',
         'spin':'GetTotalSpinMultiplicity'
     }
-    
+    _cinfony = True
+
     def __init__(self, OBMol):
         
-        if hasattr(OBMol, "_exchange"):
-            OBMol = readstring("smi", OBMol._exchange).OBMol
+        if hasattr(OBMol, "_cinfony"):
+            molfile, data = OBMol._exchange
+            mol = readstring("sdf", molfile)
+            mol.data.update(data)
+            OBMol = mol.OBMol
+
         self.OBMol = OBMol
  
     def __getattr__(self, attr):
@@ -213,7 +218,7 @@ class Molecule(object):
             # Call the OB Method to find the attribute value
             return getattr(self.OBMol, self._getmethods[attr])()
         elif attr == "_exchange":
-            return self.write("can").split("\t")[0]
+            return self.write("mol"), self.data
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
