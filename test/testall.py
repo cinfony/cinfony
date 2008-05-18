@@ -89,8 +89,8 @@ class TestToolkit(myTestCase):
     def testselfconversion(self):
         """Test that the toolkit can eat its own dog-food."""
         newmol = self.toolkit.Molecule(self.head[0])
-        self.assertEqual(newmol._exchange[0],
-                         self.head[0]._exchange[0])
+        self.assertEqual(newmol._exchange,
+                         self.head[0]._exchange)
 
     def testLocalOpt(self):
         """Test that local optimisation affects the coordinates"""

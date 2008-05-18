@@ -215,9 +215,8 @@ class Molecule(object):
     def __init__(self, Molecule):
         
         if hasattr(Molecule, "_cinfony"):
-            molfile, data = Molecule._exchange
+            molfile = Molecule._exchange
             mol = readstring("sdf", molfile)
-            mol.data.update(data)
             Molecule = mol.Molecule
             
         self.Molecule = Molecule
@@ -256,7 +255,7 @@ class Molecule(object):
                 ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
             return ans
         elif attr == "_exchange":
-            return self.write("mol"), self.data
+            return self.write("mol")
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 

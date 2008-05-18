@@ -187,9 +187,8 @@ class Molecule(object):
     def __init__(self, OBMol):
         
         if hasattr(OBMol, "_cinfony"):
-            molfile, data = OBMol._exchange
-            mol = readstring("sdf", molfile)
-            mol.data.update(data)
+            molfile = OBMol._exchange
+            mol = readstring("mol", molfile)
             OBMol = mol.OBMol
 
         self.OBMol = OBMol
@@ -218,7 +217,7 @@ class Molecule(object):
             # Call the OB Method to find the attribute value
             return getattr(self.OBMol, self._getmethods[attr])()
         elif attr == "_exchange":
-            return self.write("mol"), self.data
+            return self.write("mol")
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
