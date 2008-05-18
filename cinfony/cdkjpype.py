@@ -1,5 +1,6 @@
 import os
 import bz2
+import math
 import urllib
 import base64
 import tempfile
@@ -133,7 +134,8 @@ class Outputfile(object):
     Although it's possible to write a single molecule to a file by
     calling the write() method of a molecule, if multiple molecules
     are to be written to the same file you should use the Outputfile
-    class.    
+    class.
+    
     Required parameters:
        format
        filename
@@ -229,13 +231,6 @@ class Molecule(object):
         """
         if attr == "atoms":
             return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
-        elif attr == "_atoms":
-            ans = []
-            for i in range(self.Molecule.getAtomCount()):
-                atom = self.Molecule.getAtom(i)
-                _isofact.configure(atom)
-                ans.append( (atom.getAtomicNumber(),) )
-            return ans
 ##        elif attr == 'exactmass':
               # Is supposed to use the most abundant isotope but
               # actually uses the next most abundant
@@ -246,14 +241,6 @@ class Molecule(object):
             return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
         elif attr == 'formula':
             return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
-        elif attr == "_bonds":
-            ans = []
-            for i in range(self.Molecule.getBondCount()):
-                bond = self.Molecule.getBond(i)
-                bo = bond.getOrder()
-                atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms()]
-                ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
-            return ans
         elif attr == "_exchange":
             return self.write("mol")
         else:
@@ -386,7 +373,8 @@ class Molecule(object):
             if not web:
                 # Create OASA molecule
                 mol = oasa.molecule()
-                for atom, newatom in zip(self._atoms, newmol.atoms):
+                atomnos = []
+                for newatom in newmol.atoms:
                     if not usecoords:
                         coords = newatom.Atom.getPoint2d()
                     else:
@@ -394,16 +382,49 @@ class Molecule(object):
                         if not coords:
                             coords = newatom.Atom.getPoint2d()
                     v = mol.create_vertex()
-                    v.symbol = _isofact.getElement(atom[0]).getSymbol()
+                    v.charge = newatom.formalcharge
+                    v.symbol = _isofact.getElement(newatom.atomicnum).getSymbol()
                     mol.add_vertex(v)
-                    v.x, v.y, v.z = coords.x * 30., coords.y * -30., 0.0
-                for bond in self._bonds:
+                    v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
+                for i in range(self.Molecule.getBondCount()):
+                    bond = self.Molecule.getBond(i)
+                    bo = _revbondtypes[bond.getOrder()]
+                    atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms()]
                     e = mol.create_edge()
-                    e.order = bond[2]
-                    mol.add_edge(bond[0], bond[1], e)
+                    e.order = bo
+                    if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
+                        e.type = "h"
+                    elif bond.getStereo() == cdk.CDKConstants.STEREO_BOND_UP:
+                        e.type = "w"
+                    mol.add_edge(atoms[0], atoms[1], e)
+                mol.remove_unimportant_hydrogens()
+                maxx = max([v.x for v in mol.vertices])
+                minx = min([v.x for v in mol.vertices])
+                maxy = max([v.y for v in mol.vertices])
+                miny = min([v.y for v in mol.vertices])
+                maxcoord = max(maxx - minx, maxy - miny)
+                for v in mol.vertices:
+                    if str(v.x) == "-1.#IND":
+                        v.x = minx
+                    if str(v.y) == "-1.#IND":
+                        v.y = miny
+                fontsize = 16
+                bondwidth = 6
+                linewidth = 2
+                if maxcoord > 270: # 300  - margin * 2
+                    for v in mol.vertices:                       
+                        v.x *= 270. / maxcoord
+                        v.y *= 270. / maxcoord
+                    fontsize *= math.sqrt(270. / maxcoord)
+                    bondwidth *= math.sqrt(270. / maxcoord)
+                    linewidth *= math.sqrt(270. / maxcoord)
+                # print "Debug#", [str(a.x) for a in mol.vertices if not a.x >-100]
+                
                 canvas = oasa.cairo_out.cairo_out()
                 canvas.show_hydrogens_on_hetero = True
-                mol.remove_all_hydrogens()
+                canvas.font_size = fontsize
+                canvas.bond_width = bondwidth
+                canvas.line_width = linewidth
                 canvas.mol_to_cairo(mol, filename)
             else:
                 encodesmiles = base64.urlsafe_b64encode(bz2.compress(self.write("smi")))
@@ -553,6 +574,9 @@ class Atom(object):
         elif attr == "atomicnum":
             _isofact.configure(self.Atom)
             return self.Atom.getAtomicNumber()
+        elif attr == "formalcharge":
+            _isofact.configure(self.Atom)
+            return self.Atom.getFormalCharge()
         else:
             raise AttributeError, "Atom has no attribute %s" % attr
 

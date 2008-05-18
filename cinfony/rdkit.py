@@ -135,28 +135,6 @@ class Molecule(object):
             Mol = molecule.Mol
             
         self.Mol = Mol
-   
-    def _buildMol(self, molecule):
-        rdmol = Chem.Mol()
-        rdedmol = Chem.EditableMol(rdmol)
-        for atom in molecule._atoms:
-            rdatom = Chem.Atom(atom[0])
-            if len(atom) > 2:
-                rdatom.SetChiralTag(_chiralities[atom[2]])
-            rdedmol.AddAtom(rdatom)
-        bonds = molecule._bonds
-        for bond in bonds:
-            rdedmol.AddBond(bond[0],
-                            bond[1],
-                            _bondtypes[bond[2]])
-
-        rdmol = rdedmol.GetMol()
-        if len(bonds[0]) > 3: # Includes stereochemical information
-            for bond, newbond in zip(molecule._bonds, rdmol.GetBonds()):
-                newbond.SetStereo(_bondstereo[bond[3]])
-
-        Chem.SanitizeMol(rdmol)
-        return rdmol        
 
     def __getattr__(self, attr):
         """Return the value of an attribute
@@ -173,24 +151,6 @@ class Molecule(object):
             return descDict['MolWt'](self.Mol)
         elif attr == "_exchange":
             return self.write("mol")
-        elif attr == "_bonds":
-            Chem.Kekulize(self.Mol)
-            bonds = [(x.GetBeginAtomIdx(), x.GetEndAtomIdx(),
-                      _revbondtypes[x.GetBondType()],
-                      _revbondstereo[x.GetStereo()])
-                     for x in self.Mol.GetBonds()]
-            Chem.SanitizeMol(self.Mol)
-            return bonds
-        elif attr == "_atoms":
-            atoms = []
-            for atom in self.atoms:
-                try:
-                    coords = atom.coords
-                except AttributeError:
-                    coords = None
-                atoms.append((atom.atomicnum, coords,
-                              _revchiralities[atom.Atom.GetChiralTag()]))
-            return atoms
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 

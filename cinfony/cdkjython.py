@@ -23,118 +23,14 @@ def _getdescdict():
 _descdict = descdict = _getdescdict()
 descriptors = _descdict.keys()
 
-_informats = {}
+_informats = {'sdf': cdk.io.MDLV2000Reader}
 informats = ['smi' ,'sdf']
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'smi': cdk.io.SMILESWriter,
-               'sdf': cdk.io.MDLWriter} # FIXME: Handle the one molecule case
+               'sdf': cdk.io.MDLWriter}
 outformats = ['smi'] + _outformats.keys()
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
-
-#from org.openscience.cdk.io.iterator import IteratingMDLReader
-#from org.openscience.cdk.io import ReaderFactory, WriterFactory, SMILESWriter
-#from org.openscience.cdk.smiles import SmilesParser, SmilesGenerator
-#from org.openscience.cdk.smiles.smarts import SMARTSParser
-#from org.openscience.cdk.isomorphism import UniversalIsomorphismTester
-
-##_informats = dict([(y.formatName, y) for y in ReaderFactory().formats])
-##_outformats = dict([(y.formatName, y) for y in WriterFactory().findChemFormats(0)])
-##_formatlookup = {
-##    "ab": "ABINIT",
-##    "ace": "Aces2",
-##    "adf": "ADF",
-##    "alc": "Alchemy",
-##    "bgf": "MSI BGF",
-##    "bs": "Ball and Stick",
-##    "cac":   "CAChe MolStruct",
-##    "cache": "CAChe MolStruct",
-##    "cdk": "CDK Source Code",
-##    "ctx": "CTX", # Poor description
-##    "caccrt": "Cacao Cartesian",
-##    "cacint": "Cacao Internal",
-##    "c3d1": "Chem3D Cartesian 1",
-##    "c3d2": "Chem3D Cartesian 2",
-##    "cdx": "ChemDraw eXchange file",
-##    "cml": "Chemical Markup Language",
-##    "cmlrss": "CML enriched RSS",
-##    "crk2d": "Chemical Resource Kit 2D",
-##    "crk3d": "Chemical Resource Kit 3D",
-##    "cht": "Chemtool",
-##    "cry": "CrystClust",
-##    "cif": "Crystallographic Interchange Format",
-##    "dal": "Dalton",
-##    "dmol": "DMol3",
-##    "dock": ock 5 Box",
-##    "fh": "Fenske-Hall Z-Matrix",
-##    "fpt": "Fingerprint",
-##    "gam":    "GAMESS log file",
-##    "gamout": "GAMESS log file",
-##    "gr96": "GROMOS96",
-##    "gin": "Gaussian Input",
-##    "g90": "Gaussian90",
-##    "g92": "Gaussian92",
-##    "g94": "Gaussian94",
-##    "g95": "Gaussian95",
-##    "g98": "Gaussian98",
-##    "g03": "Gaussian 2003",
-##    "gpr": "Ghemical Quantum/Molecular Mechanics Model",
-##    "gsp": 'Ghemical Simplified Protein Model',
-##    "hin": "HyperChem HIN",
-##    "inchixml": "IUPAC-NIST Chemical Identifier (XML)",
-##    "inchi": "IUPAC-NIST Chemical Identifier (Plain Text)",
-##    "jag": "Jaguar",
-##    "jme": "JME", # Poor description
-##    "mol": "MDL Molfile",
-##    "mol2000": "MDL Mol/SDF V2000",
-##    "mol3000": "MDL Mol/SDF V3000",
-##    "rxn": "MDL Reaction format",
-##    "rxn3000": "MDL RXN V3000",
-##    "sdf": "MDL Structure-data file",
-##    "sd":  "MDL Structure-data file",
-##    "macie": "MACiE",
-##    "mmd": "MacroModel",
-##    "mmod": "MacroModel",
-##    "mpqc": "Massively Parallel Quantum Chemistry Program",
-##    "mol2": "Mol2 (Sybyl)",
-##    "mop97": "MOPAC 97",
-##    "mop93": "MOPAC 93",
-##    "mop7": "MOPAC7",
-##    "mop02": "MOPAC 2002",
-##    "nw": "NWChem",
-##    "pcm": "PCModel",
-##    "pqs": "Parallel Quantum Solutions",
-##    "pmp": "PolyMorph Predictor (Cerius)",
-##    "pdb": "Protein Brookhave Database (PDB)",
-##    "pdbml": "Protein Data Bank Markup Language (PDBML)",
-##    "ent": "Protein Brookhave Database (PDB)", # Typo
-##    "pc": "PubChem",
-##    "pcasn": "PubChem Compound ASN",
-##    "qc": "Q-Chem",
-##    "raw": "Raw Copy",
-##    "smi": "SMILES",
-##    "fix": "SMILES FIX",
-##    "res": "ShelXL",
-##    "ins": "ShelXL",
-##    "sma": "SMARTS",
-##    "spartan": "Spartan Quantum Mechanics Program",
-##    "mpd": "Sybyl descriptor",
-##    "txyz": "Tinker XYZ",
-##    "tmm2": "Tinker MM2", # OpenBabel calls this txyz
-##    "tmol": "TurboMole",
-##    "unixyz": "UniChemXYZ",
-##    "vasp": "VASP",
-##    "vmol": "Viewmol",
-##    "xed": "XED", # Poor description
-##    "xyz": "XYZ",
-##    "yob": "Yasara",
-##    "zin": "Zindo",
-##    "zmat": "ZMatrix"
-##}
-##informats = dict([(x,y) for (x,y) in _formatlookup.iteritems()
-##                  if y in _informats])
-##outformats = dict([(x,y) for (x,y) in _formatlookup.iteritems()
-##                  if y in _outformats])
 
 _isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
 
@@ -174,7 +70,7 @@ def readfile(format, filename):
 ##            java.io.FileInputStream(java.io.File(filename)), builder):
 ##            yield Molecule(mol)
         for mol in cdk.io.iterator.IteratingMDLReader(
-            open(filename, "r"), builder):
+            java.io.FileInputStream(java.io.File(filename)), builder):
             yield Molecule(mol)
     elif format=="smi":
         for mol in cdk.io.iterator.IteratingSmilesReader(
@@ -206,11 +102,10 @@ def readstring(format, string):
             raise IOError, ex
         return Molecule(ans)
     elif format in informats:
-        reader = _informats[informats(format)]
-        return Molecule(reader(
-            java.io.StringReader(string),
-            cdk.DefaultChemObjectBuilder.getInstance()
-            ))
+        reader = _informats[format](java.io.StringReader(string))
+        chemfile = reader.read(cdk.ChemFile())
+        manip = cdk.tools.manipulator.ChemFileManipulator
+        return Molecule(manip.getAllAtomContainers(chemfile)[0])
     else:
         raise ValueError,"%s is not a recognised CDK format" % format
 
@@ -250,6 +145,8 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
+        if self.format == "sdf":
+            self._molwriter.setSdFields(molecule.Molecule.getProperties())
         self._molwriter.write(molecule.Molecule)
         self.total += 1
 
@@ -296,11 +193,15 @@ class Molecule(object):
         'charge':'GetTotalCharge',
         'spin':'GetTotalSpinMultiplicity'
     }
-    
+    _cinfony = True
+
     def __init__(self, Molecule):
         
-        if hasattr(Molecule, "_exchange"):
-            Molecule = readstring("smi", Molecule._exchange).Molecule
+        if hasattr(Molecule, "_cinfony"):
+            molfile = Molecule._exchange
+            mol = readstring("sdf", molfile)
+            Molecule = mol.Molecule
+            
         self.Molecule = Molecule
         
     def __getattr__(self, attr):
@@ -337,7 +238,7 @@ class Molecule(object):
                 ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
             return ans
         elif attr == "_exchange":
-            return self.write("smi")
+            return self.write("mol")
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -384,11 +285,7 @@ class Molecule(object):
         return iter(self.__getattr__("atoms"))
 
     def __str__(self):
-        return self.write("smi")
-
-    # def addh(self):
-    #    ha = cdk.tools.HydrogenAdder()
-    #    ha.addExplicitHydrogensToSatisfyValency(self.Molecule)        
+        return self.write("smi")      
 
     def calcfp(self, fp="daylight"):
         # if fp == "substructure":
@@ -728,7 +625,7 @@ class _Canvas(javax.swing.JPanel):
         r2dm.setDrawNumbers(False)
         r2dm.setUseAntiAliasing(True)
         r2dm.setColorAtomsByType(True)
-        r2dm.setShowImplicitHydrogens(False)
+        r2dm.setShowImplicitHydrogens(True)
         r2dm.setShowAromaticity(True)
         r2dm.setShowReactionBoxes(False)
         r2dm.setKekuleStructure(False)

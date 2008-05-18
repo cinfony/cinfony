@@ -377,8 +377,9 @@ class Molecule(object):
         for atom in self.atoms:
             v = mol.create_vertex()
             v.symbol = etab.GetSymbol(atom.atomicnum)
+            v.charge = atom.formalcharge
             if usecoords:
-                v.x, v.y, v.z = atom.coords[0] * 30., atom.coords[1] * -30., 0.0
+                v.x, v.y, v.z = atom.coords[0] * 30., atom.coords[1] * 30., 0.0
             mol.add_vertex(v)
 
         for bond in ob.OBMolBondIter(self.OBMol):
@@ -391,11 +392,11 @@ class Molecule(object):
             mol.add_edge(bond.GetBeginAtomIdx() - 1,
                          bond.GetEndAtomIdx() - 1,
                          e)
-        mol.remove_all_hydrogens()
+        mol.remove_unimportant_hydrogens()
         if not usecoords:
             oasa.coords_generator.calculate_coords(mol, bond_length=30)
             if update:
-                newcoords = [(v.x / 30., v.y / -30., 0.0) for v in mol.vertices]
+                newcoords = [(v.x / 30., v.y / 30., 0.0) for v in mol.vertices]
                 for atom, newcoord in zip(ob.OBMolAtomIter(self.OBMol), newcoords):
                     atom.SetVector(*newcoord)
         if filename or show:
@@ -496,7 +497,7 @@ class Atom(object):
         elif attr in self._getmethods:
             return getattr(self.OBAtom, self._getmethods[attr])()
         else:
-            raise AttributeError, "Molecule has no attribute %s" % attr
+            raise AttributeError, "Atom has no attribute %s" % attr
 
     def __str__(self):
         """Create a string representation of the atom.
