@@ -392,6 +392,43 @@ class Molecule(object):
             mol.add_edge(bond.GetBeginAtomIdx() - 1,
                          bond.GetEndAtomIdx() - 1,
                          e)
+        # I'm sure there's a more elegant way to do the following, but here goes...
+        # let's set the stereochemistry around double bonds
+        for bond in ob.OBMolBondIter(self.OBMol):
+            ends = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
+            if bond.GetBO() == 2:
+##                print bond, ends
+##                print [(b, b.IsUp(), b.IsDown()) for b in ob.OBAtomBondIter(self.OBMol.GetAtom(ends[0])) if b.GetIdx() != bond.GetIdx()]
+                stereobonds = [[b for b in ob.OBAtomBondIter(self.OBMol.GetAtom(x)) if b.GetIdx() != bond.GetIdx() and (b.IsUp() or b.IsDown())]
+                               for x in ends]
+##                print [[b for b in ob.OBAtomBondIter(self.OBMol.GetAtom(x))]
+##                               for x in ends]
+##                print "It's a double bond", stereobonds
+                if stereobonds[0] and stereobonds[1]: # Needs to be defined at either end
+##                    print "It's a double bond with stereo!"
+    ##                print [(b[0].IsUp(), b[0].IsDown()) for b in stereobonds]
+                    if stereobonds[0][0].IsUp() == stereobonds[1][0].IsUp():
+                        # Either both up or both down
+    ##                    print "Setting to CIS"
+                        stereo = oasa.stereochemistry.cis_trans_stereochemistry.SAME_SIDE
+                    else:
+    ##                    print "Setting to TRANS"
+                        stereo = oasa.stereochemistry.cis_trans_stereochemistry.OPPOSITE_SIDE
+                    atomids = [(b[0].GetBeginAtomIdx(), b[0].GetEndAtomIdx()) for b in stereobonds]
+                    extremes = []
+                    for id, end in zip(ends, atomids):
+                        if end[0] == id:
+                            extremes.append(end[1])
+                        else:
+                            extremes.append(end[0])
+                    center = mol.get_edge_between(mol.atoms[ends[0] - 1], mol.atoms[ends[1] - 1])
+    ##                print (extremes[0], ends[0], ends[1], extremes[1])
+                    st = oasa.stereochemistry.cis_trans_stereochemistry(
+                              center = center, value = stereo,
+                              references = (mol.atoms[extremes[0] - 1], mol.atoms[ends[0] - 1],
+                                            mol.atoms[ends[1] - 1], mol.atoms[extremes[1] - 1]))
+                    mol.add_stereochemistry(st)
+        
         mol.remove_unimportant_hydrogens()
         if not usecoords:
             oasa.coords_generator.calculate_coords(mol, bond_length=30)

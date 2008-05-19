@@ -265,6 +265,7 @@ class Molecule(object):
             canvas = aggdraw.Draw(img)                
             canvas.setantialias(True)
             drawer = MolDrawing.MolDrawing(canvas)
+            drawer.wedgeDashedBonds = True
             drawer.AddMol(self.Mol, confId = confId)
             canvas.flush()
         
