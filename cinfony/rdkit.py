@@ -151,6 +151,8 @@ class Molecule(object):
             return descDict['MolWt'](self.Mol)
         elif attr == "_exchange":
             return self.write("mol")
+        elif attr == "title":
+            return self.Mol.GetProp("_Name")
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -287,7 +289,12 @@ class Molecule(object):
         _forcefields[forcefield](self.Mol, maxIters = steps)
 
     def make3D(self):
-        AllChem.EmbedMolecule(self.Mol)
+        success = AllChem.EmbedMolecule(self.Mol)
+        if success == -1: # Failed
+            success = AllChem.EmbedMolecule(self.Mol,
+                                            useRandomCoords = True)
+            if success == -1:
+                raise Error, "Embedding failed!"
         self.localopt()
         
 class Atom(object):
