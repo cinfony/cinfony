@@ -21,19 +21,15 @@ def _formatstodict(list):
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
 _obconv = ob.OBConversion()
-_informats = _formatstodict(_obconv.GetSupportedInputFormat())
-informats = _informats.keys()
-informats.sort()
-_outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
-outformats = _outformats.keys()
-outformats.sort()
+informats = _formatstodict(_obconv.GetSupportedInputFormat())
+outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
 
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
 
-descriptors = ['LogP', 'MR', 'TPSA']
-_descdict = _getplugins(ob.OBDescriptor.FindType, descriptors)
+descs = ['LogP', 'MR', 'TPSA']
+_descdict = _getplugins(ob.OBDescriptor.FindType, descs)
 fps = ['FP2', 'FP3', 'FP4']
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
 forcefields = ['UFF', 'MMFF94', 'Ghemical']
@@ -195,7 +191,7 @@ class Molecule(object):
         if hasattr(OBMol, "_cinfony"):
             a, b = OBMol._exchange
             if a == 0:
-                mol = readstring("smi", a)
+                mol = readstring("smi", b)
             else:
                 mol = readstring("mol", b)
             OBMol = mol.OBMol
@@ -253,7 +249,7 @@ class Molecule(object):
         descriptors is calculated: LogP, PSA and MR.
         """
         if not descnames:
-            descnames = descriptors
+            descnames = descs
         ans = {}
         for descname in descnames:
             try:

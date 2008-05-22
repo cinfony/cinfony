@@ -51,6 +51,15 @@ class TestToolkit(myTestCase):
         self.head = list(self.toolkit.readfile("sdf", "head.sdf"))
         self.atom = self.head[0].atoms[1]
 
+    def testattributes(self):
+        """Test attributes like informats, descs and so on"""
+        informats, outformats = self.toolkit.informats, self.toolkit.outformats
+        self.assertNotEqual(len(self.toolkit.informats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.outformats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.descs), 0)
+        self.assertNotEqual(len(self.toolkit.forcefields), 0)
+        self.assertNotEqual(len(self.toolkit.fps), 0)
+
     def FPaccesstest(self):
         # Should raise AttributeError
         return self.mols[0].calcfp().nosuchname
@@ -91,6 +100,9 @@ class TestToolkit(myTestCase):
         newmol = self.toolkit.Molecule(self.head[0])
         self.assertEqual(newmol._exchange,
                          self.head[0]._exchange)
+        newmol = self.toolkit.Molecule(self.mols[0])
+        self.assertEqual(newmol._exchange,
+                         self.mols[0]._exchange)
 
     def testLocalOpt(self):
         """Test that local optimisation affects the coordinates"""
@@ -387,11 +399,7 @@ class TestRDKit(TestToolkit):
     Nfpbits = 64
     datakeys = ['NSC']
 
-##    def testRSconversiontoMOL(self):
-##        """No conversion to MOL file done"""
-##        pass
 
-  
 class TestCDK(TestToolkit):
     toolkit = cdk
     tanimotoresult = 0.375

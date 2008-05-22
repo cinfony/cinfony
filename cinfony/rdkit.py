@@ -32,20 +32,6 @@ _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
 informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
 outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
 
-_bondtypes = {1: Chem.BondType.SINGLE,
-              2: Chem.BondType.DOUBLE,
-              3: Chem.BondType.TRIPLE}
-_revbondtypes = dict([(y,x) for (x,y) in _bondtypes.iteritems()])
-_chiralities = {0: Chem.ChiralType.CHI_UNSPECIFIED,
-                1: Chem.ChiralType.CHI_TETRAHEDRAL_CCW,
-                2: Chem.ChiralType.CHI_TETRAHEDRAL_CW
-                }
-_revchiralities = dict([(y,x) for (x,y) in _chiralities.iteritems()])
-_bondstereo = {0: Chem.rdchem.BondStereo.STEREONONE,
-               1: Chem.rdchem.BondStereo.STEREOE,
-               2: Chem.rdchem.BondStereo.STEREOZ}
-_revbondstereo = dict([(y,x) for (x,y) in _bondstereo.iteritems()])
-
 _forcefields = {'uff': AllChem.UFFOptimizeMolecule}
 forcefields = _forcefields.keys()
 
@@ -128,10 +114,14 @@ class Molecule(object):
        Mol
     """
     _cinfony = True
+    
     def __init__(self, Mol):
         if hasattr(Mol, "_cinfony"):
-            molfile = Mol._exchange
-            molecule = readstring("mol", molfile)
+            a, b = Mol._exchange
+            if a == 0:
+                molecule = readstring("smi", b)
+            else:
+                molecule = readstring("mol", b)            
             Mol = molecule.Mol
             
         self.Mol = Mol
@@ -150,7 +140,10 @@ class Molecule(object):
         elif attr == "molwt":
             return descDict['MolWt'](self.Mol)
         elif attr == "_exchange":
-            return self.write("mol")
+            if self.Mol.GetNumConformers() == 0:
+                return (0, self.write("iso"))
+            else:
+                return (1, self.write("mol"))
         elif attr == "title":
             return self.Mol.GetProp("_Name")
         else:
