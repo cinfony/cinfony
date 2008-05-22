@@ -117,7 +117,7 @@ class Outputfile(object):
        overwrite (default is False) -- if the output file already exists,
                                        should it be overwritten?
     Methods:
-       write(molecule)
+       write(molecule), close()
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format
@@ -153,10 +153,12 @@ class Outputfile(object):
 class Molecule(object):
     """Represent a Pybel molecule.
 
-    Optional parameters:
-       OBMol -- an Open Babel molecule (default is None)
-    
-    An empty Molecule is created if an Open Babel molecule is not provided.
+    Required parameter:
+       OBMol -- an Open Babel OBMol
+       or
+       Molecule -- any type of cinfony Molecule (e.g. one from cinfony.rdkit)
+
+    If a cinfony Molecule is provided it will be converted into a pybel Molecule.       
     
     Attributes:
        atoms, charge, data, dim, energy, exactmass, flags, formula, 
@@ -164,7 +166,7 @@ class Molecule(object):
     (refer to the Open Babel library documentation for more info).
     
     Methods:
-       write(), calcfp(), calcdesc()
+       addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(), write() 
       
     The original Open Babel molecule can be accessed using the attribute:
        OBMol
@@ -402,22 +404,13 @@ class Molecule(object):
         for bond in ob.OBMolBondIter(self.OBMol):
             ends = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
             if bond.GetBO() == 2:
-##                print bond, ends
-##                print [(b, b.IsUp(), b.IsDown()) for b in ob.OBAtomBondIter(self.OBMol.GetAtom(ends[0])) if b.GetIdx() != bond.GetIdx()]
                 stereobonds = [[b for b in ob.OBAtomBondIter(self.OBMol.GetAtom(x)) if b.GetIdx() != bond.GetIdx() and (b.IsUp() or b.IsDown())]
                                for x in ends]
-##                print [[b for b in ob.OBAtomBondIter(self.OBMol.GetAtom(x))]
-##                               for x in ends]
-##                print "It's a double bond", stereobonds
                 if stereobonds[0] and stereobonds[1]: # Needs to be defined at either end
-##                    print "It's a double bond with stereo!"
-    ##                print [(b[0].IsUp(), b[0].IsDown()) for b in stereobonds]
                     if stereobonds[0][0].IsUp() == stereobonds[1][0].IsUp():
                         # Either both up or both down
-    ##                    print "Setting to CIS"
                         stereo = oasa.stereochemistry.cis_trans_stereochemistry.SAME_SIDE
                     else:
-    ##                    print "Setting to TRANS"
                         stereo = oasa.stereochemistry.cis_trans_stereochemistry.OPPOSITE_SIDE
                     atomids = [(b[0].GetBeginAtomIdx(), b[0].GetEndAtomIdx()) for b in stereobonds]
                     extremes = []
@@ -427,7 +420,6 @@ class Molecule(object):
                         else:
                             extremes.append(end[0])
                     center = mol.get_edge_between(mol.atoms[ends[0] - 1], mol.atoms[ends[1] - 1])
-    ##                print (extremes[0], ends[0], ends[1], extremes[1])
                     st = oasa.stereochemistry.cis_trans_stereochemistry(
                               center = center, value = stereo,
                               references = (mol.atoms[extremes[0] - 1], mol.atoms[ends[0] - 1],
@@ -491,12 +483,9 @@ class Molecule(object):
 class Atom(object):
     """Represent a Pybel atom.
 
-    Optional parameters:
-       OBAtom -- an Open Babel Atom (default is None)
-       index -- the index of the atom in the molecule (default is None)
-     
-    An empty Atom is created if an Open Babel atom is not provided.
-    
+    Required parameter:
+       OBAtom -- an Open Babel OBAtom
+        
     Attributes:
        atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
@@ -606,13 +595,17 @@ class Smarts(object):
        smartspattern
     
     Methods:
-       findall()
+       findall(molecule)
     
     Example:
     >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
     >>> print smarts.findall(mol) 
     [(1, 2), (4, 5), (6, 7)]
+
+    The numbers returned are the indices (starting from 1) of the atoms
+    that match the SMARTS pattern. In this case, there are three matches
+    for each of the three ethyl groups in the molecule.
     """
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
