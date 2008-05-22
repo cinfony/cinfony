@@ -431,6 +431,8 @@ class Smarts(object):
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
         self.rdksmarts = Chem.MolFromSmarts(smartspattern)
+        if not self.rdksmarts:
+            raise IOError, "Invalid SMARTS pattern."
 
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.

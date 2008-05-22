@@ -21,8 +21,12 @@ def _formatstodict(list):
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
 _obconv = ob.OBConversion()
-informats = _formatstodict(_obconv.GetSupportedInputFormat())
-outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
+_informats = _formatstodict(_obconv.GetSupportedInputFormat())
+informats = _informats.keys()
+informats.sort()
+_outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
+outformats = _outformats.keys()
+outformats.sort()
 
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
@@ -394,6 +398,7 @@ class Molecule(object):
                          e)
         # I'm sure there's a more elegant way to do the following, but here goes...
         # let's set the stereochemistry around double bonds
+        self.write("smi") # Perceive UP/DOWNness
         for bond in ob.OBMolBondIter(self.OBMol):
             ends = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
             if bond.GetBO() == 2:
@@ -612,7 +617,9 @@ class Smarts(object):
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
         self.obsmarts = ob.OBSmartsPattern()
-        self.obsmarts.Init(smartspattern)
+        success = self.obsmarts.Init(smartspattern)
+        if not success:
+            raise IOError, "Invalid SMARTS pattern"
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
         
