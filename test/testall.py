@@ -111,7 +111,7 @@ class TestToolkit(myTestCase):
         newcoords = self.head[0].atoms[0].coords
         self.assertNotEqual(oldcoords, newcoords)
 
-    def testMake3D(self):
+    def notestMake3D(self):
         """Test that 3D coordinate generation does something"""
         mol = self.mols[0]
         mol.make3D()

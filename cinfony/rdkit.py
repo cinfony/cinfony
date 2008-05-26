@@ -3,7 +3,6 @@ import os
 from Chem import AllChem
 from Chem.Draw import MolDrawing
 from Chem.AvailDescriptors import descDict
-from sping.PIL.pidPIL import PILCanvas
 
 import DataStructs
 import Chem.MACCSkeys
@@ -100,15 +99,19 @@ class Molecule(object):
     """Represent an RDKit molecule.
 
     Required parameter:
-       Mol -- an RDKit Mol or any cinfony Molecule
+       Mol -- an RDKit Mol
+       or
+       Molecule -- any type of cinfony Molecule (e.g. one from cinfony.pybel)
+
+    If a cinfony Molecule is provided it will be converted into
+    an rdkit Molecule.       
     
     Attributes:
-       atoms, charge, data, dim, energy, exactmass, flags, formula, 
-       mod, molwt, spin, sssr, title, unitcell.
-    (refer to the Open Babel library documentation for more info).
+       atoms, data, molwt, title
     
     Methods:
-       write(), calcfp(), calcdesc()
+       addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
+       write() 
       
     The underlying RDKit Mol can be accessed using the attribute:
        Mol
@@ -150,23 +153,25 @@ class Molecule(object):
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
     def addh(self):
+        """Add hydrogens."""
         self.Mol = Chem.AddHs(self.Mol)
         
     def removeh(self):
+        """Remove hydrogens."""
         self.Mol = Chem.RemoveHs(self.Mol)
         
-    def write(self, format="SMI", filename=None, overwrite=False):
+    def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
         
         Optional parameters:
-           format -- default is "SMI"
+           format -- default is "smi"
            filename -- default is None
            overwite -- default is False
 
         If a filename is specified, the result is written to a file.
         Otherwise, a string is returned containing the result.
         The overwrite flag is ignored if a filename is not specified.
-        It controls whether to overwrite an existing file.
+        It controls whether to allow an existing file to be overwritten.
         """
         format = format.lower()
         if filename:
@@ -204,8 +209,9 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, the full list of Open Babel
-        descriptors is calculated: LogP, PSA and MR.
+        If descnames is not specified, the full list of RDKit
+        descriptors is calculated. See rdkit.descs for a list
+        of available descriptors.
         """
         if not descnames:
             descnames = descs
@@ -244,6 +250,20 @@ class Molecule(object):
         return fp
 
     def draw(self, show=True, filename=None, update=False, usecoords=False):
+        """Create a 2D depiction of the molecule.
+
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
+
+        Aggdraw is used for 2D depiction. Tkinter and
+        Python Imaging Library are required for image display.
+        """
         if usecoords:
             confId = 0
         else:
@@ -254,6 +274,13 @@ class Molecule(object):
                 confId = self.Mol.GetNumConformers()
                 AllChem.Compute2DCoords(self.Mol, clearConfs = False)
         if show or filename:
+            if not aggdraw:
+                errormessage = ("Aggdraw not found, but is required for 2D"
+                                "structure depiction. "
+                                "See installation instructions for more "
+                                "information.")
+                raise ImportError, errormessage
+              
             Chem.Kekulize(self.Mol)
             MolDrawing.registerCanvas('agg')
             img = PIL.new("RGBA",(300,300),"white")
@@ -264,9 +291,15 @@ class Molecule(object):
             drawer.AddMol(self.Mol, confId = confId)
             canvas.flush()
         
-            if filename: # Allow overwrite?             
+            if filename: # Note: overwrite is allowed          
                 img.save(filename)
             if show:
+                if not tk:
+                    errormessage = ("Tkinter or Python Imaging "
+                                    "Library not found, but is required for image "
+                                    "display. See installation instructions for "
+                                    "more information.")
+                    raise ImportError, errormessage                  
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
@@ -413,13 +446,13 @@ class Smarts(object):
        smartspattern
     
     Methods:
-       findall()
+       findall(molecule)
     
     Example:
     >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
     >>> print smarts.findall(mol) 
-    [(1, 2), (4, 5), (6, 7)]
+    [(0, 1), (3, 4), (5, 6)]
     """
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
@@ -439,10 +472,10 @@ class MoleculeData(object):
     """Store molecule data in a dictionary-type object
     
     Required parameters:
-      obmol -- an Open Babel OBMol 
+      obmol -- an RDKit Mol 
 
     Methods and accessor methods are like those of a dictionary except
-    that the data is retrieved on-the-fly from the underlying OBMol.
+    that the data is retrieved on-the-fly from the underlying Mol.
 
     Example:
     >>> mol = readfile("sdf", 'head.sdf').next()

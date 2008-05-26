@@ -1,22 +1,16 @@
+from __future__ import generators
+
 import math
 import os.path
 import tempfile
-import openbabel as ob
 
-try:
-    import oasa
-    import oasa.cairo_out
-except ImportError: #pragma: no cover
-    oasa = None
+import org.openscience.openbabel as ob
 
-try:
-    import Tkinter as tk
-    import Image as PIL
-    import ImageTk as piltk
-except ImportError: #pragma: no cover
-    tk = None
+import java.lang.System
+java.lang.System.loadLibrary("openbabel")
 
 def _formatstodict(list):
+    list = [list.get(i) for i in range(list.size())]
     broken = [x.replace("[Read-only]", "").replace("[Write-only]","").split(" -- ") for x in list]
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
