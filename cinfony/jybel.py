@@ -208,9 +208,9 @@ class Molecule(object):
             return MoleculeData(self.OBMol)
         elif attr == "unitcell":
             # Create a unitcell attribute on-the-fly
-            unitcell = self.OBMol.GetData(ob.UnitCell)
+            unitcell = self.OBMol.GetData(ob.openbabelConstants.UnitCell)
             if unitcell:
-                return ob.toUnitCell(unitcell)
+                return ob.openbabel.toUnitCell(unitcell)
             else:
                 raise AttributeError, "Molecule has no attribute 'unitcell'"
         elif attr in self._getmethods:
@@ -295,6 +295,7 @@ class Molecule(object):
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
             obconversion.WriteFile(self.OBMol,filename)
+            obconversion.CloseOutFile()
         else:
             return obconversion.WriteString(self.OBMol)
 
@@ -548,6 +549,7 @@ def _findbits(fp, bitsperint):
     """
     ans = []
     start = 1
+    fp = [fp.get(i) for i in range(fp.size())]
     for x in fp:
         i = start
         while x > 0:
@@ -584,7 +586,7 @@ class Fingerprint(object):
         else:
             raise AttributeError, "Fingerprint has no attribute %s" % attr
     def __str__(self):
-        return ", ".join([str(x) for x in self.fp])
+        return ", ".join([str(self.fp.get(i)) for i in range(self.fp.size())])
 
 class Smarts(object):
     """A Smarts Pattern Matcher
@@ -618,7 +620,8 @@ class Smarts(object):
            molecule
         """
         self.obsmarts.Match(molecule.OBMol)
-        return [x for x in self.obsmarts.GetUMapList()]
+        vector = self.obsmarts.GetUMapList()
+        return [vector.get(i) for i in range(vector.size())]
         
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
@@ -650,7 +653,11 @@ class MoleculeData(object):
     def __init__(self, obmol):
         self._mol = obmol
     def _data(self):
-        return [ob.toPairData(x) for x in self._mol.GetData() if x.GetDataType()==ob.PairData or x.GetDataType()==ob.CommentData]
+        data = self._mol.GetData()
+        data = [data.get(i) for i in range(data.size())]
+        return [ob.openbabel.toPairData(x) for x in data
+                if x.GetDataType()==ob.openbabelConstants.PairData or
+                x.GetDataType()==ob.openbabelConstants.CommentData]
     def _testforkey(self, key):
         if not key in self:
             raise KeyError, "'%s'" % key
@@ -681,16 +688,19 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
-        return ob.toPairData(self._mol.GetData(key)).GetValue()
+        return ob.openbabel.toPairData(self._mol.GetData(key)).GetValue()
     def __setitem__(self, key, value):
         if key in self:
-            pairdata = ob.toPairData(self._mol.GetData(key))
+            pairdata = ob.openbabel.toPairData(self._mol.GetData(key))
             pairdata.SetValue(str(value))
         else:
             pairdata = ob.OBPairData()
             pairdata.SetAttribute(key)
             pairdata.SetValue(str(value))
-            pairdata.thisown = 0 # So that SWIG Proxy will not delete pairdata
+            # For the following line to work, you need
+            #    python.security.respectJavaAccessibility = false
+            # in the Jython registry
+            pairdata.swigCMemOwn = 0 # So that SWIG Proxy will not delete pairdata
             self._mol.SetData(pairdata)
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
