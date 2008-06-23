@@ -1,7 +1,6 @@
-import os
+import sys
 
-try:
-    test = os.write
-    from cdkjpype import *
-except AttributeError:
+if sys.platform[:4] == "java":
     from cdkjython import *
+else:
+    from cdkjpype import *

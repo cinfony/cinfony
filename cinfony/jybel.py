@@ -4,7 +4,7 @@ import math
 import os.path
 import tempfile
 
-import org.openscience.openbabel as ob
+import org.openbabel as ob
 
 import java.lang.System
 java.lang.System.loadLibrary("openbabel")

@@ -38,6 +38,7 @@ def _getdescdict():
             name = str(spec.getSpecificationReference().split("#")[-1])
             descdict[name] = desc
     return descdict
+
 _descdict = descdict = _getdescdict()
 descs = _descdict.keys()
 fps = ["daylight", "graph"]
@@ -578,8 +579,8 @@ class Atom(object):
             coords = self.Atom.point3d
             if not coords:
                 coords = self.Atom.point2d
-            if not coords:
-                return (0., 0., 0.)
+                if not coords:
+                    return (0., 0., 0.)
             else:
                 return (coords.x, coords.y, coords.z)
         elif attr == "atomicnum":
@@ -712,8 +713,6 @@ class MoleculeData(object):
 # >>> readstring("smi", "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 # CCCCCCCCCCCCCC").calcdesc(["lipinskifailures"])
 # {'lipinskifailures': 1}
-
-# Mixture of line endings in SDF files with data tags...
 
 if __name__=="__main__": #pragma: no cover
     mol = readstring("smi", "CCCC")

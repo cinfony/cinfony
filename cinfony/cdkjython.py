@@ -21,15 +21,17 @@ def _getdescdict():
     return descdict
 
 _descdict = descdict = _getdescdict()
-descriptors = _descdict.keys()
-
+descs = _descdict.keys()
+fps = ["daylight", "graph"]
+_formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
+            'mol2': "MOL2", 'mol': "MDL MOL"}
 _informats = {'sdf': cdk.io.MDLV2000Reader}
-informats = ['smi' ,'sdf']
+informats = dict([(x, _formats[x]) for x in ['smi', 'sdf']])
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'smi': cdk.io.SMILESWriter,
                'sdf': cdk.io.MDLWriter}
-outformats = ['smi'] + _outformats.keys()
+outformats = dict([(x, _formats[x]) for x in _outformats.keys()])
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 
 _isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
@@ -66,9 +68,6 @@ def readfile(format, filename):
         raise IOError, "No such file: '%s'" % filename
     builder = cdk.DefaultChemObjectBuilder.getInstance()
     if format=="sdf":
-##        for mol in cdk.io.iterator.IteratingMDLReader(
-##            java.io.FileInputStream(java.io.File(filename)), builder):
-##            yield Molecule(mol)
         for mol in cdk.io.iterator.IteratingMDLReader(
             java.io.FileInputStream(java.io.File(filename)), builder):
             yield Molecule(mol)
@@ -198,8 +197,11 @@ class Molecule(object):
     def __init__(self, Molecule):
         
         if hasattr(Molecule, "_cinfony"):
-            molfile = Molecule._exchange
-            mol = readstring("sdf", molfile)
+            a, b = Molecule._exchange
+            if a == 0:
+                mol = readstring("smi", b)
+            else:
+                mol = readstring("sdf", b)    
             Molecule = mol.Molecule
             
         self.Molecule = Molecule
@@ -212,13 +214,6 @@ class Molecule(object):
         """
         if attr == "atoms":
             return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
-        elif attr == "_atoms":
-            ans = []
-            for i in range(self.Molecule.getAtomCount()):
-                atom = self.Molecule.getAtom(i)
-                _isofact.configure(atom)
-                ans.append( (atom.getAtomicNumber(),) )
-            return ans
 ##        elif attr == 'exactmass':
               # Is supposed to use the most abundant isotope but
               # actually uses the next most abundant
@@ -229,16 +224,12 @@ class Molecule(object):
             return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
         elif attr == 'formula':
             return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
-        elif attr == "_bonds":
-            ans = []
-            for i in range(self.Molecule.getBondCount()):
-                bond = self.Molecule.getBond(i)
-                bo = bond.getOrder()
-                atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms()]
-                ans.append( (atoms[0], atoms[1], _revbondtypes[bo]) )
-            return ans
         elif attr == "_exchange":
-            return self.write("mol")
+            gt = cdk.geometry.GeometryTools
+            if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):
+                return (1, self.write("mol"))
+            else:
+                return (0, self.write("smi"))
         else:
             raise AttributeError, "Molecule has no attribute '%s'" % attr
 
@@ -260,7 +251,7 @@ class Molecule(object):
         hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
 
     def removeh(self):
-        atommanip = cdk.tools.manipulator.AtomContainerManipulator()
+        atommanip = cdk.tools.manipulator.AtomContainerManipulator
         self.Molecule = atommanip.removeHydrogens(self.Molecule)
 
     def write(self, format="smi", filename=None, overwrite=False):       
@@ -311,7 +302,7 @@ class Molecule(object):
         descriptors is calculated: LogP, PSA and MR.
         """
         if not descnames:
-            descnames = descriptors
+            descnames = descs
         ans = {}
         # Clone it to add hydrogens
         clone = self.Molecule.clone()
@@ -496,12 +487,17 @@ class Atom(object):
         if attr == "coords":
             coords = self.Atom.point3d
             if not coords:
-                return (0., 0., 0.)
+                coords = self.Atom.point2d
+                if not coords:
+                    return (0., 0., 0.)
             else:
                 return (coords.x, coords.y, coords.z)
         elif attr == "atomicnum":
             _isofact.configure(self.Atom)
             return self.Atom.getAtomicNumber()
+        elif attr == "formalcharge":
+            _isofact.configure(self.Atom)
+            return self.Atom.getFormalCharge()
         else:
             raise AttributeError, "Atom has no attribute %s" % attr
 

@@ -2,19 +2,19 @@ import os
 import sys
 import unittest
 
-try:
-    test = os.write
+pybel = obpybel = rdkit = cdk = jybel = None
+if sys.platform[:4] == "java":
+    from cinfony import cdk, jybel
+else:
     try:
         from cinfony import pybel, rdkit, cdk
     except ImportError:
-        cinfony = None
+        pass
     try:
         import pybel as obpybel
     except ImportError:
-        obpybel = None
-except AttributeError:
-    from cinfony import cdk
-    pybel = rdkit = obpybel = None
+        pass
+
 
 # For compatability with Python2.3
 try:
@@ -368,10 +368,10 @@ GASTEIGER
 Energy = 0
 
 @<TRIPOS>ATOM
-      1 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-      2 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-      3 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
-      4 C           0.0000    0.0000    0.0000 C.3     1  LIG1        0.0000
+      1 C1          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+      2 C2          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+      3 C3          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+      4 C4          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
 @<TRIPOS>BOND
      1     1     2    1
      2     2     3    1
@@ -389,10 +389,20 @@ Energy = 0
 class TestOBPybel(TestPybel):
     toolkit = obpybel
 
+class TestJybel(TestPybel):
+    toolkit = jybel
+    def testDrawdependencies(self):
+        "No testing the draw dependencies"
+        pass
+
+    def testDraw(self):
+        """No creating a 2D depiction"""
+        pass
+
 class TestRDKit(TestToolkit):
     toolkit = rdkit
     tanimotoresult = 1/3.
-    Ndescs = 176
+    Ndescs = 177
     Natoms = 9
     tpsaname = "TPSA"
     Nbits = 12
@@ -438,8 +448,10 @@ if __name__=="__main__":
         os.remove("testoutput.txt")
 
     testcases = [TestPybel, TestCDK, TestRDKit]
+    if sys.platform[:4] == "java":
+        testcases = [TestCDK, TestJybel]
     # testcases = [TestCDK]
-    #   testcases = [TestPybel]
+    #testcases = [TestJybel]
     # testcases = [TestRDKit]
     # testcases = [TestOBPybel]
     for testcase in testcases:
