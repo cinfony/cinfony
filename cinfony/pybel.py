@@ -301,6 +301,7 @@ class Molecule(object):
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
             obconversion.WriteFile(self.OBMol,filename)
+            obconversion.CloseOutFile()
         else:
             return obconversion.WriteString(self.OBMol)
 
@@ -311,12 +312,12 @@ class Molecule(object):
            forcefield -- default is "MMFF94"
            steps -- default is 500
 
-        If the molecule does not have 2D or 3D coordinates, make3D() is
+        If the molecule does not have any coordinates, make3D() is
         called before the optimization. Note that the molecule needs
         to have explicit hydrogens. If not, call addh().
         """
         
-        if not (self.OBMol.Has2D() or self.OBMol.Has3D()):
+	if not (self.OBMol.HasNonZeroCoords()):
             self.make3D()
         ff = _forcefields[forcefield]
         ff.Setup(self.OBMol)
@@ -696,8 +697,7 @@ class MoleculeData(object):
             pairdata = ob.OBPairData()
             pairdata.SetAttribute(key)
             pairdata.SetValue(str(value))
-            pairdata.thisown = 0 # So that SWIG Proxy will not delete pairdata
-            self._mol.SetData(pairdata)
+            self._mol.CloneData(pairdata)
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
  
