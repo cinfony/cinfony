@@ -157,6 +157,28 @@ M  END
         self.assertEqual(len(data), len(result))
         self.assertEqual(data[-2], result[-2].rstrip()) # M  END
 
+    def testRSconversiontoMOL2(self):
+        """Convert to mol2"""
+        as_mol2 = self.mols[0].write("mol2")
+        test = """@<TRIPOS>MOLECULE
+*****
+ 4 3 0 0 0
+SMALL
+GASTEIGER
+Energy = 0
+
+@<TRIPOS>ATOM
+      1 C1          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+      2 C2          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+      3 C3          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+      4 C4          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
+@<TRIPOS>BOND
+     1     1     2    1
+     2     2     3    1
+     3     3     4    1
+"""
+        self.assertEqual(as_mol2, test)
+
     def testRSstringrepr(self):
         """Test the string representation of a molecule"""
         self.assertEqual(str(self.mols[0]).strip(), "CCCC")
@@ -356,28 +378,6 @@ class TestPybel(TestToolkit):
         self.toolkit.oasa = None
         self.assertRaises(ImportError,
                           self.importtest)
-
-    def testRSconversiontoMOL2(self):
-        """Convert to mol2"""
-        as_mol2 = self.mols[0].write("mol2")
-        test = """@<TRIPOS>MOLECULE
-*****
- 4 3 0 0 0
-SMALL
-GASTEIGER
-Energy = 0
-
-@<TRIPOS>ATOM
-      1 C1          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-      2 C2          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-      3 C3          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-      4 C4          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-@<TRIPOS>BOND
-     1     1     2    1
-     2     2     3    1
-     3     3     4    1
-"""
-        self.assertEqual(as_mol2, test)
 
     def testRSgetprops(self):
         """Get the values of the properties."""
