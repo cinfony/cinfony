@@ -168,23 +168,6 @@ class Molecule(object):
     The original Open Babel molecule can be accessed using the attribute:
        OBMol
     """
-    _getmethods = {
-        'conformers':'GetConformers',
-        # 'coords':'GetCoordinates', you can access the coordinates the atoms elsewhere
-        # 'data':'GetData', has been removed
-        'dim':'GetDimension',
-        'energy':'GetEnergy',
-        'exactmass':'GetExactMass',
-        'flags':'GetFlags',
-        'formula':'GetFormula',
-        # 'internalcoord':'GetInternalCoord', # Causes SWIG warning
-        'mod':'GetMod',
-        'molwt':'GetMolWt',
-        'sssr':'GetSSSR',
-        'title':'GetTitle',
-        'charge':'GetTotalCharge',
-        'spin':'GetTotalSpinMultiplicity'
-    }
     _cinfony = True
 
     def __init__(self, OBMol):
@@ -199,36 +182,53 @@ class Molecule(object):
 
         self.OBMol = OBMol
  
-    def __getattr__(self, attr):
-        """Return the value of an attribute
-
-        Note: The values are calculated on-the-fly. You may want to store the value in
-        a variable if you repeatedly access the same attribute.
-        """
-        # This function is not accessed in the case of OBMol
-        if attr == "atoms":
-            # Create an atoms attribute on-the-fly
-            return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
-        elif attr == "data":
-            # Create a data attribute on-the-fly
-            return MoleculeData(self.OBMol)
-        elif attr == "unitcell":
-            # Create a unitcell attribute on-the-fly
-            unitcell = self.OBMol.GetData(ob.UnitCell)
-            if unitcell:
-                return ob.toUnitCell(unitcell)
-            else:
-                raise AttributeError, "Molecule has no attribute 'unitcell'"
-        elif attr in self._getmethods:
-            # Call the OB Method to find the attribute value
-            return getattr(self.OBMol, self._getmethods[attr])()
-        elif attr == "_exchange":
-            if self.OBMol.HasNonZeroCoords():
-                return (1, self.write("mol"))
-            else:
-                return (0, self.write("can").split()[0])
+    @property
+    def atoms(self):
+        return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
+    @property
+    def data(self):
+        return MoleculeData(self.OBMol)
+    @property
+    def unitcell(self):
+        unitcell = self.OBMol.GetData(ob.UnitCell)
+        if unitcell:
+            return ob.toUnitCell(unitcell)
         else:
-            raise AttributeError, "Molecule has no attribute '%s'" % attr
+            raise AttributeError, "Molecule has no attribute 'unitcell'"
+    @property
+    def conformers(self): return self.OBMol.GetConformers()
+    @property
+    def dim(self): return self.OBMol.GetDimension()
+    @property
+    def energy(self): return self.GetEnergy()
+    @property
+    def dim(self): return self.OBMol.GetDimension()
+    @property
+    def energy(self): return self.OBMol.GetEnergy()
+    @property
+    def exactmass(self): return self.OBMol.GetExactMass()
+    @property
+    def flags(self): return self.OBMol.GetFlags()
+    @property
+    def formula(self): return self.OBMol.GetFormula()
+    @property
+    def mod(self): return self.OBMol.GetMod()
+    @property
+    def molwt(self): return self.OBMol.GetMolWt()
+    @property
+    def sssr(self): return self.OBMol.GetSSSR()
+    @property
+    def title(self): return self.OBMol.GetTitle()
+    @property
+    def charge(self): return self.OBMol.GetTotalCharge()
+    @property
+    def spin(self): return self.OBMol.GetTotalSpinMultiplicity()
+    @property
+    def _exchange(self):
+        if self.OBMol.HasNonZeroCoords():
+            return (1, self.write("mol"))
+        else:
+            return (0, self.write("can").split()[0])
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
@@ -237,8 +237,7 @@ class Molecule(object):
            for atom in mymol:
                print atom
         """
-        for atom in self.atoms:
-            yield atom
+        return iter(self.atoms)
 
     def calcdesc(self, descnames=[]):
         """Calculate descriptor values.
@@ -502,38 +501,47 @@ class Atom(object):
     The original Open Babel atom can be accessed using the attribute:
        OBAtom
     """
-    
-    _getmethods = {
-        'atomicmass':'GetAtomicMass',
-        'atomicnum':'GetAtomicNum',
-        'cidx':'GetCIdx',
-        'coordidx':'GetCoordinateIdx',
-        # 'data':'GetData', has been removed
-        'exactmass':'GetExactMass',
-        'formalcharge':'GetFormalCharge',
-        'heavyvalence':'GetHvyValence',
-        'heterovalence':'GetHeteroValence',
-        'hyb':'GetHyb',
-        'idx':'GetIdx',
-        'implicitvalence':'GetImplicitValence',
-        'isotope':'GetIsotope',
-        'partialcharge':'GetPartialCharge',
-        'spin':'GetSpinMultiplicity',
-        'type':'GetType',
-        'valence':'GetValence',
-        'vector':'GetVector',
-        }
 
     def __init__(self, OBAtom):
         self.OBAtom = OBAtom
-        
-    def __getattr__(self, attr):
-        if attr == "coords":
-            return (self.OBAtom.GetX(), self.OBAtom.GetY(), self.OBAtom.GetZ())
-        elif attr in self._getmethods:
-            return getattr(self.OBAtom, self._getmethods[attr])()
-        else:
-            raise AttributeError, "Atom has no attribute %s" % attr
+
+    @property
+    def coords(self):
+        return (self.OBAtom.GetX(), self.OBAtom.GetY(), self.OBAtom.GetZ())
+    @property
+    def atomicmass(self): return self.OBAtom.GetAtomicMass()
+    @property
+    def atomicnum(self): return self.OBAtom.GetAtomicNum()
+    @property
+    def cidx(self): return self.OBAtom.GetCIdx()
+    @property
+    def coordidx(self): return self.OBAtom.GetCoordinateIdx()
+    @property
+    def exactmass(self): return self.OBAtom.GetExactMass()
+    @property
+    def formalcharge(self): return self.OBAtom.GetFormalCharge()
+    @property
+    def heavyvalence(self): return self.OBAtom.GetHvyValence()
+    @property
+    def heterovalence(self): return self.OBAtom.GetHeteroValence()
+    @property
+    def hyb(self): return self.OBAtom.GetHyb()
+    @property
+    def idx(self): return self.OBAtom.GetIdx()
+    @property
+    def implicitvalence(self): return self.OBAtom.GetImplicitValence()
+    @property
+    def isotope(self): return self.OBAtom.GetIsotope()
+    @property
+    def partialcharge(self): return self.OBAtom.GetPartialCharge()
+    @property
+    def spin(self): return self.OBAtom.GetSpinMultiplicity()
+    @property
+    def type(self): return self.OBAtom.GetType()
+    @property
+    def valence(self): return self.OBAtom.GetValence()
+    @property
+    def vector(self): return self.OBAtom.GetVector()
 
     def __str__(self):
         """Create a string representation of the atom.
@@ -584,12 +592,9 @@ class Fingerprint(object):
         self.fp = obFingerprint
     def __or__(self, other):
         return ob.OBFingerprint.Tanimoto(self.fp, other.fp)
-    def __getattr__(self, attr):
-        if attr == "bits":
-            # Create a bits attribute on-the-fly
-            return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())
-        else:
-            raise AttributeError, "Fingerprint has no attribute %s" % attr
+    @property
+    def bits(self):
+        return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())    
     def __str__(self):
         return ", ".join([str(x) for x in self.fp])
 
