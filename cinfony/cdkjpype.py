@@ -293,7 +293,9 @@ class Molecule(object):
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename            
             writer = java.io.FileWriter(java.io.File(filename))
-        _outformats[format](writer).writeMolecule(self.Molecule)
+        molwriter = _outformats[format](writer)
+        molwriter.writeMolecule(self.Molecule)
+        molwriter.close()
         writer.close()
         if filename == None:
             # Using str() for unicode conversion
