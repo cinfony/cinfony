@@ -4,10 +4,10 @@ import unittest
 
 pybel = obpybel = rdkit = cdk = jybel = None
 if sys.platform[:4] == "java":
-    from cinfony import cdk, openbabel
+    from cinfony import cdk, jybel
 else:
     try:
-        from cinfony import cdk, openbabel, rdkit
+        from cinfony import cdk, pybel, rdkit
     except ImportError:
         pass
     try:
@@ -333,7 +333,7 @@ Energy = 0
         self.assertEqual(len(self.mols[0].atoms),4)
         
 class TestPybel(TestToolkit):
-    toolkit = openbabel
+    toolkit = pybel
     tanimotoresult = 1/3.
     Ndescs = 3
     Natoms = 15
@@ -390,7 +390,7 @@ class TestOBPybel(TestPybel):
     toolkit = obpybel
 
 class TestJybel(TestPybel):
-    toolkit = openbabel
+    toolkit = jybel
     def testDrawdependencies(self):
         "No testing the draw dependencies"
         pass
@@ -447,7 +447,8 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    testcases = [TestPybel, TestCDK, TestRDKit]
+    # testcases = [TestPybel, TestCDK, TestRDKit]
+    testcases = [TestPybel]
     if sys.platform[:4] == "java":
         testcases = [TestCDK, TestJybel]
     # testcases = [TestCDK]
