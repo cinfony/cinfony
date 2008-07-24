@@ -499,69 +499,41 @@ class Fingerprint(object):
         return self.fp.toString()
 
 class Atom(object):
-    """Represent a Pybel atom.
+    """Represent a cdkjpype Atom.
 
     Required parameters:
        Atom -- a CDK Atom
      
     Attributes:
-       atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
-       formalcharge, heavyvalence, heterovalence, hyb, idx,
-       implicitvalence, index, isotope, partialcharge, spin, type,
-       valence, vector.
+       atomicnum, coords, formalcharge
 
     The original CDK Atom can be accessed using the attribute:
        Atom
     """
-    
-    _getmethods = {
-        'atomicmass':'GetAtomicMass',
-        'atomicnum':'GetAtomicNum',
-        'cidx':'GetCIdx',
-        'coordidx':'GetCoordinateIdx',
-        # 'data':'GetData', has been removed
-        'exactmass':'GetExactMass',
-        'formalcharge':'GetFormalCharge',
-        'heavyvalence':'GetHvyValence',
-        'heterovalence':'GetHeteroValence',
-        'hyb':'GetHyb',
-        'idx':'GetIdx',
-        'implicitvalence':'GetImplicitValence',
-        'isotope':'GetIsotope',
-        'partialcharge':'GetPartialCharge',
-        'spin':'GetSpinMultiplicity',
-        'type':'GetType',
-        'valence':'GetValence',
-        'vector':'GetVector',
-        }
 
     def __init__(self, Atom):
         self.Atom = Atom
         
-    def __getattr__(self, attr):
-        if attr == "coords":
-            coords = self.Atom.point3d
+    @property
+    def atomicnum(self):
+        _isofact.configure(self.Atom)
+        return self.Atom.getAtomicNumber()
+    @property
+    def coords(self):
+        coords = self.Atom.point3d
+        if not coords:
+            coords = self.Atom.point2d
             if not coords:
-                coords = self.Atom.point2d
-                if not coords:
-                    return (0., 0., 0.)
-            else:
-                return (coords.x, coords.y, coords.z)
-        elif attr == "atomicnum":
-            _isofact.configure(self.Atom)
-            return self.Atom.getAtomicNumber()
-        elif attr == "formalcharge":
-            _isofact.configure(self.Atom)
-            return self.Atom.getFormalCharge()
+                return (0., 0., 0.)
         else:
-            raise AttributeError, "Atom has no attribute %s" % attr
+            return (coords.x, coords.y, coords.z)
+    @property
+    def formalcharge(self):
+        _isofact.configure(self.Atom)
+        return self.Atom.getFormalCharge()
 
     def __str__(self):
         """Create a string representation of the atom.
-
-        >>> a = Atom()
-        >>> print a
-        Atom: 0 (0.0, 0.0, 0.0)
         """
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
