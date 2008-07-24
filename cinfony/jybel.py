@@ -162,23 +162,6 @@ class Molecule(object):
     The original Open Babel molecule can be accessed using the attribute:
        OBMol
     """
-    _getmethods = {
-        'conformers':'GetConformers',
-        # 'coords':'GetCoordinates', you can access the coordinates the atoms elsewhere
-        # 'data':'GetData', has been removed
-        'dim':'GetDimension',
-        'energy':'GetEnergy',
-        'exactmass':'GetExactMass',
-        'flags':'GetFlags',
-        'formula':'GetFormula',
-        # 'internalcoord':'GetInternalCoord', # Causes SWIG warning
-        'mod':'GetMod',
-        'molwt':'GetMolWt',
-        'sssr':'GetSSSR',
-        'title':'GetTitle',
-        'charge':'GetTotalCharge',
-        'spin':'GetTotalSpinMultiplicity'
-    }
     _cinfony = True
 
     def __init__(self, OBMol):
@@ -193,36 +176,49 @@ class Molecule(object):
 
         self.OBMol = OBMol
  
-    def __getattr__(self, attr):
-        """Return the value of an attribute
-
-        Note: The values are calculated on-the-fly. You may want to store the value in
-        a variable if you repeatedly access the same attribute.
-        """
-        # This function is not accessed in the case of OBMol
-        if attr == "atoms":
-            # Create an atoms attribute on-the-fly
-            return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
-        elif attr == "data":
-            # Create a data attribute on-the-fly
-            return MoleculeData(self.OBMol)
-        elif attr == "unitcell":
-            # Create a unitcell attribute on-the-fly
-            unitcell = self.OBMol.GetData(ob.openbabelConstants.UnitCell)
-            if unitcell:
-                return ob.openbabel.toUnitCell(unitcell)
-            else:
-                raise AttributeError, "Molecule has no attribute 'unitcell'"
-        elif attr in self._getmethods:
-            # Call the OB Method to find the attribute value
-            return getattr(self.OBMol, self._getmethods[attr])()
-        elif attr == "_exchange":
-            if self.OBMol.HasNonZeroCoords():
-                return (1, self.write("mol"))
-            else:
-                return (0, self.write("can").split()[0])
+    def atoms(self):
+        return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
+    atoms = property(atoms)
+    def charge(self): return self.OBMol.GetTotalCharge()
+    charge = property(charge)
+    def conformers(self): return self.OBMol.GetConformers()
+    conformers = property(conformers)
+    def data(self):
+        return MoleculeData(self.OBMol)
+    data = property(data)
+    def dim(self): return self.OBMol.GetDimension()
+    dim = property(dim)
+    def energy(self): return self.GetEnergy()
+    energy = property(energy)
+    def exactmass(self): return self.OBMol.GetExactMass()
+    exactmass = property(exactmass)
+    def flags(self): return self.OBMol.GetFlags()
+    flags = property(flags)
+    def formula(self): return self.OBMol.GetFormula()
+    formula = property(formula)
+    def mod(self): return self.OBMol.GetMod()
+    mod = property(mod)
+    def molwt(self): return self.OBMol.GetMolWt()
+    molwt = property(molwt)
+    def spin(self): return self.OBMol.GetTotalSpinMultiplicity()
+    spin = property(spin)
+    def sssr(self): return self.OBMol.GetSSSR()
+    sssr = property(sssr)
+    def title(self): return self.OBMol.GetTitle()
+    title = property(title)
+    def unitcell(self):
+        unitcell = self.OBMol.GetData(ob.openbabelConstants.UnitCell)
+        if unitcell:
+            return ob.openbabel.toUnitCell(unitcell)
         else:
-            raise AttributeError, "Molecule has no attribute '%s'" % attr
+            raise AttributeError, "Molecule has no attribute 'unitcell'"
+    unitcell = property(unitcell)
+    def _exchange(self):
+        if self.OBMol.HasNonZeroCoords():
+            return (1, self.write("mol"))
+        else:
+            return (0, self.write("can").split()[0])
+    _exchange = property(_exchange)
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.

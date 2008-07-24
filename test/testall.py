@@ -447,10 +447,16 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    # testcases = [TestPybel, TestCDK, TestRDKit]
-    testcases = [TestPybel]
+    lookup = {'cdk': TestCDK, 'obabel':TestPybel, 'rdkit':TestRDKit}
+    testcases = [TestPybel, TestCDK, TestRDKit]
     if sys.platform[:4] == "java":
+        lookup['obabel'] = TestJybel
         testcases = [TestCDK, TestJybel]
+    if len(sys.argv) > 1:
+        testcases = [lookup[x] for x in sys.argv[1:]]
+
+    # 
+
     # testcases = [TestCDK]
     #testcases = [TestJybel]
     # testcases = [TestRDKit]
