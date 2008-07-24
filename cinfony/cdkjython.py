@@ -157,41 +157,20 @@ class Outputfile(object):
 
     
 class Molecule(object):
-    """Represent a Pybel molecule.
+    """Represent a cdkjython Molecule.
 
-    Optional parameters:
-       Molecule -- a CDK Molecule (default is None)
-    
-    An empty Molecule is created if an Open Babel molecule is not provided.
+    Required parameters:
+       Molecule -- a CDK Molecule
     
     Attributes:
-       atoms, charge, data, dim, energy, exactmass, flags, formula, 
-       mod, molwt, spin, sssr, title, unitcell.
-    (refer to the Open Babel library documentation for more info).
+       atoms, data, formula, molwt, title
     
     Methods:
-       write(), calcfp(), calcdesc()
+       addh(), calcfp(), calcdesc(), draw(), removeh(), write()
       
     The original CDK Molecule can be accessed using the attribute:
        Molecule
     """
-    _getmethods = {
-        'conformers':'GetConformers',
-        # 'coords':'GetCoordinates', you can access the coordinates the atoms elsewhere
-        # 'data':'GetData', has been removed
-        'dim':'GetDimension',
-        'energy':'GetEnergy',
-        'exactmass':'GetExactMass',
-        'flags':'GetFlags',
-        'formula':'GetFormula',
-        # 'internalcoord':'GetInternalCoord', # Causes SWIG warning
-        'mod':'GetMod',
-        'molwt':'GetMolWt',
-        'sssr':'GetSSSR',
-        'title':'GetTitle',
-        'charge':'GetTotalCharge',
-        'spin':'GetTotalSpinMultiplicity'
-    }
     _cinfony = True
 
     def __init__(self, Molecule):
@@ -206,33 +185,28 @@ class Molecule(object):
             
         self.Molecule = Molecule
         
-    def __getattr__(self, attr):
-        """Return the value of an attribute
-
-        Note: The values are calculated on-the-fly. You may want to store the value in
-        a variable if you repeatedly access the same attribute.
-        """
-        if attr == "atoms":
-            return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
+    def atoms(self): return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
+    atoms = property(atoms)
 ##        elif attr == 'exactmass':
               # Is supposed to use the most abundant isotope but
               # actually uses the next most abundant
 ##            return cdk.tools.MFAnalyser(self.Molecule).getMass()
-        elif attr == "data":
-            return MoleculeData(self.Molecule)
-        elif attr == 'molwt':
-            return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
-        elif attr == 'formula':
-            return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
-        elif attr == "_exchange":
-            gt = cdk.geometry.GeometryTools
-            if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):
-                return (1, self.write("mol"))
-            else:
-                return (0, self.write("smi"))
+    def data(self): return MoleculeData(self.Molecule)
+    data = property(data)
+    def formula(self): return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
+    formula = property(formula)
+    def molwt(self): return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
+    molwt = property(molwt)
+    def title(self): return self.Molecule.getProperty(cdk.CDKConstants.TITLE)
+    title = property(title)
+    def _exchange(self):
+        gt = cdk.geometry.GeometryTools
+        if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):
+            return (1, self.write("mol"))
         else:
-            raise AttributeError, "Molecule has no attribute '%s'" % attr
-
+            return (0, self.write("smi"))
+    _exchange = property(_exchange)
+    
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
         
@@ -240,8 +214,7 @@ class Molecule(object):
            for atom in mymol:
                print atom
         """
-        for atom in self.atoms:
-            yield atom
+        return iter(self.atoms)
 
     def __str__(self):
         return self.write()
@@ -267,16 +240,12 @@ class Molecule(object):
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename            
             writer = java.io.FileWriter(java.io.File(filename))
-        _outformats[format](writer).writeMolecule(self.Molecule)
+        molwriter = _outformats[format](writer)
+        molwriter.writeMolecule(self.Molecule)
+        molwriter.close()
         writer.close()
         if filename == None:
             return writer.toString()
-
-    def __iter__(self):
-        return iter(self.__getattr__("atoms"))
-
-    def __str__(self):
-        return self.write("smi")      
 
     def calcfp(self, fp="daylight"):
         # if fp == "substructure":
@@ -298,8 +267,8 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, the full list of Open Babel
-        descriptors is calculated: LogP, PSA and MR.
+        If descnames is not specified, all available descriptors are calculated.
+        See descs for the list of descriptor names.
         """
         if not descnames:
             descnames = descs
@@ -441,9 +410,8 @@ class Fingerprint(object):
 class Atom(object):
     """Represent a Pybel atom.
 
-    Optional parameters:
-       OBAtom -- an Open Babel Atom (default is None)
-       index -- the index of the atom in the molecule (default is None)
+    Required parameters:
+       Atom -- a CDK Atom
      
     An empty Atom is created if an Open Babel atom is not provided.
     
@@ -453,10 +421,8 @@ class Atom(object):
        implicitvalence, index, isotope, partialcharge, spin, type,
        valence, vector.
 
-    (refer to the Open Babel library documentation for more info).
-    
-    The original Open Babel atom can be accessed using the attribute:
-       OBAtom
+    The original CDK Atom can be accessed using the attribute:
+       Atom
     """
     
     _getmethods = {

@@ -44,8 +44,8 @@ descs = _descdict.keys()
 fps = ["daylight", "graph"]
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
-_informats = {'sdf': cdk.io.MDLV2000Reader}
-informats = dict([(x, _formats[x]) for x in ['smi', 'sdf']])
+_informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
+informats = dict([(x, _formats[x]) for x in ['smi', 'sdf', 'mol']])
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'smi': cdk.io.SMILESWriter,
@@ -97,10 +97,10 @@ def readfile(format, filename):
             builder
             ))
     elif format in informats:
-        reader = _informats[format](java.io.StringReader(string))
+        reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
         chemfile = reader.read(cdk.ChemFile())
         manip = cdk.tools.manipulator.ChemFileManipulator
-        return Molecule(manip.getAllAtomContainers(chemfile)[0])
+        return iter(Molecule(manip.getAllAtomContainers(chemfile)[0]),)
     else:
         raise ValueError,"%s is not a recognised CDK format" % format
 
@@ -180,41 +180,20 @@ class Outputfile(object):
 
     
 class Molecule(object):
-    """Represent a Pybel molecule.
+    """Represent a cdkjpype Molecule.
 
-    Optional parameters:
-       Molecule -- a CDK Molecule (default is None)
-    
-    An empty Molecule is created if an Open Babel molecule is not provided.
+    Required parameters:
+       Molecule -- a CDK Molecule
     
     Attributes:
-       atoms, charge, data, dim, energy, exactmass, flags, formula, 
-       mod, molwt, spin, sssr, title, unitcell.
-    (refer to the Open Babel library documentation for more info).
+       atoms, data, formula, molwt, title
     
     Methods:
-       write(), calcfp(), calcdesc()
+       addh(), calcfp(), calcdesc(), draw(), removeh(), write()
       
     The original CDK Molecule can be accessed using the attribute:
        Molecule
     """
-    _getmethods = {
-        'conformers':'GetConformers',
-        # 'coords':'GetCoordinates', you can access the coordinates the atoms elsewhere
-        # 'data':'GetData', has been removed
-        'dim':'GetDimension',
-        'energy':'GetEnergy',
-        'exactmass':'GetExactMass',
-        'flags':'GetFlags',
-        'formula':'GetFormula',
-        # 'internalcoord':'GetInternalCoord', # Causes SWIG warning
-        'mod':'GetMod',
-        'molwt':'GetMolWt',
-        'sssr':'GetSSSR',
-        'title':'GetTitle',
-        'charge':'GetTotalCharge',
-        'spin':'GetTotalSpinMultiplicity'
-    }
     _cinfony = True
 
     def __init__(self, Molecule):
@@ -229,32 +208,27 @@ class Molecule(object):
             
         self.Molecule = Molecule
         
-    def __getattr__(self, attr):
-        """Return the value of an attribute
-
-        Note: The values are calculated on-the-fly. You may want to store the value in
-        a variable if you repeatedly access the same attribute.
-        """
-        if attr == "atoms":
-            return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
+    @property
+    def atoms(self): return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
 ##        elif attr == 'exactmass':
               # Is supposed to use the most abundant isotope but
               # actually uses the next most abundant
 ##            return cdk.tools.MFAnalyser(self.Molecule).getMass()
-        elif attr == "data":
-            return MoleculeData(self.Molecule)
-        elif attr == 'molwt':
-            return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
-        elif attr == 'formula':
-            return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
-        elif attr == "_exchange":
-            gt = cdk.geometry.GeometryTools
-            if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):
-                return (1, self.write("mol"))
-            else:
-                return (0, self.write("smi"))
+    @property
+    def data(self): return MoleculeData(self.Molecule)
+    @property
+    def formula(self): return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
+    @property
+    def molwt(self): return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
+    @property
+    def title(self): return self.Molecule.getProperty(cdk.CDKConstants.TITLE)
+    @property
+    def _exchange(self):
+        gt = cdk.geometry.GeometryTools
+        if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):
+            return (1, self.write("mol"))
         else:
-            raise AttributeError, "Molecule has no attribute '%s'" % attr
+            return (0, self.write("smi"))
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
@@ -263,8 +237,7 @@ class Molecule(object):
            for atom in mymol:
                print atom
         """
-        for atom in self.atoms:
-            yield atom
+        return iter(self.atoms)
 
     def __str__(self):
         return self.write()
@@ -301,12 +274,6 @@ class Molecule(object):
             # Using str() for unicode conversion
             return str(writer.toString())
 
-    def __iter__(self):
-        return iter(self.__getattr__("atoms"))
-
-    def __str__(self):
-        return self.write("smi")      
-
     def calcfp(self, fp="daylight"):
         # if fp == "substructure":
         #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
@@ -327,8 +294,8 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, the full list of Open Babel
-        descriptors is calculated: LogP, PSA and MR.
+        If descnames is not specified, all available descriptors are calculated.
+        See descs for the list of descriptor names.
         """
         if not descnames:
             descnames = descs
@@ -534,22 +501,17 @@ class Fingerprint(object):
 class Atom(object):
     """Represent a Pybel atom.
 
-    Optional parameters:
-       OBAtom -- an Open Babel Atom (default is None)
-       index -- the index of the atom in the molecule (default is None)
+    Required parameters:
+       Atom -- a CDK Atom
      
-    An empty Atom is created if an Open Babel atom is not provided.
-    
     Attributes:
        atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
        implicitvalence, index, isotope, partialcharge, spin, type,
        valence, vector.
 
-    (refer to the Open Babel library documentation for more info).
-    
-    The original Open Babel atom can be accessed using the attribute:
-       OBAtom
+    The original CDK Atom can be accessed using the attribute:
+       Atom
     """
     
     _getmethods = {
