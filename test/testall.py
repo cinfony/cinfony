@@ -409,6 +409,9 @@ class TestRDKit(TestToolkit):
     Nfpbits = 64
     datakeys = ['NSC']
 
+    def testRSconversiontoMOL2(self):
+        """No conversion to MOL2 done"""
+        pass
 
 class TestCDK(TestToolkit):
     toolkit = cdk

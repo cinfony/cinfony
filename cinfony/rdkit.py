@@ -96,16 +96,11 @@ def readstring(format, string):
             string, format)
 
 class Molecule(object):
-    """Represent an RDKit molecule.
+    """Represent an rdkit Molecule.
 
     Required parameter:
-       Mol -- an RDKit Mol
-       or
-       Molecule -- any type of cinfony Molecule (e.g. one from cinfony.pybel)
+       Mol -- an RDKit Mol or any type of cinfony Molecule
 
-    If a cinfony Molecule is provided it will be converted into
-    an rdkit Molecule.       
-    
     Attributes:
        atoms, data, molwt, title
     
@@ -129,28 +124,20 @@ class Molecule(object):
             
         self.Mol = Mol
 
-    def __getattr__(self, attr):
-        """Return the value of an attribute
-
-        Note: The values are calculated on-the-fly. You may want to store the value in
-        a variable if you repeatedly access the same attribute.
-        """
-        # This function is not accessed in the case of OBMol
-        if attr == "atoms":
-            return [Atom(rdkatom) for rdkatom in self.Mol.GetAtoms()]
-        elif attr == "data":
-            return MoleculeData(self.Mol)
-        elif attr == "molwt":
-            return descDict['MolWt'](self.Mol)
-        elif attr == "_exchange":
-            if self.Mol.GetNumConformers() == 0:
-                return (0, self.write("iso"))
-            else:
-                return (1, self.write("mol"))
-        elif attr == "title":
-            return self.Mol.GetProp("_Name")
+    @property
+    def atoms(self): return [Atom(rdkatom) for rdkatom in self.Mol.GetAtoms()]
+    @property
+    def data(self): return MoleculeData(self.Mol)
+    @property
+    def molwt(self): return descDict['MolWt'](self.Mol)
+    @property
+    def title(self): return self.Mol.GetProp("_Name")
+    @property
+    def _exchange(self):
+        if self.Mol.GetNumConformers() == 0:
+            return (0, self.write("iso"))
         else:
-            raise AttributeError, "Molecule has no attribute '%s'" % attr
+            return (1, self.write("mol"))
 
     def addh(self):
         """Add hydrogens."""
@@ -197,8 +184,7 @@ class Molecule(object):
            for atom in mymol:
                print atom
         """
-        for atom in self.atoms:
-            yield atom
+        return iter(self.atoms)
 
     def __str__(self):
         return self.write()
@@ -324,59 +310,32 @@ class Molecule(object):
         self.localopt()
         
 class Atom(object):
-    """Represent a Pybel atom.
+    """Represent an rdkit Atom.
 
     Required parameters:
        Atom -- an RDKit Atom
      
     Attributes:
-       atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
-       formalcharge, heavyvalence, heterovalence, hyb, idx,
-       implicitvalence, index, isotope, partialcharge, spin, type,
-       valence, vector.
-
-    (refer to the Open Babel library documentation for more info).
+        atomicnum, coords, formalcharge
     
     The original RDKit Atom can be accessed using the attribute:
        Atom
     """
     
-    _getmethods = {
-        'atomicmass':'GetAtomicMass',
-        'atomicnum':'GetAtomicNum',
-        'cidx':'GetCIdx',
-        'coordidx':'GetCoordinateIdx',
-        # 'data':'GetData', has been removed
-        # 'exactmass':'GetMass',
-        'formalcharge':'GetFormalCharge',
-        'heavyvalence':'GetHvyValence',
-        'heterovalence':'GetHeteroValence',
-        #'hyb':'GetHyb',
-        #'idx':'GetIdx',
-        #'implicitvalence':'GetImplicitValence',
-        #'isotope':'GetIsotope',
-        #'partialcharge':'GetPartialCharge',
-        #'spin':'GetSpinMultiplicity',
-        #'type':'GetType',
-        #'valence':'GetValence',
-        #'vector':'GetVector',
-        }
-
     def __init__(self, Atom):
         self.Atom = Atom
-        
-    def __getattr__(self, attr):
-        if attr == "coords":
-            owningmol = self.Atom.GetOwningMol()
-            if owningmol.GetNumConformers() == 0:
-                raise AttributeError, "Atom has no coordinates (0D structure)"
-            idx = self.Atom.GetIdx()
-            atomcoords = owningmol.GetConformer().GetAtomPosition(idx)
-            return (atomcoords[0], atomcoords[1], atomcoords[2])
-        elif attr in self._getmethods:
-            return getattr(self.Atom, self._getmethods[attr])()        
-        else:
-            raise AttributeError, "Atom has no attribute %s" % attr
+    @property
+    def atomicnum(self): return self.Atom.GetAtomicNum()
+    @property
+    def coords(self):
+        owningmol = self.Atom.GetOwningMol()
+        if owningmol.GetNumConformers() == 0:
+            raise AttributeError, "Atom has no coordinates (0D structure)"
+        idx = self.Atom.GetIdx()
+        atomcoords = owningmol.GetConformer().GetAtomPosition(idx)
+        return (atomcoords[0], atomcoords[1], atomcoords[2])
+    @property
+    def formalcharge(self): return self.Atom.GetFormalCharge()
 
     def __str__(self):
         """Create a string representation of the atom.
