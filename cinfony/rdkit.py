@@ -31,7 +31,7 @@ _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
 informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
 outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
 
-_forcefields = {'uff': AllChem.UFFOptimizeMolecule}
+_forcefields = {'UFF': AllChem.UFFOptimizeMolecule}
 forcefields = _forcefields.keys()
 
 def readfile(format, filename):
@@ -302,18 +302,19 @@ class Molecule(object):
                 root.mainloop()
             Chem.SanitizeMol(self.Mol)
 
-    def localopt(self, forcefield = "uff", steps = 50):
+    def localopt(self, forcefield = "UFF", steps = 500):
         forcefield = forcefield.lower()
         _forcefields[forcefield](self.Mol, maxIters = steps)
 
-    def make3D(self):
+    def make3D(self, forcefield = "UFF", steps = 50):
+        forcefield = forcefield.lower()
         success = AllChem.EmbedMolecule(self.Mol)
         if success == -1: # Failed
             success = AllChem.EmbedMolecule(self.Mol,
                                             useRandomCoords = True)
             if success == -1:
                 raise Error, "Embedding failed!"
-        self.localopt()
+        self.localopt(forcefield, steps)
         
 class Atom(object):
     """Represent an rdkit Atom.

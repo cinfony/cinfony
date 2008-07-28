@@ -157,8 +157,8 @@ class Molecule(object):
     If a cinfony Molecule is provided it will be converted into a pybel Molecule.       
     
     Attributes:
-       atoms, charge, data, dim, energy, exactmass, flags, formula, 
-       mod, molwt, spin, sssr, title, unitcell.
+       atoms, charge, conformers, data, dim, energy, exactmass, formula, 
+       molwt, spin, sssr, title, unitcell.
     (refer to the Open Babel library documentation for more info).
     
     Methods:
@@ -186,21 +186,11 @@ class Molecule(object):
     def atoms(self):
         return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
     @property
-    def data(self):
-        return MoleculeData(self.OBMol)
-    @property
-    def unitcell(self):
-        unitcell = self.OBMol.GetData(ob.UnitCell)
-        if unitcell:
-            return ob.toUnitCell(unitcell)
-        else:
-            raise AttributeError, "Molecule has no attribute 'unitcell'"
+    def charge(self): return self.OBMol.GetTotalCharge()
     @property
     def conformers(self): return self.OBMol.GetConformers()
     @property
-    def dim(self): return self.OBMol.GetDimension()
-    @property
-    def energy(self): return self.GetEnergy()
+    def data(self): return MoleculeData(self.OBMol)
     @property
     def dim(self): return self.OBMol.GetDimension()
     @property
@@ -208,22 +198,23 @@ class Molecule(object):
     @property
     def exactmass(self): return self.OBMol.GetExactMass()
     @property
-    def flags(self): return self.OBMol.GetFlags()
-    @property
     def formula(self): return self.OBMol.GetFormula()
     @property
-    def mod(self): return self.OBMol.GetMod()
-    @property
     def molwt(self): return self.OBMol.GetMolWt()
+    @property
+    def spin(self): return self.OBMol.GetTotalSpinMultiplicity()
     @property
     def sssr(self): return self.OBMol.GetSSSR()
     def _gettitle(self): return self.OBMol.GetTitle()
     def _settitle(self, val): self.OBMol.SetTitle(val)
     title = property(_gettitle, _settitle)
     @property
-    def charge(self): return self.OBMol.GetTotalCharge()
-    @property
-    def spin(self): return self.OBMol.GetTotalSpinMultiplicity()
+    def unitcell(self):
+        unitcell = self.OBMol.GetData(ob.UnitCell)
+        if unitcell:
+            return ob.toUnitCell(unitcell)
+        else:
+            raise AttributeError, "Molecule has no attribute 'unitcell'"
     @property
     def _exchange(self):
         if self.OBMol.HasNonZeroCoords():
@@ -317,7 +308,8 @@ class Molecule(object):
         to have explicit hydrogens. If not, call addh().
         """
         
-	if not (self.OBMol.HasNonZeroCoords()):
+	if self.dim != 3:
+            print self.dim
             self.make3D()
         ff = _forcefields[forcefield]
         ff.Setup(self.OBMol)

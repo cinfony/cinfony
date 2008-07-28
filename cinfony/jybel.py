@@ -156,7 +156,7 @@ class Molecule(object):
     (refer to the Open Babel library documentation for more info).
     
     Methods:
-       addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
+       addh(), calcfp(), calcdesc(), localopt(), make3D(), removeh(),
        write() 
       
     The original Open Babel molecule can be accessed using the attribute:
