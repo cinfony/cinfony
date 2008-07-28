@@ -217,8 +217,9 @@ class Molecule(object):
     def molwt(self): return self.OBMol.GetMolWt()
     @property
     def sssr(self): return self.OBMol.GetSSSR()
-    @property
-    def title(self): return self.OBMol.GetTitle()
+    def _gettitle(self): return self.OBMol.GetTitle()
+    def _settitle(self, val): self.OBMol.SetTitle(val)
+    title = property(_gettitle, _settitle)
     @property
     def charge(self): return self.OBMol.GetTotalCharge()
     @property

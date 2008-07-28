@@ -204,8 +204,9 @@ class Molecule(object):
     spin = property(spin)
     def sssr(self): return self.OBMol.GetSSSR()
     sssr = property(sssr)
-    def title(self): return self.OBMol.GetTitle()
-    title = property(title)
+    def _gettitle(self): return self.OBMol.GetTitle()
+    def _settitle(self, val): self.OBMol.SetTitle(val)
+    title = property(_gettitle, _settitle)
     def unitcell(self):
         unitcell = self.OBMol.GetData(ob.openbabelConstants.UnitCell)
         if unitcell:

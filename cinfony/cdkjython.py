@@ -197,8 +197,9 @@ class Molecule(object):
     formula = property(formula)
     def molwt(self): return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
     molwt = property(molwt)
-    def title(self): return self.Molecule.getProperty(cdk.CDKConstants.TITLE)
-    title = property(title)
+    def _gettitle(self): return self.Molecule.getProperty(cdk.CDKConstants.TITLE)
+    def _settitle(self, val): self.Molecule.setProperty(cdk.CDKConstants.TITLE, val)
+    title = property(_gettitle, _settitle)
     def _exchange(self):
         gt = cdk.geometry.GeometryTools
         if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):

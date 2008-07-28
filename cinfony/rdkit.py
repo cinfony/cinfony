@@ -130,8 +130,14 @@ class Molecule(object):
     def data(self): return MoleculeData(self.Mol)
     @property
     def molwt(self): return descDict['MolWt'](self.Mol)
-    @property
-    def title(self): return self.Mol.GetProp("_Name")
+    def _gettitle(self):
+        # Note to self: maybe should implement the get() method for self.data
+        if "_Name" in self.data:
+            return self.data["_Name"]
+        else:
+            return ""
+    def _settitle(self, val): self.Mol.SetProp("_Name", val)
+    title = property(_gettitle, _settitle)
     @property
     def _exchange(self):
         if self.Mol.GetNumConformers() == 0:
