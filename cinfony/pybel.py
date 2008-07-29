@@ -41,18 +41,19 @@ def readfile(format, filename):
     """Iterate over the molecules in a file.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        filename
 
-    You can access the first molecule in a file using:
+    You can access the first molecule in a file using the next() method
+    of the iterator:
         mol = readfile("smi", "myfile.smi").next()
         
     You can make a list of the molecules in a file using:
-        mols = [mol for mol in readfile("smi", "myfile.smi")]
+        mols = list(readfile("smi", "myfile.smi"))
         
     You can iterate over the molecules in a file as shown in the
-    following code snippet...
-
+    following code snippet:
     >>> atomtotal = 0
     >>> for mol in readfile("sdf","head.sdf"):
     ...     atomtotal += len(mol.atoms)
@@ -77,9 +78,11 @@ def readstring(format, string):
     """Read in a molecule from a string.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        string
 
+    Example:
     >>> input = "C1=CC=CS1"
     >>> mymol = readstring("smi",input)
     >>> len(mymol.atoms)
@@ -107,13 +110,15 @@ class Outputfile(object):
     class.
     
     Required parameters:
-       format
+       format - see the outformats variable for a list of available
+                output formats
        filename
     Optional parameters:
        overwrite (default is False) -- if the output file already exists,
                                        should it be overwritten?
     Methods:
-       write(molecule), close()
+       write(molecule)
+       close()
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format
@@ -152,9 +157,9 @@ class Molecule(object):
     Required parameter:
        OBMol -- an Open Babel OBMol
        or
-       Molecule -- any type of cinfony Molecule (e.g. one from cinfony.rdkit)
+       Molecule -- any type of Cinfony Molecule (e.g. one from cinfony.rdkit)
 
-    If a cinfony Molecule is provided it will be converted into a pybel Molecule.       
+    If a Cinfony Molecule is provided it will be converted into a Pybel Molecule.       
     
     Attributes:
        atoms, charge, conformers, data, dim, energy, exactmass, formula, 
@@ -238,7 +243,7 @@ class Molecule(object):
            descnames -- a list of names of descriptors
 
         If descnames is not specified, the full list of Open Babel
-        descriptors is calculated. See pybel.descs for a list
+        descriptors is calculated. See the descs variable for a list
         of available descriptors.
         """
         if not descnames:
@@ -259,8 +264,8 @@ class Molecule(object):
            fptype -- the name of the Open Babel fingerprint type.
 
         If fptype is not specified, the FP2 fingerprint type
-        is used. See the Open Babel library documentation for more
-        details.
+        is used. See the fps variable for a list of available
+        fingerprints.
         """
         fp = ob.vectorUnsignedInt()
         try:
@@ -308,8 +313,7 @@ class Molecule(object):
         to have explicit hydrogens. If not, call addh().
         """
         
-	if self.dim != 3:
-            print self.dim
+        if self.dim != 3:
             self.make3D()
         ff = _forcefields[forcefield]
         ff.Setup(self.OBMol)
@@ -537,12 +541,7 @@ class Atom(object):
     def vector(self): return self.OBAtom.GetVector()
 
     def __str__(self):
-        """Create a string representation of the atom.
-
-        >>> a = Atom()
-        >>> print a
-        Atom: 0 (0.0, 0.0, 0.0)
-        """
+        """Create a string representation of the Atom."""
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
