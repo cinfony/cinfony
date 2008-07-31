@@ -1,3 +1,15 @@
+"""
+rdkit - A Cinfony module for accessing the RDKit from CPython
+
+Global variables:
+  Chem and AllChem - the underlying RDKit Python bindings
+  informats - a dictionary of supported input formats
+  outformats - a dictionary of supported output formats
+  descs - a list of supported descriptors
+  fps - a list of supported fingerprint types
+  forcefields - a list of supported forcefields
+"""
+
 import os
 
 from Chem import AllChem
@@ -38,21 +50,21 @@ def readfile(format, filename):
     """Iterate over the molecules in a file.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        filename
 
-    You can access the first molecule in a file using:
+    You can access the first molecule in a file using the next() method
+    of the iterator:
         mol = readfile("smi", "myfile.smi").next()
         
     You can make a list of the molecules in a file using:
-        mols = [mol for mol in readfile("smi", "myfile.smi")]
+        mols = list(readfile("smi", "myfile.smi"))
         
     You can iterate over the molecules in a file as shown in the
-    following code snippet...
-
+    following code snippet:
     >>> atomtotal = 0
-    >>> for mol in readfile("sdf","head.sdf"):
-    ...     mol.addh()
+    >>> for mol in readfile("sdf", "head.sdf"):
     ...     atomtotal += len(mol.atoms)
     ...
     >>> print atomtotal
@@ -74,11 +86,13 @@ def readstring(format, string):
     """Read in a molecule from a string.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        string
 
+    Example:
     >>> input = "C1=CC=CS1"
-    >>> mymol = readstring("smi",input)
+    >>> mymol = readstring("smi", input)
     >>> len(mymol.atoms)
     5
     """
@@ -366,13 +380,15 @@ class Outputfile(object):
     class.
     
     Required parameters:
-       format
+       format - see the outformats variable for a list of available
+                output formats
        filename
     Optional parameters:
        overwrite (default is False) -- if the output file already exists,
                                        should it be overwritten?
     Methods:
        write(molecule)
+       close()
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format

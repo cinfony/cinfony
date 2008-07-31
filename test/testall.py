@@ -458,12 +458,6 @@ if __name__=="__main__":
     if len(sys.argv) > 1:
         testcases = [lookup[x] for x in sys.argv[1:]]
 
-    # 
-
-    # testcases = [TestCDK]
-    #testcases = [TestJybel]
-    # testcases = [TestRDKit]
-    # testcases = [TestOBPybel]
     for testcase in testcases:
         print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)

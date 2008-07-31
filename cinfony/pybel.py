@@ -1,3 +1,15 @@
+"""
+pybel - A Cinfony module for accessing OpenBabel from CPython
+
+Global variables:
+  ob - the underlying SWIG bindings for OpenBabel
+  informats - a dictionary of supported input formats
+  outformats - a dictionary of supported output formats
+  descs - a list of supported descriptors
+  fps - a list of supported fingerprint types
+  forcefields - a list of supported forcefields
+"""
+
 import math
 import os.path
 import tempfile
@@ -55,7 +67,7 @@ def readfile(format, filename):
     You can iterate over the molecules in a file as shown in the
     following code snippet:
     >>> atomtotal = 0
-    >>> for mol in readfile("sdf","head.sdf"):
+    >>> for mol in readfile("sdf", "head.sdf"):
     ...     atomtotal += len(mol.atoms)
     ...
     >>> print atomtotal
@@ -84,7 +96,7 @@ def readstring(format, string):
 
     Example:
     >>> input = "C1=CC=CS1"
-    >>> mymol = readstring("smi",input)
+    >>> mymol = readstring("smi", input)
     >>> len(mymol.atoms)
     5
     """

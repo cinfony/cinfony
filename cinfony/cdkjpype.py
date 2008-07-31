@@ -1,3 +1,15 @@
+"""
+cdkjpype - A Cinfony module for accessing the CDK from CPython
+
+Global variables:
+  cdk - the underlying CDK Java library (org.openscience.cdk)
+  informats - a dictionary of supported input formats
+  outformats - a dictionary of supported output formats
+  descs - a list of supported descriptors
+  fps - a list of supported fingerprint types
+  forcefields - a list of supported forcefields
+"""
+
 import os
 import bz2
 import math
@@ -64,20 +76,21 @@ def readfile(format, filename):
     """Iterate over the molecules in a file.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        filename
 
-    You can access the first molecule in a file using:
+    You can access the first molecule in a file using the next() method
+    of the iterator:
         mol = readfile("smi", "myfile.smi").next()
         
     You can make a list of the molecules in a file using:
-        mols = [mol for mol in readfile("smi", "myfile.smi")]
+        mols = list(readfile("smi", "myfile.smi"))
         
     You can iterate over the molecules in a file as shown in the
-    following code snippet...
-
+    following code snippet:
     >>> atomtotal = 0
-    >>> for mol in readfile("sdf","head.sdf"):
+    >>> for mol in readfile("sdf", "head.sdf"):
     ...     atomtotal += len(mol.atoms)
     ...
     >>> print atomtotal
@@ -105,16 +118,23 @@ def readfile(format, filename):
         raise ValueError,"%s is not a recognised CDK format" % format
 
 def readstring(format, string):
-    """Read in a molecule from a string.
-
+    """Represent a file to which *output* is to be sent.
+    
+    Although it's possible to write a single molecule to a file by
+    calling the write() method of a molecule, if multiple molecules
+    are to be written to the same file you should use the Outputfile
+    class.
+    
     Required parameters:
-       format
-       string
-
-    >>> input = "C1=CC=CS1"
-    >>> mymol = readstring("smi",input)
-    >>> len(mymol.atoms)
-    5
+       format - see the outformats variable for a list of available
+                output formats
+       filename
+    Optional parameters:
+       overwrite (default is False) -- if the output file already exists,
+                                       should it be overwritten?
+    Methods:
+       write(molecule)
+       close()
     """
     if format=="smi":
         sp = cdk.smiles.SmilesParser(cdk.DefaultChemObjectBuilder.getInstance())
