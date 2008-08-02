@@ -118,23 +118,18 @@ def readfile(format, filename):
         raise ValueError,"%s is not a recognised CDK format" % format
 
 def readstring(format, string):
-    """Represent a file to which *output* is to be sent.
-    
-    Although it's possible to write a single molecule to a file by
-    calling the write() method of a molecule, if multiple molecules
-    are to be written to the same file you should use the Outputfile
-    class.
-    
+    """Read in a molecule from a string.
+
     Required parameters:
-       format - see the outformats variable for a list of available
-                output formats
-       filename
-    Optional parameters:
-       overwrite (default is False) -- if the output file already exists,
-                                       should it be overwritten?
-    Methods:
-       write(molecule)
-       close()
+       format - see the informats variable for a list of available
+                input formats
+       string
+
+    Example:
+    >>> input = "C1=CC=CS1"
+    >>> mymol = readstring("smi", input)
+    >>> len(mymol.atoms)
+    5
     """
     if format=="smi":
         sp = cdk.smiles.SmilesParser(cdk.DefaultChemObjectBuilder.getInstance())
@@ -153,20 +148,19 @@ def readstring(format, string):
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
-    
-    Although it's possible to write a single molecule to a file by
-    calling the write() method of a molecule, if multiple molecules
-    are to be written to the same file you should use the Outputfile
-    class.
-    
+   
     Required parameters:
-       format
+       format - see the outformats variable for a list of available
+                output formats
        filename
+
     Optional parameters:
-       overwrite (default is False) -- if the output file already exists,
-                                       should it be overwritten?
+       overwite -- if the output file already exists, should it
+                   be overwritten? (default is False)
+                   
     Methods:
        write(molecule)
+       close()
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format
@@ -203,15 +197,15 @@ class Molecule(object):
     """Represent a cdkjpype Molecule.
 
     Required parameters:
-       Molecule -- a CDK Molecule
-    
+       Molecule -- a CDK Molecule or any type of cinfony Molecule
+
     Attributes:
        atoms, data, formula, molwt, title
     
     Methods:
        addh(), calcfp(), calcdesc(), draw(), removeh(), write()
       
-    The original CDK Molecule can be accessed using the attribute:
+    The underlying CDK Molecule can be accessed using the attribute:
        Molecule
     """
     _cinfony = True
@@ -264,16 +258,33 @@ class Molecule(object):
         return self.write()
 
     def addh(self):
+        """Add hydrogens."""        
         hAdder = cdk.tools.HydrogenAdder()
         hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
 
     def removeh(self):
+        """Remove hydrogens."""        
         # Don't create an instance of AtomContainerManipulator
         # as accessing removeHydrogens exposes a bug in JPype (reported)
         atommanip = cdk.tools.manipulator.AtomContainerManipulator
         self.Molecule = atommanip.removeHydrogens(self.Molecule)
 
-    def write(self, format="smi", filename=None, overwrite=False):       
+    def write(self, format="smi", filename=None, overwrite=False):
+        """Write the molecule to a file or return a string.
+        
+        Optional parameters:
+           format -- see the informats variable for a list of available
+                     output formats (default is "smi")
+           filename -- default is None
+           overwite -- if the output file already exists, should it
+                       be overwritten? (default is False)
+
+        If a filename is specified, the result is written to a file.
+        Otherwise, a string is returned containing the result.
+
+        To write multiple molecules to the same file you should use
+        the Outputfile class.
+        """        
         if format not in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
         if filename == None:
@@ -347,8 +358,23 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False, web=False,
+    def draw(self, show=True, filename=None, update=False,
              usecoords=False):
+        """Create a 2D depiction of the molecule.
+
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
+
+        OASA is used for depiction. Tkinter and Python
+        Imaging Library are required for image display.
+        """
+        web = False # Disable the use of ChemBioGrid web services
         writetofile = filename is not None
 
         if not usecoords:            
@@ -372,6 +398,12 @@ class Molecule(object):
                 filedes, filename = tempfile.mkstemp()
             if not web:
                 # Create OASA molecule
+                if not oasa:
+                    errormessage = ("OASA not found, but is required for 2D structure "
+                            "depiction. OASA is part of BKChem. "
+                            "See installation instructions for more "
+                            "information.")
+                    raise ImportError, errormessage                
                 mol = oasa.molecule()
                 atomnos = []
                 for newatom in newmol.atoms:
@@ -433,6 +465,12 @@ class Molecule(object):
                 if writetofile:
                     print >> open(filename, "wb"), imagedata
             if show:
+                if not tk:
+                    errormessage = ("Tkinter or Python Imaging "
+                                    "Library not found, but is required for image "
+                                    "display. See installation instructions for "
+                                    "more information.")
+                    raise ImportError, errormessage                    
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())

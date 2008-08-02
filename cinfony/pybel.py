@@ -115,19 +115,16 @@ def readstring(format, string):
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
-    
-    Although it's possible to write a single molecule to a file by
-    calling the write() method of a molecule, if multiple molecules
-    are to be written to the same file you should use the Outputfile
-    class.
-    
+   
     Required parameters:
        format - see the outformats variable for a list of available
                 output formats
        filename
+
     Optional parameters:
-       overwrite (default is False) -- if the output file already exists,
-                                       should it be overwritten?
+       overwite -- if the output file already exists, should it
+                   be overwritten? (default is False)
+                   
     Methods:
        write(molecule)
        close()
@@ -164,15 +161,11 @@ class Outputfile(object):
         self.filename = None
 
 class Molecule(object):
-    """Represent a Pybel molecule.
+    """Represent a Pybel Molecule.
 
     Required parameter:
-       OBMol -- an Open Babel OBMol
-       or
-       Molecule -- any type of Cinfony Molecule (e.g. one from cinfony.rdkit)
-
-    If a Cinfony Molecule is provided it will be converted into a Pybel Molecule.       
-    
+       OBMol -- an Open Babel OBMol or any type of cinfony Molecule
+ 
     Attributes:
        atoms, charge, conformers, data, dim, energy, exactmass, formula, 
        molwt, spin, sssr, title, unitcell.
@@ -182,7 +175,7 @@ class Molecule(object):
        addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
        write() 
       
-    The original Open Babel molecule can be accessed using the attribute:
+    The underlyin Open Babel molecule can be accessed using the attribute:
        OBMol
     """
     _cinfony = True
@@ -287,18 +280,21 @@ class Molecule(object):
         fingerprinter.GetFingerprint(self.OBMol, fp)
         return Fingerprint(fp)
 
-    def write(self, format="SMI", filename=None, overwrite=False):
+    def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
         
         Optional parameters:
-           format -- default is "SMI"
+           format -- see the informats variable for a list of available
+                     output formats (default is "smi")
            filename -- default is None
-           overwite -- default is False
+           overwite -- if the output file already exists, should it
+                       be overwritten? (default is False)
 
         If a filename is specified, the result is written to a file.
         Otherwise, a string is returned containing the result.
-        The overwrite flag is ignored if a filename is not specified.
-        It controls whether to overwrite an existing file.
+
+        To write multiple molecules to the same file you should use
+        the Outputfile class.
         """
         obconversion = ob.OBConversion()
         formatok = obconversion.SetOutFormat(format)
@@ -317,7 +313,8 @@ class Molecule(object):
         """Locally optimize the coordinates.
         
         Optional parameters:
-           forcefield -- default is "MMFF94"
+           forcefield -- default is "MMFF94". See the forcefields variable
+                         for a list of available forcefields.
            steps -- default is 500
 
         If the molecule does not have any coordinates, make3D() is
@@ -326,7 +323,7 @@ class Molecule(object):
         """
         
         if self.dim != 3:
-            self.make3D()
+            self.make3D(forcefield)
         ff = _forcefields[forcefield]
         ff.Setup(self.OBMol)
         ff.SteepestDescent(steps)
@@ -342,11 +339,12 @@ class Molecule(object):
 ##            ff.WeightedRotorSearch(numrots, int(math.log(numrots + 1) * steps))
 ##        ff.GetCoordinates(self.OBMol)
     
-    def make3D(self, forcefield="MMFF94", steps=50):
+    def make3D(self, forcefield = "MMFF94", steps = 50):
         """Generate 3D coordinates.
         
         Optional parameters:
-           forcefield -- default is "MMFF94"
+           forcefield -- default is "MMFF94". See the forcefields variable
+                         for a list of available forcefields.
            steps -- default is 50
 
         Once coordinates are generated, hydrogens are added and a quick

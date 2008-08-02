@@ -109,12 +109,59 @@ def readstring(format, string):
         raise IOError, "Failed to convert '%s' to format '%s'" % (
             string, format)
 
+class Outputfile(object):
+    """Represent a file to which *output* is to be sent.
+   
+    Required parameters:
+       format - see the outformats variable for a list of available
+                output formats
+       filename
+
+    Optional parameters:
+       overwite -- if the output file already exists, should it
+                   be overwritten? (default is False)
+                   
+    Methods:
+       write(molecule)
+       close()
+    """
+    def __init__(self, format, filename, overwrite=False):
+        self.format = format
+        self.filename = filename
+        if not overwrite and os.path.isfile(self.filename):
+            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
+        if format=="sdf":
+            self._writer = Chem.SDWriter(self.filename)
+        elif format=="smi":
+            self._writer = Chem.SmilesWriter(self.filename)
+        else:
+            raise ValueError,"%s is not a recognised RDKit format" % format
+        self.total = 0 # The total number of molecules written to the file
+    
+    def write(self, molecule):
+        """Write a molecule to the output file.
+        
+        Required parameters:
+           molecule
+        """
+        if not self.filename:
+            raise IOError, "Outputfile instance is closed."
+
+        self._writer.write(molecule.Mol)
+        self.total += 1
+
+    def close(self):
+        """Close the Outputfile to further writing."""
+        self.filename = None
+        self._writer.flush()
+        del self._writer
+
 class Molecule(object):
     """Represent an rdkit Molecule.
 
     Required parameter:
        Mol -- an RDKit Mol or any type of cinfony Molecule
-
+      
     Attributes:
        atoms, data, molwt, title
     
@@ -171,14 +218,17 @@ class Molecule(object):
         """Write the molecule to a file or return a string.
         
         Optional parameters:
-           format -- default is "smi"
+           format -- see the informats variable for a list of available
+                     output formats (default is "smi")
            filename -- default is None
-           overwite -- default is False
+           overwite -- if the output file already exists, should it
+                       be overwritten? (default is False)
 
         If a filename is specified, the result is written to a file.
         Otherwise, a string is returned containing the result.
-        The overwrite flag is ignored if a filename is not specified.
-        It controls whether to allow an existing file to be overwritten.
+
+        To write multiple molecules to the same file you should use
+        the Outputfile class.
         """
         format = format.lower()
         if filename:
@@ -317,10 +367,34 @@ class Molecule(object):
             Chem.SanitizeMol(self.Mol)
 
     def localopt(self, forcefield = "UFF", steps = 500):
+        """Locally optimize the coordinates.
+        
+        Optional parameters:
+           forcefield -- default is "UFF". See the forcefields variable
+                         for a list of available forcefields.
+           steps -- default is 500
+
+        If the molecule does not have any coordinates, make3D() is
+        called before the optimization.
+        """        
         forcefield = forcefield.lower()
+        if self.Mol.GetNumConformers() == 0:
+            self.make3D(forcefield)
         _forcefields[forcefield](self.Mol, maxIters = steps)
 
     def make3D(self, forcefield = "UFF", steps = 50):
+        """Generate 3D coordinates.
+        
+        Optional parameters:
+           forcefield -- default is "UFF". See the forcefields variable
+                         for a list of available forcefields.
+           steps -- default is 50
+
+        Once coordinates are generated, a quick
+        local optimization is carried out with 50 steps and the
+        UFF forcefield. Call localopt() if you want
+        to improve the coordinates further.
+        """        
         forcefield = forcefield.lower()
         success = AllChem.EmbedMolecule(self.Mol)
         if success == -1: # Failed
@@ -370,56 +444,6 @@ class Atom(object):
                                                     self.coords[1], self.coords[2])
         else:
             return "Atom: %d (no coords)" % (self.atomicnum)
-
-class Outputfile(object):
-    """Represent a file to which *output* is to be sent.
-    
-    Although it's possible to write a single molecule to a file by
-    calling the write() method of a molecule, if multiple molecules
-    are to be written to the same file you should use the Outputfile
-    class.
-    
-    Required parameters:
-       format - see the outformats variable for a list of available
-                output formats
-       filename
-    Optional parameters:
-       overwrite (default is False) -- if the output file already exists,
-                                       should it be overwritten?
-    Methods:
-       write(molecule)
-       close()
-    """
-    def __init__(self, format, filename, overwrite=False):
-        self.format = format
-        self.filename = filename
-        if not overwrite and os.path.isfile(self.filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
-        if format=="sdf":
-            self._writer = Chem.SDWriter(self.filename)
-        elif format=="smi":
-            self._writer = Chem.SmilesWriter(self.filename)
-        else:
-            raise ValueError,"%s is not a recognised RDKit format" % format
-        self.total = 0 # The total number of molecules written to the file
-    
-    def write(self, molecule):
-        """Write a molecule to the output file.
-        
-        Required parameters:
-           molecule
-        """
-        if not self.filename:
-            raise IOError, "Outputfile instance is closed."
-
-        self._writer.write(molecule.Mol)
-        self.total += 1
-
-    def close(self):
-        """Close the Outputfile to further writing."""
-        self.filename = None
-        self._writer.flush()
-        del self._writer
 
 class Smarts(object):
     """A Smarts Pattern Matcher
