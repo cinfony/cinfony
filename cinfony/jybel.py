@@ -159,7 +159,7 @@ class Outputfile(object):
         self.filename = None
 
 class Molecule(object):
-    """Represent a Pybel Molecule.
+    """Represent a Jybel Molecule.
 
     Required parameter:
        OBMol -- an Open Babel OBMol or any type of cinfony Molecule
@@ -365,7 +365,7 @@ class Molecule(object):
         return self.write()
 
 class Atom(object):
-    """Represent a Pybel atom.
+    """Represent a Jybel atom.
 
     Required parameter:
        OBAtom -- an Open Babel OBAtom

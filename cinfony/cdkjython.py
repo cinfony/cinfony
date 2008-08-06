@@ -466,7 +466,7 @@ class Fingerprint(object):
         return self.fp.toString()
 
 class Atom(object):
-    """Represent a cdkjpype Atom.
+    """Represent a cdkjython Atom.
 
     Required parameters:
        Atom -- a CDK Atom
