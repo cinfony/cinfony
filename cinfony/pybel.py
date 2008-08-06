@@ -34,19 +34,25 @@ def _formatstodict(list):
     return dict(broken)
 _obconv = ob.OBConversion()
 informats = _formatstodict(_obconv.GetSupportedInputFormat())
+"""A dictionary of supported input formats"""
 outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
+"""A dictionary of supported output formats"""
 
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
 
 descs = ['LogP', 'MR', 'TPSA']
+"""A list of supported descriptors"""
 _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
 fps = ['FP2', 'FP3', 'FP4']
+"""A list of supported fingerprint types"""
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
 forcefields = ['uff', 'mmff94', 'ghemical']
+"""A list of supported forcefields"""
 _forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
 operations = ['Gen3D']
+"""A list of supported operations"""
 _operations = _getplugins(ob.OBOp.FindType, operations)
 
 def readfile(format, filename):
@@ -410,7 +416,7 @@ class Molecule(object):
                          e)
         # I'm sure there's a more elegant way to do the following, but here goes...
         # let's set the stereochemistry around double bonds
-        self.write("smi") # Perceive UP/DOWNness
+        self.write("can") # Perceive UP/DOWNness
         for bond in ob.OBMolBondIter(self.OBMol):
             ends = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
             if bond.GetBO() == 2:
