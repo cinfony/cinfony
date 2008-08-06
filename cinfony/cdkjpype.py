@@ -53,17 +53,22 @@ def _getdescdict():
 
 _descdict = descdict = _getdescdict()
 descs = _descdict.keys()
+"""A list of supported descriptors"""
 fps = ["daylight", "graph"]
+"""A list of supported fingerprint types"""
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(x, _formats[x]) for x in ['smi', 'sdf', 'mol']])
+"""A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'smi': cdk.io.SMILESWriter,
                'sdf': cdk.io.MDLWriter}
 outformats = dict([(x, _formats[x]) for x in _outformats.keys()])
+"""A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
+"""A list of supported forcefields"""
 
 _isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
 

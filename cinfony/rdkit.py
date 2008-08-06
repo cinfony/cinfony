@@ -36,15 +36,20 @@ except ImportError:
     aggdraw = None
 
 fps = ['daylight', 'maccs', 'atompairs', 'torsions']
+"""A list of supported fingerprint types"""
 descs = descDict.keys()
+"""A list of supported descriptors"""
 
 _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
             'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
 informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
+"""A dictionary of supported input formats"""
 outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
+"""A dictionary of supported output formats"""
 
 _forcefields = {'uff': AllChem.UFFOptimizeMolecule}
 forcefields = _forcefields.keys()
+"""A list of supported forcefields"""
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.

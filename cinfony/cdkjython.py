@@ -1,4 +1,15 @@
 from __future__ import generators
+"""
+cdkjython - A Cinfony module for accessing the CDK from Jython
+
+Global variables:
+  cdk - the underlying CDK Java library (org.openscience.cdk)
+  informats - a dictionary of supported input formats
+  outformats - a dictionary of supported output formats
+  descs - a list of supported descriptors
+  fps - a list of supported fingerprint types
+  forcefields - a list of supported forcefields
+"""
 
 import os
 import urllib
@@ -22,17 +33,22 @@ def _getdescdict():
 
 _descdict = descdict = _getdescdict()
 descs = _descdict.keys()
+"""A list of supported descriptors"""
 fps = ["daylight", "graph"]
+"""A list of supported fingerprint types"""
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
-_informats = {'sdf': cdk.io.MDLV2000Reader}
-informats = dict([(x, _formats[x]) for x in ['smi', 'sdf']])
+_informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
+informats = dict([(x, _formats[x]) for x in ['smi', 'sdf', 'mol']])
+"""A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'smi': cdk.io.SMILESWriter,
                'sdf': cdk.io.MDLWriter}
 outformats = dict([(x, _formats[x]) for x in _outformats.keys()])
+"""A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
+"""A list of supported forcefields"""
 
 _isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
 
@@ -45,20 +61,21 @@ def readfile(format, filename):
     """Iterate over the molecules in a file.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        filename
 
-    You can access the first molecule in a file using:
+    You can access the first molecule in a file using the next() method
+    of the iterator:
         mol = readfile("smi", "myfile.smi").next()
         
     You can make a list of the molecules in a file using:
-        mols = [mol for mol in readfile("smi", "myfile.smi")]
+        mols = list(readfile("smi", "myfile.smi"))
         
     You can iterate over the molecules in a file as shown in the
-    following code snippet...
-
+    following code snippet:
     >>> atomtotal = 0
-    >>> for mol in readfile("sdf","head.sdf"):
+    >>> for mol in readfile("sdf", "head.sdf"):
     ...     atomtotal += len(mol.atoms)
     ...
     >>> print atomtotal
@@ -76,8 +93,10 @@ def readfile(format, filename):
             java.io.FileInputStream(java.io.File(filename)), builder):
             yield Molecule(mol)
     elif format in informats:
-        reader = _informats[informats(format)]
-        yield Molecule(reader(open(filename), builder))
+        reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
+        chemfile = reader.read(cdk.ChemFile())
+        manip = cdk.tools.manipulator.ChemFileManipulator
+        return iter(Molecule(manip.getAllAtomContainers(chemfile)[0]),)
     else:
         raise ValueError,"%s is not a recognised CDK format" % format
 
@@ -85,11 +104,13 @@ def readstring(format, string):
     """Read in a molecule from a string.
 
     Required parameters:
-       format
+       format - see the informats variable for a list of available
+                input formats
        string
 
+    Example:
     >>> input = "C1=CC=CS1"
-    >>> mymol = readstring("smi",input)
+    >>> mymol = readstring("smi", input)
     >>> len(mymol.atoms)
     5
     """
@@ -110,20 +131,19 @@ def readstring(format, string):
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
-    
-    Although it's possible to write a single molecule to a file by
-    calling the write() method of a molecule, if multiple molecules
-    are to be written to the same file you should use the Outputfile
-    class.
-    
+   
     Required parameters:
-       format
+       format - see the outformats variable for a list of available
+                output formats
        filename
+
     Optional parameters:
-       overwrite (default is False) -- if the output file already exists,
-                                       should it be overwritten?
+       overwite -- if the output file already exists, should it
+                   be overwritten? (default is False)
+                   
     Methods:
        write(molecule)
+       close()
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format
@@ -160,15 +180,15 @@ class Molecule(object):
     """Represent a cdkjython Molecule.
 
     Required parameters:
-       Molecule -- a CDK Molecule
-    
+       Molecule -- a CDK Molecule or any type of cinfony Molecule
+
     Attributes:
        atoms, data, formula, molwt, title
     
     Methods:
        addh(), calcfp(), calcdesc(), draw(), removeh(), write()
       
-    The original CDK Molecule can be accessed using the attribute:
+    The underlying CDK Molecule can be accessed using the attribute:
        Molecule
     """
     _cinfony = True
@@ -221,14 +241,31 @@ class Molecule(object):
         return self.write()
 
     def addh(self):
+        """Add hydrogens."""        
         hAdder = cdk.tools.HydrogenAdder()
         hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
 
     def removeh(self):
+        """Remove hydrogens."""        
         atommanip = cdk.tools.manipulator.AtomContainerManipulator
         self.Molecule = atommanip.removeHydrogens(self.Molecule)
 
-    def write(self, format="smi", filename=None, overwrite=False):       
+    def write(self, format="smi", filename=None, overwrite=False):
+        """Write the molecule to a file or return a string.
+        
+        Optional parameters:
+           format -- see the informats variable for a list of available
+                     output formats (default is "smi")
+           filename -- default is None
+           overwite -- if the output file already exists, should it
+                       be overwritten? (default is False)
+
+        If a filename is specified, the result is written to a file.
+        Otherwise, a string is returned containing the result.
+
+        To write multiple molecules to the same file you should use
+        the Outputfile class.
+        """        
         if format not in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
         if filename == None:
@@ -249,6 +286,13 @@ class Molecule(object):
             return writer.toString()
 
     def calcfp(self, fp="daylight"):
+        """Calculate a molecular fingerprint.
+        
+        Optional parameters:
+           fptype -- the fingerprint type (default is "daylight"). See the
+                     fps variable for a list of of available fingerprint
+                     types.
+        """        
         # if fp == "substructure":
         #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
         #        cdk.fingerprint.StandardSubstructureSets.getFunctionalGroupSubstructureSet()
@@ -268,8 +312,9 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, all available descriptors are calculated.
-        See descs for the list of descriptor names.
+        If descnames is not specified, all available descriptors are
+        calculated. See the descs variable for a list of available
+        descriptors.
         """
         if not descnames:
             descnames = descs
@@ -303,7 +348,19 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False, usecoords=False):
+    def draw(self, show=True, filename=None, update=False,
+             usecoords=False):
+        """Create a 2D depiction of the molecule.
+
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
+        """
         mol = Molecule(self.Molecule.clone())
         cdk.aromaticity.HueckelAromaticityDetector.detectAromaticity(mol.Molecule)
         
@@ -379,10 +436,10 @@ class Fingerprint(object):
     """A Molecular Fingerprint.
     
     Required parameters:
-       obFingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+       fingerprint -- a vector calculated by one of the fingerprint methods
 
     Attributes:
-       fp -- the original obFingerprint
+       fp -- the underlying fingerprint object
        bits -- a list of bits set in the Fingerprint
 
     Methods:
@@ -420,6 +477,7 @@ class Atom(object):
     The original CDK Atom can be accessed using the attribute:
        Atom
     """
+
     def __init__(self, Atom):
         self.Atom = Atom
         
@@ -442,51 +500,45 @@ class Atom(object):
     formalcharge = property(formalcharge)
 
     def __str__(self):
-        """Create a string representation of the atom.
-
-        >>> a = Atom()
-        >>> print a
-        Atom: 0 (0.0, 0.0, 0.0)
-        """
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
-class Smarts(object):
-    """A Smarts Pattern Matcher
-
-    Required parameters:
-       smartspattern
-    
-    Methods:
-       findall()
-    
-    Example:
-    >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
-    >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
-    >>> print smarts.findall(mol) 
-    [(1, 2), (4, 5), (6, 7)]
-    """
-    def __init__(self, smartspattern):
-        """Initialise with a SMARTS pattern."""
-        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
-        
-    def findall(self, molecule):
-        """Find all matches of the SMARTS pattern to a particular molecule.
-        
-        Required parameters:
-           molecule
-        """
-        match = self.smarts.matches(molecule.Molecule)
-        return list(self.smarts.getUniqueMatchingAtoms())
+##class Smarts(object):
+##    """A Smarts Pattern Matcher
+##
+##    Required parameters:
+##       smartspattern
+##    
+##    Methods:
+##       findall()
+##    
+##    Example:
+##    >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
+##    >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
+##    >>> print smarts.findall(mol) 
+##    [(1, 2), (4, 5), (6, 7)]
+##    """
+##    def __init__(self, smartspattern):
+##        """Initialise with a SMARTS pattern."""
+##        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
+##        
+##    def findall(self, molecule):
+##        """Find all matches of the SMARTS pattern to a particular molecule.
+##        
+##        Required parameters:
+##           molecule
+##        """
+##        match = self.smarts.matches(molecule.Molecule)
+##        return list(self.smarts.getUniqueMatchingAtoms())
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
     
     Required parameters:
-      obmol -- an Open Babel OBMol 
+      Molecule -- a CDK Molecule
 
     Methods and accessor methods are like those of a dictionary except
-    that the data is retrieved on-the-fly from the underlying OBMol.
+    that the data is retrieved on-the-fly from the underlying Molecule.
 
     Example:
     >>> mol = readfile("sdf", 'head.sdf').next()
@@ -506,8 +558,8 @@ class MoleculeData(object):
     >>> print len(data), data.keys(), data.has_key("NSC")
     1 ['Comment'] False
     """
-    def __init__(self, mol):
-        self._mol = mol
+    def __init__(self, Molecule):
+        self._mol = Molecule
     def _data(self):
         return self._mol.getProperties()
     def _testforkey(self, key):

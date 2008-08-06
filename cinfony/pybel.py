@@ -181,7 +181,7 @@ class Molecule(object):
        addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
        write() 
       
-    The underlyin Open Babel molecule can be accessed using the attribute:
+    The underlying Open Babel molecule can be accessed using the attribute:
        OBMol
     """
     _cinfony = True
