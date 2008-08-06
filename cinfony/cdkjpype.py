@@ -307,6 +307,13 @@ class Molecule(object):
             return str(writer.toString())
 
     def calcfp(self, fp="daylight"):
+        """Calculate a molecular fingerprint.
+        
+        Optional parameters:
+           fptype -- the fingerprint type (default is "daylight"). See the
+                     fps variable for a list of of available fingerprint
+                     types.
+        """        
         # if fp == "substructure":
         #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
         #        cdk.fingerprint.StandardSubstructureSets.getFunctionalGroupSubstructureSet()
@@ -326,8 +333,9 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, all available descriptors are calculated.
-        See descs for the list of descriptor names.
+        If descnames is not specified, all available descriptors are
+        calculated. See the descs variable for a list of available
+        descriptors.
         """
         if not descnames:
             descnames = descs
@@ -528,10 +536,10 @@ class Fingerprint(object):
     """A Molecular Fingerprint.
     
     Required parameters:
-       obFingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+       fingerprint -- a vector calculated by one of the fingerprint methods
 
     Attributes:
-       fp -- the original obFingerprint
+       fp -- the underlying fingerprint object
        bits -- a list of bits set in the Fingerprint
 
     Methods:

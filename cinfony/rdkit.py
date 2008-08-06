@@ -35,7 +35,7 @@ try:
 except ImportError:
     aggdraw = None
 
-fps = ['Daylight', 'MACCS', 'atompairs', 'torsions']
+fps = ['daylight', 'maccs', 'atompairs', 'torsions']
 descs = descDict.keys()
 
 _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
@@ -43,7 +43,7 @@ _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
 informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
 outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
 
-_forcefields = {'UFF': AllChem.UFFOptimizeMolecule}
+_forcefields = {'uff': AllChem.UFFOptimizeMolecule}
 forcefields = _forcefields.keys()
 
 def readfile(format, filename):
@@ -265,9 +265,9 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, the full list of RDKit
-        descriptors is calculated. See rdkit.descs for a list
-        of available descriptors.
+        If descnames is not specified, all available descriptors are
+        calculated. See the descs variable for a list of available
+        descriptors.
         """
         if not descnames:
             descnames = descs
@@ -280,15 +280,13 @@ class Molecule(object):
             ans[descname] = desc(self.Mol)
         return ans
 
-    def calcfp(self, fptype="Daylight"):
+    def calcfp(self, fptype="daylight"):
         """Calculate a molecular fingerprint.
         
         Optional parameters:
-           fptype -- the name of the Open Babel fingerprint type.
-
-        If fptype is not specified, the FP2 fingerprint type
-        is used. See the Open Babel library documentation for more
-        details.
+           fptype -- the fingerprint type (default is "daylight"). See the
+                     fps variable for a list of of available fingerprint
+                     types.
         """
         fptype = fptype.lower()
         if fptype=="daylight":
@@ -366,11 +364,11 @@ class Molecule(object):
                 root.mainloop()
             Chem.SanitizeMol(self.Mol)
 
-    def localopt(self, forcefield = "UFF", steps = 500):
+    def localopt(self, forcefield = "uff", steps = 500):
         """Locally optimize the coordinates.
         
         Optional parameters:
-           forcefield -- default is "UFF". See the forcefields variable
+           forcefield -- default is "uff". See the forcefields variable
                          for a list of available forcefields.
            steps -- default is 500
 
@@ -382,11 +380,11 @@ class Molecule(object):
             self.make3D(forcefield)
         _forcefields[forcefield](self.Mol, maxIters = steps)
 
-    def make3D(self, forcefield = "UFF", steps = 50):
+    def make3D(self, forcefield = "uff", steps = 50):
         """Generate 3D coordinates.
         
         Optional parameters:
-           forcefield -- default is "UFF". See the forcefields variable
+           forcefield -- default is "uff". See the forcefields variable
                          for a list of available forcefields.
            steps -- default is 50
 
@@ -542,11 +540,11 @@ class MoleculeData(object):
 class Fingerprint(object):
     """A Molecular Fingerprint.
     
-    Required parameters: # FIXME
-       fingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+    Required parameters:
+       fingerprint -- a vector calculated by one of the fingerprint methods
 
     Attributes:
-       fp -- the original fingerprint
+       fp -- the underlying fingerprint object
        bits -- a list of bits set in the Fingerprint
 
     Methods:

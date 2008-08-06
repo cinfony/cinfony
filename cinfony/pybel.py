@@ -44,7 +44,7 @@ descs = ['LogP', 'MR', 'TPSA']
 _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
 fps = ['FP2', 'FP3', 'FP4']
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
-forcefields = ['UFF', 'MMFF94', 'Ghemical']
+forcefields = ['uff', 'mmff94', 'ghemical']
 _forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
 operations = ['Gen3D']
 _operations = _getplugins(ob.OBOp.FindType, operations)
@@ -247,9 +247,9 @@ class Molecule(object):
         Optional parameter:
            descnames -- a list of names of descriptors
 
-        If descnames is not specified, the full list of Open Babel
-        descriptors is calculated. See the descs variable for a list
-        of available descriptors.
+        If descnames is not specified, all available descriptors are
+        calculated. See the descs variable for a list of available
+        descriptors.
         """
         if not descnames:
             descnames = descs
@@ -266,11 +266,9 @@ class Molecule(object):
         """Calculate a molecular fingerprint.
         
         Optional parameters:
-           fptype -- the name of the Open Babel fingerprint type.
-
-        If fptype is not specified, the FP2 fingerprint type
-        is used. See the fps variable for a list of available
-        fingerprints.
+           fptype -- the fingerprint type (default is "FP2"). See the
+                     fps variable for a list of of available fingerprint
+                     types.
         """
         fp = ob.vectorUnsignedInt()
         try:
@@ -309,11 +307,11 @@ class Molecule(object):
         else:
             return obconversion.WriteString(self.OBMol)
 
-    def localopt(self, forcefield="MMFF94", steps=500):
+    def localopt(self, forcefield="mmff94", steps=500):
         """Locally optimize the coordinates.
         
         Optional parameters:
-           forcefield -- default is "MMFF94". See the forcefields variable
+           forcefield -- default is "mmff94". See the forcefields variable
                          for a list of available forcefields.
            steps -- default is 500
 
@@ -321,7 +319,7 @@ class Molecule(object):
         called before the optimization. Note that the molecule needs
         to have explicit hydrogens. If not, call addh().
         """
-        
+        forcefield = forcefield.lower()
         if self.dim != 3:
             self.make3D(forcefield)
         ff = _forcefields[forcefield]
@@ -339,11 +337,11 @@ class Molecule(object):
 ##            ff.WeightedRotorSearch(numrots, int(math.log(numrots + 1) * steps))
 ##        ff.GetCoordinates(self.OBMol)
     
-    def make3D(self, forcefield = "MMFF94", steps = 50):
+    def make3D(self, forcefield = "mmff94", steps = 50):
         """Generate 3D coordinates.
         
         Optional parameters:
-           forcefield -- default is "MMFF94". See the forcefields variable
+           forcefield -- default is "mmff94". See the forcefields variable
                          for a list of available forcefields.
            steps -- default is 50
 
@@ -352,6 +350,7 @@ class Molecule(object):
         MMFF94 forcefield. Call localopt() if you want
         to improve the coordinates further.
         """
+        forcefield = forcefield.lower()
         _operations['Gen3D'].Do(self.OBMol)
         self.addh()
         self.localopt(forcefield, steps)
@@ -579,10 +578,10 @@ class Fingerprint(object):
     """A Molecular Fingerprint.
     
     Required parameters:
-       obFingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+       fingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
 
     Attributes:
-       fp -- the original obFingerprint
+       fp -- the underlying fingerprint object
        bits -- a list of bits set in the Fingerprint
 
     Methods:
@@ -590,8 +589,8 @@ class Fingerprint(object):
        given two Fingerprints 'a', and 'b', the Tanimoto coefficient is given by:
           tanimoto = a | b
     """
-    def __init__(self, obFingerprint):
-        self.fp = obFingerprint
+    def __init__(self, fingerprint):
+        self.fp = fingerprint
     def __or__(self, other):
         return ob.OBFingerprint.Tanimoto(self.fp, other.fp)
     @property
