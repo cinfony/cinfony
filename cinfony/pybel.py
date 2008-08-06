@@ -497,9 +497,9 @@ class Atom(object):
        OBAtom -- an Open Babel OBAtom
         
     Attributes:
-       atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
+       atomicmass, atomicnum, cidx, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
-       implicitvalence, index, isotope, partialcharge, spin, type,
+       implicitvalence, isotope, partialcharge, spin, type,
        valence, vector.
 
     (refer to the Open Babel library documentation for more info).
@@ -550,7 +550,6 @@ class Atom(object):
     def vector(self): return self.OBAtom.GetVector()
 
     def __str__(self):
-        """Create a string representation of the Atom."""
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 

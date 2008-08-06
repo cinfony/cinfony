@@ -600,47 +600,45 @@ class Atom(object):
         return self.Atom.getFormalCharge()
 
     def __str__(self):
-        """Create a string representation of the atom.
-        """
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
-class Smarts(object):
-    """A Smarts Pattern Matcher
-
-    Required parameters:
-       smartspattern
-    
-    Methods:
-       findall()
-    
-    Example:
-    >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
-    >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
-    >>> print smarts.findall(mol) 
-    [(1, 2), (4, 5), (6, 7)]
-    """
-    def __init__(self, smartspattern):
-        """Initialise with a SMARTS pattern."""
-        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
-        
-    def findall(self, molecule):
-        """Find all matches of the SMARTS pattern to a particular molecule.
-        
-        Required parameters:
-           molecule
-        """
-        match = self.smarts.matches(molecule.Molecule)
-        return list(self.smarts.getUniqueMatchingAtoms())
+##class Smarts(object):
+##    """A Smarts Pattern Matcher
+##
+##    Required parameters:
+##       smartspattern
+##    
+##    Methods:
+##       findall()
+##    
+##    Example:
+##    >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
+##    >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
+##    >>> print smarts.findall(mol) 
+##    [(1, 2), (4, 5), (6, 7)]
+##    """
+##    def __init__(self, smartspattern):
+##        """Initialise with a SMARTS pattern."""
+##        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
+##        
+##    def findall(self, molecule):
+##        """Find all matches of the SMARTS pattern to a particular molecule.
+##        
+##        Required parameters:
+##           molecule
+##        """
+##        match = self.smarts.matches(molecule.Molecule)
+##        return list(self.smarts.getUniqueMatchingAtoms())
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
     
     Required parameters:
-      obmol -- an Open Babel OBMol 
+      Molecule -- a CDK Molecule
 
     Methods and accessor methods are like those of a dictionary except
-    that the data is retrieved on-the-fly from the underlying OBMol.
+    that the data is retrieved on-the-fly from the underlying Molecule.
 
     Example:
     >>> mol = readfile("sdf", 'head.sdf').next()
@@ -660,8 +658,8 @@ class MoleculeData(object):
     >>> print len(data), data.keys(), data.has_key("NSC")
     1 ['Comment'] False
     """
-    def __init__(self, mol):
-        self._mol = mol
+    def __init__(self, Molecule):
+        self._mol = Molecule
     def _data(self):
         return self._mol.getProperties()
     def _testforkey(self, key):

@@ -431,12 +431,6 @@ class Atom(object):
     def formalcharge(self): return self.Atom.GetFormalCharge()
 
     def __str__(self):
-        """Create a string representation of the atom.
-
-        >>> a = Atom()
-        >>> print a
-        Atom: 0 (0.0, 0.0, 0.0)
-        """
         if hasattr(self, "coords"):
             return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, self.coords[0],
                                                     self.coords[1], self.coords[2])
@@ -457,6 +451,10 @@ class Smarts(object):
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
     >>> print smarts.findall(mol) 
     [(0, 1), (3, 4), (5, 6)]
+
+    The numbers returned are the indices (starting from 0) of the atoms
+    that match the SMARTS pattern. In this case, there are three matches
+    for each of the three ethyl groups in the molecule.
     """
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
@@ -476,7 +474,7 @@ class MoleculeData(object):
     """Store molecule data in a dictionary-type object
     
     Required parameters:
-      obmol -- an RDKit Mol 
+      Mol -- an RDKit Mol 
 
     Methods and accessor methods are like those of a dictionary except
     that the data is retrieved on-the-fly from the underlying Mol.
