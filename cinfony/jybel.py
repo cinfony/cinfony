@@ -9,6 +9,7 @@ Global variables:
   fps - a list of supported fingerprint types
   forcefields - a list of supported forcefields
 """
+from __future__ import generators
 
 import math
 import os.path

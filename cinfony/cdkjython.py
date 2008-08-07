@@ -1,4 +1,3 @@
-from __future__ import generators
 """
 cdkjython - A Cinfony module for accessing the CDK from Jython
 
@@ -10,6 +9,7 @@ Global variables:
   fps - a list of supported fingerprint types
   forcefields - a list of supported forcefields
 """
+from __future__ import generators
 
 import os
 import urllib
@@ -96,7 +96,7 @@ def readfile(format, filename):
         reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
         chemfile = reader.read(cdk.ChemFile())
         manip = cdk.tools.manipulator.ChemFileManipulator
-        return iter(Molecule(manip.getAllAtomContainers(chemfile)[0]),)
+        yield Molecule(manip.getAllAtomContainers(chemfile)[0])
     else:
         raise ValueError,"%s is not a recognised CDK format" % format
 

@@ -1,0 +1,38 @@
+<html><head><title>Epydoc Redirect Page</title>
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="pragma" content="no-cache" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+<!--
+var pages = ["cinfony.cdkjython.MoleculeData-c", "cinfony.cdkjpype.MoleculeData-c", "cinfony.cdkjython.Fingerprint-c", "cinfony.cdkjpype.Fingerprint-c", "cinfony.cdkjython.Outputfile-c", "cinfony.cdkjpype.Outputfile-c", "cinfony.cdkjython.Molecule-c", "cinfony.jybel.MoleculeData-c", "cinfony.pybel.MoleculeData-c", "cinfony.rdkit.MoleculeData-c", "cinfony.cdkjpype.Molecule-c", "cinfony.jybel.Fingerprint-c", "cinfony.pybel.Fingerprint-c", "cinfony.rdkit.Fingerprint-c", "cinfony.jybel.Outputfile-c", "cinfony.pybel.Outputfile-c", "cinfony.rdkit.Outputfile-c", "cinfony.cdkjython.Atom-c", "cinfony.jybel.Molecule-c", "cinfony.pybel.Molecule-c", "cinfony.rdkit.Molecule-c", "cinfony.cdkjpype.Atom-c", "cinfony.jybel.Smarts-c", "cinfony.pybel.Smarts-c", "cinfony.rdkit.Smarts-c", "cinfony.jybel.Atom-c", "cinfony.pybel.Atom-c", "cinfony.rdkit.Atom-c", "cinfony.cdkjython-m", "cinfony.cdkjpype-m", "cinfony.obabel-m", "cinfony.jybel-m", "cinfony.pybel-m", "cinfony.rdkit-m", "cinfony.cdk-m", "cinfony-m"];
+var dottedName = get_anchor();
+if (dottedName) {
+    var target = redirect_url(dottedName);
+    if (target) window.location.replace(target);
+}
+// -->
+</script>
+
+<h3>Epydoc Auto-redirect page</h3>
+
+<p>When javascript is enabled, this page will redirect URLs of
+the form <tt>redirect.html#<i>dotted.name</i></tt> to the
+documentation for the object with the given fully-qualified
+dotted name.</p>
+<p><a id="message"> &nbsp; </a></p>
+
+<script type="text/javascript">
+<!--
+if (dottedName) {
+    var msg = document.getElementById("message");
+    msg.innerHTML = "No documentation found for <tt>"+
+                    dottedName+"</tt>";
+}
+// -->
+</script>
+
+</body>
+</html>
