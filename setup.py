@@ -23,7 +23,7 @@ Topic :: Software Development :: Libraries :: Python Modules
 from distutils.core import setup
 setup(
     name = "cinfony",
-    version = "0.1",
+    version = "0.8",
     url = "http://code.googlecode.com/p/cinfony",
     author = "Noel O'Boyle",
     author_email = "baoilleach@gmail.com",
@@ -34,9 +34,6 @@ setup(
     long_description = "\n".join(doclines[2:]),      
     classifiers = filter(None, classifiers.split("\n")),
     platforms = ["Any."],
-#    scripts = ["src/scripts/ccget", "src/scripts/cda"],
-#    package_dir = {'':'cinfony'},
     packages = ['cinfony'],
-#    packages = cclib_packages,
     )
 
