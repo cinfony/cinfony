@@ -329,7 +329,9 @@ class Molecule(object):
         if self.dim != 3:
             self.make3D(forcefield)
         ff = _forcefields[forcefield]
-        ff.Setup(self.OBMol)
+        success = ff.Setup(self.OBMol)
+        if not success:
+            return
         ff.SteepestDescent(steps)
         ff.GetCoordinates(self.OBMol)
     
