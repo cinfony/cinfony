@@ -5,6 +5,8 @@ import unittest
 pybel = obpybel = rdkit = cdk = jybel = None
 if sys.platform[:4] == "java":
     from cinfony import cdk, jybel
+elif sys.platform[:3] == "cli":
+    from cinfony import ironable
 else:
     try:
         from cinfony import cdk, pybel, rdkit
@@ -399,6 +401,9 @@ class TestJybel(TestPybel):
         """No creating a 2D depiction"""
         pass
 
+class TestIronable(TestJybel):
+    toolkit = ironable
+
 class TestRDKit(TestToolkit):
     toolkit = rdkit
     tanimotoresult = 1/3.
@@ -455,6 +460,9 @@ if __name__=="__main__":
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         testcases = [TestCDK, TestJybel]
+    elif sys.platform[:3] == "cli":
+        lookup['obabel'] = TestIronable
+        testcases = [TestIronable]
     if len(sys.argv) > 1:
         testcases = [lookup[x] for x in sys.argv[1:]]
 
