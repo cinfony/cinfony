@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 
-pybel = obpybel = rdkit = cdk = jybel = None
+pybel = obpybel = ironable = rdkit = cdk = jybel = None
 if sys.platform[:4] == "java":
     from cinfony import cdk, jybel
 elif sys.platform[:3] == "cli":
@@ -134,7 +134,6 @@ class TestToolkit(myTestCase):
         """Get the values of the properties."""
         # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
         # Only OpenBabel has a working exactmass
-        # CDK doesn't include implicit Hs when calculating the molwt
         self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
@@ -444,10 +443,8 @@ class TestCDK(TestToolkit):
         """Get the values of the properties."""
         # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
         # Only OpenBabel has a working exactmass
-        # CDK doesn't include implicit Hs when calculating the molwt
-        self.mols[0].addh()
         self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
-        self.assertEqual(len(self.mols[0].atoms), 14)
+        self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
 if __name__=="__main__":

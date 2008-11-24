@@ -215,7 +215,11 @@ class Molecule(object):
     data = property(data)
     def formula(self): return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
     formula = property(formula)
-    def molwt(self): return cdk.tools.MFAnalyser(self.Molecule).getCanonicalMass()
+    def molwt(self):
+        # Clone it to add hydrogens
+        clone = self.Molecule.clone()
+        Molecule(clone).addh()
+        return cdk.tools.MFAnalyser(clone).getCanonicalMass()
     molwt = property(molwt)
     def _gettitle(self): return self.Molecule.getProperty(cdk.CDKConstants.TITLE)
     def _settitle(self, val): self.Molecule.setProperty(cdk.CDKConstants.TITLE, val)
