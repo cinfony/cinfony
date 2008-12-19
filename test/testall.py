@@ -2,18 +2,18 @@ import os
 import sys
 import unittest
 
-pybel = obpybel = ironable = rdkit = cdk = jybel = None
+ironable = rdkit = cdk = None
 if sys.platform[:4] == "java":
-    from cinfony import cdk, jybel
+    from cinfony import cdk, obabel
 elif sys.platform[:3] == "cli":
     from cinfony import ironable
 else:
     try:
-        from cinfony import cdk, pybel, rdkit
+        from cinfony import cdk, obabel, rdkit
     except ImportError:
         pass
     try:
-        import pybel as obpybel
+        import pybel as obabel
     except ImportError:
         pass
 
@@ -333,8 +333,8 @@ Energy = 0
         self.mols[0].removeh()
         self.assertEqual(len(self.mols[0].atoms),4)
         
-class TestPybel(TestToolkit):
-    toolkit = pybel
+class TestOBabel(TestToolkit):
+    toolkit = obabel
     tanimotoresult = 1/3.
     Ndescs = 3
     Natoms = 15
@@ -387,11 +387,7 @@ class TestPybel(TestToolkit):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
-class TestOBPybel(TestPybel):
-    toolkit = obpybel
-
-class TestJybel(TestPybel):
-    toolkit = jybel
+class TestJybel(TestOBabel):
     def testDrawdependencies(self):
         "No testing the draw dependencies"
         pass
@@ -452,8 +448,8 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    lookup = {'cdk': TestCDK, 'obabel':TestPybel, 'rdkit':TestRDKit}
-    testcases = [TestPybel, TestCDK, TestRDKit]
+    lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdkit':TestRDKit}
+    testcases = [TestOBabel, TestCDK, TestRDKit]
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         testcases = [TestCDK, TestJybel]
