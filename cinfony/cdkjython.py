@@ -9,8 +9,6 @@ Global variables:
   fps - a list of supported fingerprint types
   forcefields - a list of supported forcefields
 """
-from __future__ import generators
-
 import os
 import urllib
 import tempfile
@@ -44,7 +42,7 @@ informats = dict([(x, _formats[x]) for x in ['smi', 'sdf', 'mol']])
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'smi': cdk.io.SMILESWriter,
-               'sdf': cdk.io.MDLWriter}
+               'sdf': cdk.io.SDFWriter}
 outformats = dict([(x, _formats[x]) for x in _outformats.keys()])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
@@ -85,18 +83,20 @@ def readfile(format, filename):
         raise IOError, "No such file: '%s'" % filename
     builder = cdk.DefaultChemObjectBuilder.getInstance()
     if format=="sdf":
-        for mol in cdk.io.iterator.IteratingMDLReader(
-            java.io.FileInputStream(java.io.File(filename)), builder):
-            yield Molecule(mol)
+        return (Molecule(mol) for mol in cdk.io.iterator.IteratingMDLReader(
+               java.io.FileInputStream(java.io.File(filename)),
+               builder)
+               )
     elif format=="smi":
-        for mol in cdk.io.iterator.IteratingSmilesReader(
-            java.io.FileInputStream(java.io.File(filename)), builder):
-            yield Molecule(mol)
+        return (Molecule(mol) for mol in cdk.io.iterator.IteratingSmilesReader(
+            java.io.FileInputStream(java.io.File(filename)),
+            builder
+            ))
     elif format in informats:
         reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
         chemfile = reader.read(cdk.ChemFile())
         manip = cdk.tools.manipulator.ChemFileManipulator
-        yield Molecule(manip.getAllAtomContainers(chemfile)[0])
+        return iter(Molecule(manip.getAllAtomContainers(chemfile)[0]),)
     else:
         raise ValueError,"%s is not a recognised CDK format" % format
 
@@ -164,8 +164,6 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-        if self.format == "sdf":
-            self._molwriter.setSdFields(molecule.Molecule.getProperties())
         self._molwriter.write(molecule.Molecule)
         self.total += 1
 
@@ -183,7 +181,7 @@ class Molecule(object):
        Molecule -- a CDK Molecule or any type of cinfony Molecule
 
     Attributes:
-       atoms, data, formula, molwt, title
+       atoms, data, exactmass, formula, molwt, title
     
     Methods:
        addh(), calcfp(), calcdesc(), draw(), removeh(), write()
@@ -205,32 +203,38 @@ class Molecule(object):
             
         self.Molecule = Molecule
         
+    @property
     def atoms(self): return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
-    atoms = property(atoms)
-##        elif attr == 'exactmass':
-              # Is supposed to use the most abundant isotope but
-              # actually uses the next most abundant
-##            return cdk.tools.MFAnalyser(self.Molecule).getMass()
+    @property
     def data(self): return MoleculeData(self.Molecule)
-    data = property(data)
-    def formula(self): return cdk.tools.MFAnalyser(self.Molecule).getMolecularFormula()
-    formula = property(formula)
+    @property
+    def formula(self):
+        manip = cdk.tools.manipulator.MolecularFormulaManipulator
+        mf = manip.getMolecularFormula(self.Molecule)
+        return manip.getString(mf) # GetHillString
+    @property
+    def exactmass(self):
+        clone = Molecule(self.Molecule.clone())
+        clone.addh()
+        manip = cdk.tools.manipulator.MolecularFormulaManipulator
+        mf = manip.getMolecularFormula(clone.Molecule)
+        return manip.getMajorIsotopeMass(mf)
+    @property
     def molwt(self):
-        # Clone it to add hydrogens
-        clone = self.Molecule.clone()
-        Molecule(clone).addh()
-        return cdk.tools.MFAnalyser(clone).getCanonicalMass()
-    molwt = property(molwt)
+        clone = Molecule(self.Molecule.clone())
+        clone.addh()
+        atommanip = cdk.tools.manipulator.AtomContainerManipulator
+        return atommanip.getNaturalExactMass(clone.Molecule)
     def _gettitle(self): return self.Molecule.getProperty(cdk.CDKConstants.TITLE)
     def _settitle(self, val): self.Molecule.setProperty(cdk.CDKConstants.TITLE, val)
     title = property(_gettitle, _settitle)
+    @property
     def _exchange(self):
         gt = cdk.geometry.GeometryTools
         if gt.has2DCoordinates(self.Molecule) or gt.has3DCoordinates(self.Molecule):
             return (1, self.write("mol"))
         else:
             return (0, self.write("smi"))
-    _exchange = property(_exchange)
     
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
@@ -245,9 +249,9 @@ class Molecule(object):
         return self.write()
 
     def addh(self):
-        """Add hydrogens."""        
-        hAdder = cdk.tools.HydrogenAdder()
-        hAdder.addExplicitHydrogensToSatisfyValency(self.Molecule)
+        """Add hydrogens."""
+        atommanip = cdk.tools.manipulator.AtomContainerManipulator
+        atommanip.convertImplicitToExplicitHydrogens(self.Molecule)
 
     def removeh(self):
         """Remove hydrogens."""        
@@ -323,20 +327,13 @@ class Molecule(object):
         if not descnames:
             descnames = descs
         ans = {}
-        # Clone it to add hydrogens
-        clone = self.Molecule.clone()
-        Molecule(clone).addh()
         for descname in descnames:
-            # Clone it to workaround CDK1.0.2 bug where
-            # different descriptor calculations are not
-            # independent (should be fixed for next release)
-            cloneagain = clone.clone()
             try:
                 desc = _descdict[descname]
             except KeyError:
                 raise ValueError, "%s is not a recognised CDK descriptor type" % descname
             try:
-                value = desc.calculate(cloneagain).getValue()
+                value = desc.calculate(self.Molecule).getValue()
                 if hasattr(value, "get"): # Instead of array
                     for i in range(value.length()):
                         ans[descname + ".%d" % i] = value.get(i)
@@ -366,7 +363,7 @@ class Molecule(object):
                        the current coordinates (default is False)
         """
         mol = Molecule(self.Molecule.clone())
-        cdk.aromaticity.HueckelAromaticityDetector.detectAromaticity(mol.Molecule)
+        cdk.aromaticity.CDKHueckelAromaticityDetector.detectAromaticity(mol.Molecule)
         
         if not usecoords:            
             # Do the SDG
@@ -485,10 +482,11 @@ class Atom(object):
     def __init__(self, Atom):
         self.Atom = Atom
         
+    @property
     def atomicnum(self):
         _isofact.configure(self.Atom)
         return self.Atom.getAtomicNumber()
-    atomicnum = property(atomicnum)
+    @property
     def coords(self):
         coords = self.Atom.point3d
         if not coords:
@@ -497,11 +495,10 @@ class Atom(object):
                 return (0., 0., 0.)
         else:
             return (coords.x, coords.y, coords.z)
-    coords = property(coords)
+    @property
     def formalcharge(self):
         _isofact.configure(self.Atom)
         return self.Atom.getFormalCharge()
-    formalcharge = property(formalcharge)
 
     def __str__(self):
         c = self.coords
@@ -570,11 +567,11 @@ class MoleculeData(object):
         if not key in self:
             raise KeyError, "'%s'" % key
     def keys(self):
-        return list(self._data().keys())
+        return list(self._data().keySet())
     def values(self):
         return list(self._data().values())
     def items(self):
-        return [(k, self[k]) for k in self._data().keys()]
+        return [(k, self[k]) for k in self._data().keySet()]
     def __iter__(self):
         return iter(self.keys())
     def iteritems(self):
