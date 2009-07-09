@@ -433,7 +433,7 @@ class Molecule(object):
                 for i in range(self.Molecule.getBondCount()):
                     bond = self.Molecule.getBond(i)
                     bo = _revbondtypes[bond.getOrder()]
-                    atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms()]
+                    atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms().iterator()]
                     e = mol.create_edge()
                     e.order = bo
                     if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
@@ -588,7 +588,7 @@ class Atom(object):
     @property
     def atomicnum(self):
         _isofact.configure(self.Atom)
-        return self.Atom.getAtomicNumber()
+        return self.Atom.getAtomicNumber().intValue()
     @property
     def coords(self):
         coords = self.Atom.point3d
