@@ -1,8 +1,9 @@
+import pdb
 import os
 import sys
 import unittest
 
-ironable = rdkit = cdk = None
+ironable = rdkit = cdk = obabel = None
 if sys.platform[:4] == "java":
     from cinfony import cdk, obabel
 elif sys.platform[:3] == "cli":
@@ -161,6 +162,7 @@ M  END
     def testRSconversiontoMOL2(self):
         """Convert to mol2"""
         as_mol2 = self.mols[0].write("mol2")
+        print as_mol2
         test = """@<TRIPOS>MOLECULE
 *****
  4 3 0 0 0
@@ -255,11 +257,6 @@ Energy = 0
 
     def testRFdesc(self):
         """Test the descriptors"""
-        if self.toolkit.__name__ == "cinfony.cdk":
-            # For the CDK, you need to call addh()
-            # or some descriptors will be incorrectly calculated
-            # (even those that are supposed to be immune like TPSA)
-            self.mols[1].addh()
         desc = self.mols[1].calcdesc()
         self.assertEqual(len(desc), self.Ndescs)
         self.assertAlmostEqual(desc[self.tpsaname], 26.02, 2)
@@ -402,7 +399,7 @@ class TestIronable(TestJybel):
 class TestRDKit(TestToolkit):
     toolkit = rdkit
     tanimotoresult = 1/3.
-    Ndescs = 177
+    Ndescs = 176
     Natoms = 9
     tpsaname = "TPSA"
     Nbits = 12
@@ -416,12 +413,12 @@ class TestRDKit(TestToolkit):
 class TestCDK(TestToolkit):
     toolkit = cdk
     tanimotoresult = 0.375
-    Ndescs = 143
+    Ndescs = 269
     Natoms = 15
     tpsaname = "tpsa"
     Nbits = 4
     Nfpbits = 4 # The CDK uses a true java.util.Bitset
-    datakeys = ['NSC', 'Remark', 'Title']
+    datakeys = ['NSC', 'cdk:Remark', 'cdk:Title']
 
     def testSMARTS(self):
         """No SMARTS testing done"""
@@ -443,13 +440,15 @@ class TestCDK(TestToolkit):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
+##    def testRFoutputfile(self):
+##        pass
+
 if __name__=="__main__":
-    # Tidy up
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdkit':TestRDKit}
-    testcases = [TestOBabel, TestCDK, TestRDKit]
+    testcases = [TestCDK, TestOBabel, TestRDKit]
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         testcases = [TestCDK, TestJybel]
