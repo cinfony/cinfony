@@ -115,13 +115,18 @@ def readstring(format, string):
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
    
+    Although it's possible to write a single molecule to a file by
+    calling the write() method of a molecule, if multiple molecules
+    are to be written to the same file you should use the Outputfile
+    class.
+    
     Required parameters:
        format - see the outformats variable for a list of available
                 output formats
        filename
 
     Optional parameters:
-       overwite -- if the output file already exists, should it
+       overwrite -- if the output file already exists, should it
                    be overwritten? (default is False)
                    
     Methods:
@@ -191,45 +196,45 @@ class Molecule(object):
 
         self.OBMol = OBMol
  
+    @property
     def atoms(self):
         return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
-    atoms = property(atoms)
+    @property
     def charge(self): return self.OBMol.GetTotalCharge()
-    charge = property(charge)
+    @property
     def conformers(self): return self.OBMol.GetConformers()
-    conformers = property(conformers)
+    @property
     def data(self): return MoleculeData(self.OBMol)
-    data = property(data)
+    @property
     def dim(self): return self.OBMol.GetDimension()
-    dim = property(dim)
-    def energy(self): return self.GetEnergy()
-    energy = property(energy)
+    @property
+    def energy(self): return self.OBMol.GetEnergy()
+    @property
     def exactmass(self): return self.OBMol.GetExactMass()
-    exactmass = property(exactmass)
+    @property
     def formula(self): return self.OBMol.GetFormula()
-    formula = property(formula)
+    @property
     def molwt(self): return self.OBMol.GetMolWt()
-    molwt = property(molwt)
+    @property
     def spin(self): return self.OBMol.GetTotalSpinMultiplicity()
-    spin = property(spin)
+    @property
     def sssr(self): return self.OBMol.GetSSSR()
-    sssr = property(sssr)
     def _gettitle(self): return self.OBMol.GetTitle()
     def _settitle(self, val): self.OBMol.SetTitle(val)
     title = property(_gettitle, _settitle)
+    @property
     def unitcell(self):
         unitcell = self.OBMol.GetData(ob.openbabel_javaConstants.UnitCell)
         if unitcell:
             return ob.openbabel_java.toUnitCell(unitcell)
         else:
             raise AttributeError, "Molecule has no attribute 'unitcell'"
-    unitcell = property(unitcell)
+    @property
     def _exchange(self):
         if self.OBMol.HasNonZeroCoords():
             return (1, self.write("mol"))
         else:
             return (0, self.write("can").split()[0])
-    _exchange = property(_exchange)
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
@@ -322,7 +327,9 @@ class Molecule(object):
         if self.dim != 3:
             self.make3D(forcefield)
         ff = _forcefields[forcefield]
-        ff.Setup(self.OBMol)
+        success = ff.Setup(self.OBMol)
+        if not success:
+            return
         ff.SteepestDescent(steps)
         ff.GetCoordinates(self.OBMol)
     
@@ -372,7 +379,7 @@ class Atom(object):
        OBAtom -- an Open Babel OBAtom
         
     Attributes:
-       atomicmass, atomicnum, cidx, coordidx, exactmass,
+       atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
        implicitvalence, isotope, partialcharge, spin, type,
        valence, vector.
@@ -386,43 +393,43 @@ class Atom(object):
     def __init__(self, OBAtom):
         self.OBAtom = OBAtom
 
+    @property
     def coords(self):
         return (self.OBAtom.GetX(), self.OBAtom.GetY(), self.OBAtom.GetZ())
-    coords = property(coords)
+    @property
     def atomicmass(self): return self.OBAtom.GetAtomicMass()
-    atomicmass = property(atomicmass)
+    @property
     def atomicnum(self): return self.OBAtom.GetAtomicNum()
-    atomicnum = property(atomicnum)
+    @property
     def cidx(self): return self.OBAtom.GetCIdx()
-    cidx = property(cidx)
+    @property
     def coordidx(self): return self.OBAtom.GetCoordinateIdx()
-    coordidx = property(coordidx)
+    @property
     def exactmass(self): return self.OBAtom.GetExactMass()
-    exactmass = property(exactmass)
+    @property
     def formalcharge(self): return self.OBAtom.GetFormalCharge()
-    formalcharge = property(formalcharge)
+    @property
     def heavyvalence(self): return self.OBAtom.GetHvyValence()
-    heavyvalence = property(heavyvalence)
+    @property
     def heterovalence(self): return self.OBAtom.GetHeteroValence()
-    heterovalence = property(heterovalence)
+    @property
     def hyb(self): return self.OBAtom.GetHyb()
-    hyb = property(hyb)
+    @property
     def idx(self): return self.OBAtom.GetIdx()
-    idx = property(idx)
+    @property
     def implicitvalence(self): return self.OBAtom.GetImplicitValence()
-    implicitvalence = property(implicitvalence)
+    @property
     def isotope(self): return self.OBAtom.GetIsotope()
-    isotope = property(isotope)
+    @property
     def partialcharge(self): return self.OBAtom.GetPartialCharge()
-    partialcharge = property(partialcharge)
+    @property
     def spin(self): return self.OBAtom.GetSpinMultiplicity()
-    spin = property(spin)
+    @property
     def type(self): return self.OBAtom.GetType()
-    type = property(type)
+    @property
     def valence(self): return self.OBAtom.GetValence()
-    valence = property(valence)
+    @property
     def vector(self): return self.OBAtom.GetVector()
-    vector = property(vector)
 
     def __str__(self):
         c = self.coords
@@ -468,9 +475,9 @@ class Fingerprint(object):
         self.fp = fingerprint
     def __or__(self, other):
         return ob.OBFingerprint.Tanimoto(self.fp, other.fp)
+    @property
     def bits(self):
         return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())    
-    bits = property(bits)
     def __str__(self):
         return ", ".join([str(self.fp.get(i)) for i in range(self.fp.size())])
 
