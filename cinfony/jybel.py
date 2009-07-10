@@ -218,9 +218,9 @@ class Molecule(object):
     def _settitle(self, val): self.OBMol.SetTitle(val)
     title = property(_gettitle, _settitle)
     def unitcell(self):
-        unitcell = self.OBMol.GetData(ob.openbabelConstants.UnitCell)
+        unitcell = self.OBMol.GetData(ob.openbabel_javaConstants.UnitCell)
         if unitcell:
-            return ob.openbabel.toUnitCell(unitcell)
+            return ob.openbabel_java.toUnitCell(unitcell)
         else:
             raise AttributeError, "Molecule has no attribute 'unitcell'"
     unitcell = property(unitcell)
@@ -541,9 +541,9 @@ class MoleculeData(object):
     def _data(self):
         data = self._mol.GetData()
         data = [data.get(i) for i in range(data.size())]
-        return [ob.openbabel.toPairData(x) for x in data
-                if x.GetDataType()==ob.openbabelConstants.PairData or
-                x.GetDataType()==ob.openbabelConstants.CommentData]
+        return [ob.openbabel_java.toPairData(x) for x in data
+                if x.GetDataType()==ob.openbabel_javaConstants.PairData or
+                x.GetDataType()==ob.openbabel_javaConstants.CommentData]
     def _testforkey(self, key):
         if not key in self:
             raise KeyError, "'%s'" % key
@@ -574,10 +574,10 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
-        return ob.openbabel.toPairData(self._mol.GetData(key)).GetValue()
+        return ob.openbabel_java.toPairData(self._mol.GetData(key)).GetValue()
     def __setitem__(self, key, value):
         if key in self:
-            pairdata = ob.openbabel.toPairData(self._mol.GetData(key))
+            pairdata = ob.openbabel_java.toPairData(self._mol.GetData(key))
             pairdata.SetValue(str(value))
         else:
             pairdata = ob.OBPairData()
