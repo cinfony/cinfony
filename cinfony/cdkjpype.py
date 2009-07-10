@@ -192,8 +192,8 @@ class Outputfile(object):
     def close(self):
         """Close the Outputfile to further writing."""
         self.filename = None
-        self._writer.close()
         self._molwriter.close()
+        self._writer.close()
 
     
 class Molecule(object):
@@ -601,7 +601,7 @@ class Atom(object):
     @property
     def formalcharge(self):
         _isofact.configure(self.Atom)
-        return self.Atom.getFormalCharge()
+        return self.Atom.getFormalCharge().intValue()
 
     def __str__(self):
         c = self.coords

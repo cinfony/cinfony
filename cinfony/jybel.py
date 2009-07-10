@@ -18,7 +18,7 @@ import tempfile
 import org.openbabel as ob
 
 import java.lang.System
-java.lang.System.loadLibrary("openbabel")
+java.lang.System.loadLibrary("openbabel_java")
 
 def _formatstodict(list):
     list = [list.get(i) for i in range(list.size())]
