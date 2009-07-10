@@ -23,7 +23,7 @@ Topic :: Software Development :: Libraries :: Python Modules
 from distutils.core import setup
 setup(
     name = "cinfony",
-    version = "0.8.1",
+    version = "0.9",
     url = "http://code.googlecode.com/p/cinfony",
     author = "Noel O'Boyle",
     author_email = "baoilleach@gmail.com",

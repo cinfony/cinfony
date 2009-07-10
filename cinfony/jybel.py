@@ -9,7 +9,6 @@ Global variables:
   fps - a list of supported fingerprint types
   forcefields - a list of supported forcefields
 """
-from __future__ import generators
 
 import math
 import os.path
@@ -77,7 +76,7 @@ def readfile(format, filename):
     if not formatok:
         raise ValueError,"%s is not a recognised OpenBabel format" % format
     if not os.path.isfile(filename):
-        raise IOError, "No such file: '%s'" % filename
+        raise IOError("No such file: '%s'" % filename)
     obmol = ob.OBMol()
     notatend = obconversion.ReadFile(obmol,filename)
     while notatend:
@@ -108,8 +107,8 @@ def readstring(format, string):
 
     success = obconversion.ReadString(obmol, string)
     if not success:
-        raise IOError, "Failed to convert '%s' to format '%s'" % (
-            string, format)
+        raise IOError("Failed to convert '%s' to format '%s'" % (
+            string, format))
     return Molecule(obmol)
 
 class Outputfile(object):
@@ -137,7 +136,7 @@ class Outputfile(object):
         self.format = format
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         self.obConversion = ob.OBConversion()
         formatok = self.obConversion.SetOutFormat(self.format)
         if not formatok:
@@ -151,7 +150,7 @@ class Outputfile(object):
            molecule
         """
         if not self.filename:
-            raise IOError, "Outputfile instance is closed."
+            raise IOError("Outputfile instance is closed.")
 
         if self.total==0:
             self.obConversion.WriteFile(molecule.OBMol, self.filename)
@@ -228,7 +227,7 @@ class Molecule(object):
         if unitcell:
             return ob.openbabel_java.toUnitCell(unitcell)
         else:
-            raise AttributeError, "Molecule has no attribute 'unitcell'"
+            raise AttributeError("Molecule has no attribute 'unitcell'")
     @property
     def _exchange(self):
         if self.OBMol.HasNonZeroCoords():
@@ -262,7 +261,7 @@ class Molecule(object):
             try:
                 desc = _descdict[descname]
             except KeyError:
-                raise ValueError, "%s is not a recognised Open Babel descriptor type" % descname
+                raise ValueError("%s is not a recognised Open Babel descriptor type" % descname)
             ans[descname] = desc.Predict(self.OBMol)
         return ans
     
@@ -278,7 +277,7 @@ class Molecule(object):
         try:
             fingerprinter = _fingerprinters[fptype]
         except KeyError:
-            raise ValueError, "%s is not a recognised Open Babel Fingerprint type" % fptype
+            raise ValueError("%s is not a recognised Open Babel Fingerprint type" % fptype)
         fingerprinter.GetFingerprint(self.OBMol, fp)
         return Fingerprint(fp)
 
@@ -305,7 +304,7 @@ class Molecule(object):
 
         if filename:
             if not overwrite and os.path.isfile(filename):
-                raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
+                raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
             obconversion.WriteFile(self.OBMol,filename)
             obconversion.CloseOutFile()
         else:
@@ -505,7 +504,7 @@ class Smarts(object):
         self.obsmarts = ob.OBSmartsPattern()
         success = self.obsmarts.Init(smartspattern)
         if not success:
-            raise IOError, "Invalid SMARTS pattern"
+            raise IOError("Invalid SMARTS pattern")
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
         
@@ -553,7 +552,7 @@ class MoleculeData(object):
                 x.GetDataType()==ob.openbabel_javaConstants.CommentData]
     def _testforkey(self, key):
         if not key in self:
-            raise KeyError, "'%s'" % key
+            raise KeyError("'%s'" % key)
     def keys(self):
         return [x.GetAttribute() for x in self._data()]
     def values(self):
