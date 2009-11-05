@@ -39,7 +39,7 @@ def _makeserver(serverurl):
     return server
 
 rajweb = _makeserver("http://ws1.bmc.uu.se:8182/cdk")
-nci = _makeserver("http://cactus.nci.nih.gov/chemical/structure/")
+nci = _makeserver("http://cactus.nci.nih.gov/chemical/structure")
 
 _descs = None # Cache the list of descriptors
 def getdescs():
