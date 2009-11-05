@@ -38,6 +38,10 @@ except ImportError:
     tk = None
 
 cdk = JPackage("org").openscience.cdk
+try:
+    testmol = cdk.Molecule()
+except TypeError:
+    raise ImportError, "The CDK Jar file cannot be found."
 
 def _getdescdict():
     de = cdk.qsar.DescriptorEngine(cdk.qsar.DescriptorEngine.MOLECULAR)
