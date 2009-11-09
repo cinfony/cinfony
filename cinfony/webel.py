@@ -3,7 +3,6 @@ webel
 """
 import re
 import os
-import urllib
 import urllib2
 import StringIO
 
@@ -25,10 +24,24 @@ outformats = ["smi", "cdxml", "inchi", "sdf", "names", "inchikey",
 fps = ["std", "maccs", "estate"]
 """A list of supported fingerprint types"""
 
-def _esc(text):
-    return text.replace("#", "%23")
-def _quo(text):
-    return urllib.quote(text)
+# The following function is taken from urllib.py in the IronPython dist
+def _quo(text, safe="/"):
+    always_safe = ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+               'abcdefghijklmnopqrstuvwxyz'
+               '0123456789' '_.-')
+    _safemaps = {}
+    cachekey = (safe, always_safe)
+    try:
+        safe_map = _safemaps[cachekey]
+    except KeyError:
+        safe += always_safe
+        safe_map = {}
+        for i in range(256):
+            c = chr(i)
+            safe_map[c] = (c in safe) and c or ('%%%02X' % i)
+        _safemaps[cachekey] = safe_map
+    res = map(safe_map.__getitem__, text)
+    return ''.join(res)
 
 def _makeserver(serverurl):
     """Curry the name of the server"""
@@ -69,7 +82,7 @@ def readstring(format, string):
         raise ValueError("%s is not a recognised Webel format" % format)
     
     if format != "smi":
-        smiles = nci(string, "smiles").rstrip()
+        smiles = nci(_quo(string), "smiles").rstrip()
     else:
         smiles = string
     mol = Molecule(smiles)
@@ -117,7 +130,7 @@ class Outputfile(object):
         if self.format == "smi":
             output = molecule.smiles
         else:
-            output = nci(_esc(molecule.smiles), "file?format=%s" % self.format).rstrip()
+            output = nci(_quo(molecule.smiles), "file?format=%s" % self.format).rstrip()
         
         print >> self.file, output
 
@@ -232,12 +245,12 @@ class Molecule(object):
             output = self.smiles
         elif format == "names":
             try:
-                output = nci(_esc(self.smiles), "%s" % format).rstrip().split("\n")
+                output = nci(_quo(self.smiles), "%s" % format).rstrip().split("\n")
             except urllib2.URLError, e:
                 if e.code == 404:
                     output = []
         else:
-            output = nci(_esc(self.smiles), "file?format=%s" % format).rstrip()
+            output = nci(_quo(self.smiles), "file?format=%s" % format).rstrip()
 
         if filename:
             if not overwrite and os.path.isfile(filename):
@@ -279,7 +292,7 @@ class Molecule(object):
         Tkinter and Python Imaging Library are required for
         image display.
         """
-        imagedata = nci(_esc(self.smiles), "image")
+        imagedata = nci(_quo(self.smiles), "image")
         if filename:
             print >> open(filename, "wb"), imagedata
         if show:
