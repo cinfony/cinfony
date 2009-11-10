@@ -1,6 +1,12 @@
 """
-webel
+webel - A Cinfony module that runs entirely on web services
+
+Global variables:
+  informats - a dictionary of supported input formats
+  outformats - a dictionary of supported output formats
+  fps - a list of supported fingerprint types
 """
+
 import re
 import os
 import urllib2
@@ -13,12 +19,21 @@ try:
 except ImportError:
     tk = None
 
-informats = ["smi", "inchikey", "inchi", "name"]
+informats = {"smi":"SMILES", "inchikey":"InChIKey", "inchi":"InChI",
+             "name":"Common name"}
 """A dictionary of supported input formats"""
-outformats = ["smi", "cdxml", "inchi", "sdf", "names", "inchikey",
-              "alc", "cerius", "charmm", "cif", "cml", "ctx",
-              "gjf", "gromacs", "hyperchem", "jme", "maestro",
-              "mol", "mol2", "mrv", "pdb", "sdf3000", "sln", "xyz"]
+outformats = {"smi":"SMILES", "cdxml":"ChemDraw XML", "inchi":"InChI",
+              "sdf":"Symyx SDF", "names":"Common names", "inchikey":"InChIKey",
+              "alc":"Alchemy", "cerius":"MSI Cerius II", "charmm":"CHARMM",
+              "cif":"Crystallographic Information File",
+              "cml":"Chemical Markup Language", "ctx":"Gasteiger Clear Text",
+              "gjf":"Gaussian job file", "gromacs":"GROMACS",
+              "hyperchem":"HyperChem", "jme":"Java Molecule Editor",
+              "maestro":"Schrodinger MacroModel",
+              "mol":"Symyx mol", "mol2":"Tripos Sybyl MOL2",
+              "mrv":"ChemAxon MRV", "pdb":"Protein Data Bank",
+              "sdf3000":"Symyx SDF3000", "sln":"Sybl line notation",
+              "xyz":"XYZ"}
 """A dictionary of supported output formats"""
 
 fps = ["std", "maccs", "estate"]
@@ -73,9 +88,7 @@ def readstring(format, string):
 
     Example:
     >>> input = "C1=CC=CS1"
-    >>> mymol = readstring("smi", input)
-    >>> len(mymol.atoms)
-    5
+    >>> mymol = readstring("smi", input)   
     """
     format = format.lower()
     if not format in informats:
@@ -139,22 +152,19 @@ class Outputfile(object):
         self.file.close()
 
 class Molecule(object):
-    """Represent a Pybel Molecule.
+    """Represent a Webel Molecule.
 
     Required parameter:
-       OBMol -- an Open Babel OBMol or any type of cinfony Molecule
+       smiles -- a SMILES string or any type of cinfony Molecule
  
     Attributes:
-       atoms, charge, conformers, data, dim, energy, exactmass, formula, 
-       molwt, spin, sssr, title, unitcell.
-    (refer to the Open Babel library documentation for more info).
+       formula, molwt, title
     
     Methods:
-       addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
-       write() 
+       calcfp(), calcdesc(), draw(), write() 
       
-    The underlying Open Babel molecule can be accessed using the attribute:
-       OBMol
+    The underlying SMILES string can be accessed using the attribute:
+       smiles
     """
     _cinfony = True
 
@@ -261,24 +271,6 @@ class Molecule(object):
         else:
             return output
 
-##    def make3D(self, forcefield = "mmff94", steps = 50):
-##        """Generate 3D coordinates.
-##        
-##        Optional parameters:
-##           forcefield -- default is "mmff94". See the forcefields variable
-##                         for a list of available forcefields.
-##           steps -- default is 50
-##
-##        Once coordinates are generated, hydrogens are added and a quick
-##        local optimization is carried out with 50 steps and the
-##        MMFF94 forcefield. Call localopt() if you want
-##        to improve the coordinates further.
-##        """
-##        forcefield = forcefield.lower()
-##        _builder.Build(self.OBMol)
-##        self.addh()
-##        self.localopt(forcefield, steps)
-##
     def __str__(self):
         return self.write()
 
@@ -315,7 +307,7 @@ class Fingerprint(object):
     """A Molecular Fingerprint.
     
     Required parameters:
-       fingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
+       fingerprint -- a string of 0's and 1's representing a binary fingerprint
 
     Attributes:
        fp -- the underlying fingerprint object
@@ -345,17 +337,13 @@ class Smarts(object):
        smartspattern
     
     Methods:
-       findall(molecule)
+       match(molecule)
     
     Example:
     >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
     >>> smarts.match(mol) 
     True
-
-    The numbers returned are the indices (starting from 1) of the atoms
-    that match the SMARTS pattern. In this case, there are three matches
-    for each of the three ethyl groups in the molecule.
     """
     def __init__(self, smartspattern):
         """Initialise with a SMARTS pattern."""
