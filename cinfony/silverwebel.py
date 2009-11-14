@@ -8,16 +8,14 @@ Global variables:
 """
 
 import re
-import os
-import urllib2
-import StringIO
+from time import sleep
 
-try:
-    import Tkinter as tk
-    import Image as PIL
-    import ImageTk as piltk
-except ImportError:
-    tk = None
+# .NET classes
+from System.Net import WebClient
+from System import Uri, UriKind
+_webclient = WebClient()
+
+tk = None
 
 informats = {"smi":"SMILES", "inchikey":"InChIKey", "inchi":"InChI",
              "name":"Common name"}
@@ -288,7 +286,7 @@ class Molecule(object):
 
     def draw(self):
         """Create a 2D depiction of the molecule."""
-        
+        global showimage        
         url = "http://cactus.nci.nih.gov/chemical/structure/%s/image" % _quo(self.smiles)
         showimage(url)
 
