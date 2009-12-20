@@ -41,9 +41,8 @@ informats = dict([(x, _formats[x]) for x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
-               'smi': cdk.io.SMILESWriter,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(x, _formats[x]) for x in _outformats.keys()])
+outformats = dict([(x, _formats[x]) for x in _outformats.keys() + ['smi']])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 """A list of supported forcefields"""
@@ -152,8 +151,13 @@ class Outputfile(object):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
         if not format in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
-        self._writer = java.io.FileWriter(java.io.File(self.filename))
-        self._molwriter = _outformats[self.format](self._writer)
+        if self.format == "smi":
+            self._sg = cdk.smiles.SmilesGenerator()
+            self._sg.setUseAromaticityFlag(True)
+            self._outputfile = open(self.filename, "w")
+        else:
+            self._writer = java.io.FileWriter(java.io.File(self.filename))
+            self._molwriter = _outformats[self.format](self._writer)
         self.total = 0 # The total number of molecules written to the file
     
     def write(self, molecule):
@@ -164,15 +168,20 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-        self._molwriter.write(molecule.Molecule)
+        if self.format == "smi":
+            self._outputfile.write("%s\n" % self._sg.createSMILES(molecule.Molecule))
+        else:
+            self._molwriter.write(molecule.Molecule)
         self.total += 1
 
     def close(self):
         """Close the Outputfile to further writing."""
         self.filename = None
-        self._molwriter.close()
-        self._writer.close()
-        
+        if self.format == "smi":
+            self._outputfile.close()
+        else:
+            self._molwriter.close()
+            self._writer.close()
 
     
 class Molecule(object):
@@ -280,6 +289,8 @@ class Molecule(object):
         if filename == None:
             if format == "smi":
                 sg = cdk.smiles.SmilesGenerator()
+                # Set flag or else c1ccccc1 will be written as C1CCCCC1
+                sg.setUseAromaticityFlag(True)
                 return sg.createSMILES(self.Molecule)
             else:
                 writer = java.io.StringWriter()

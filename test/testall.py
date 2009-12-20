@@ -10,7 +10,15 @@ elif sys.platform[:3] == "cli":
     from cinfony import ironable
 else:
     try:
-        from cinfony import cdk, obabel, rdkit
+        from cinfony import cdk
+    except ImportError:
+        pass
+    try:
+        from cinfony import obabel
+    except ImportError:
+        pass
+    try:
+        from cinfony import rdkit
     except ImportError:
         pass
     try:
@@ -70,7 +78,7 @@ class TestToolkit(myTestCase):
     def testFPTanimoto(self):
         """Test the calculation of the Tanimoto coefficient"""
         fps = [x.calcfp() for x in self.mols]
-        self.assertEqual(fps[0] | fps[1], self.tanimotoresult)
+        self.assertAlmostEqual(fps[0] | fps[1], self.tanimotoresult, 3)
         
     def testFPstringrepr(self):
         """Test the string representation and corner cases."""
@@ -87,7 +95,7 @@ class TestToolkit(myTestCase):
         bits = [set(x) for x in bits]
         # Calculate the Tanimoto coefficient the old-fashioned way
         tanimoto = len(bits[0] & bits[1]) / float(len(bits[0] | bits[1]))
-        self.assertEqual(tanimoto, self.tanimotoresult)
+        self.assertAlmostEqual(tanimoto, self.tanimotoresult, 3)
 
     def RSaccesstest(self):
         # Should raise AttributeError
@@ -138,6 +146,13 @@ class TestToolkit(myTestCase):
         self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
+
+    def testRoundTripSMILES(self):
+        """Convert the SMILES of benzene to itself"""
+        benzene = "c1ccccc1"
+        mol = self.toolkit.readstring("smi", benzene)
+        smi = mol.write("smi")
+        self.assertEqual(smi, benzene)
 
     def testRSconversiontoMOL(self):
         """Convert to mol"""
@@ -412,7 +427,7 @@ class TestRDKit(TestToolkit):
 
 class TestCDK(TestToolkit):
     toolkit = cdk
-    tanimotoresult = 0.375
+    tanimotoresult = 0.571
     Ndescs = 269
     Natoms = 15
     tpsaname = "tpsa"
