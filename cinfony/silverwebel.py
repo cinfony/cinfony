@@ -180,13 +180,13 @@ class Molecule(object):
 
     def __init__(self, smiles):
         
-##        if hasattr(OBMol, "_cinfony"):
-##            a, b = OBMol._exchange
-##            if a == 0:
-##                mol = readstring("smi", b)
-##            else:
-##                mol = readstring("mol", b)
-##            OBMol = mol.OBMol
+        if hasattr(smiles, "_cinfony"):
+            a, b = smiles._exchange
+            if a == 0:
+                smiles = b
+            else:
+                # Must convert to SMILES
+                smiles = smiles.write("smi").split()[0]            
 
         self.smiles = smiles
         self.title = ""
@@ -195,12 +195,9 @@ class Molecule(object):
     def formula(self): return rajweb("mf", _quo(self.smiles))
     @property
     def molwt(self): return float(rajweb("mw", _quo(self.smiles)))
-##    @property
-##    def _exchange(self):
-##        if self.OBMol.HasNonZeroCoords():
-##            return (1, self.write("mol"))
-##        else:
-##            return (0, self.write("can").split()[0])
+    @property
+    def _exchange(self):
+        return (0, self.smiles)
 
     def calcdesc(self, descnames=[]):
         """Calculate descriptor values.
