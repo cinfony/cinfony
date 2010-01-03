@@ -25,6 +25,7 @@ def _formatstodict(list):
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
 _obconv = ob.OBConversion()
+_builder = ob.OBBuilder()
 informats = _formatstodict(_obconv.GetSupportedInputFormat())
 """A dictionary of supported input formats"""
 outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
@@ -78,7 +79,7 @@ def readfile(format, filename):
     obconversion = ob.OBConversion()
     formatok = obconversion.SetInFormat(format)
     if not formatok:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError("%s is not a recognised OpenBabel format" % format)
     if not os.path.isfile(filename):
         raise IOError("No such file: '%s'" % filename)
     obmol = ob.OBMol()
@@ -107,7 +108,7 @@ def readstring(format, string):
 
     formatok = obconversion.SetInFormat(format)
     if not formatok:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError("%s is not a recognised OpenBabel format" % format)
 
     success = obconversion.ReadString(obmol, string)
     if not success:
@@ -144,7 +145,7 @@ class Outputfile(object):
         self.obConversion = ob.OBConversion()
         formatok = self.obConversion.SetOutFormat(self.format)
         if not formatok:
-            raise ValueError,"%s is not a recognised OpenBabel format" % format
+            raise ValueError("%s is not a recognised OpenBabel format" % format)
         self.total = 0 # The total number of molecules written to the file
     
     def write(self, molecule):
@@ -304,7 +305,7 @@ class Molecule(object):
         obconversion = ob.OBConversion()
         formatok = obconversion.SetOutFormat(format)
         if not formatok:
-            raise ValueError,"%s is not a recognised OpenBabel format" % format
+            raise ValueError("%s is not a recognised OpenBabel format" % format)
 
         if filename:
             if not overwrite and os.path.isfile(filename):
@@ -360,7 +361,7 @@ class Molecule(object):
         to improve the coordinates further.
         """
         forcefield = forcefield.lower()
-        _operations['Gen3D'].Do(self.OBMol)
+        _builder.Build(self.OBMol)
         self.addh()
         self.localopt(forcefield, steps)
 
