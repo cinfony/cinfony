@@ -36,7 +36,7 @@ try:
 except ImportError:
     aggdraw = None
 
-fps = ['daylight', 'maccs', 'atompairs', 'torsions']
+fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
 """A list of supported fingerprint types"""
 descs = descDict.keys()
 """A list of supported descriptors"""
@@ -77,16 +77,30 @@ def readfile(format, filename):
     43
     """
     if not os.path.isfile(filename):
-        raise IOError, "No such file: '%s'" % filename    
-    format = format.lower()    
+        raise IOError, "No such file: '%s'" % filename
+    format = format.lower()
+    # Eagerly evaluate the supplier functions in order to report
+    # errors in the format and errors in opening the file.
+    # Then switch to an iterator...
     if format=="sdf":
         iterator = Chem.SDMolSupplier(filename)
-        for mol in iterator:
-            yield Molecule(mol)
+        def sdf_reader():
+            for mol in iterator:
+                yield Molecule(mol)
+        return sdf_reader()
     elif format=="mol":
-        yield Molecule(Chem.MolFromMolFile(filename))
+        def mol_reader():
+            yield Molecule(Chem.MolFromMolFile(filename))
+        return mol_reader()
+    elif format=="smi":
+        iterator = Chem.SmilesMolSupplier(filename, delimiter=" \t",
+                                          titleLine=False)
+        def smi_reader():
+            for mol in iterator:
+                yield Molecule(mol)
+        return smi_reader()    
     else:
-        raise ValueError,"%s is not a recognised RDKit format" % format
+        raise ValueError, "%s is not a recognised RDKit format" % format
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -286,17 +300,19 @@ class Molecule(object):
             ans[descname] = desc(self.Mol)
         return ans
 
-    def calcfp(self, fptype="daylight"):
+    def calcfp(self, fptype="rdkit"):
         """Calculate a molecular fingerprint.
         
         Optional parameters:
-           fptype -- the fingerprint type (default is "daylight"). See the
+           fptype -- the fingerprint type (default is "rdkit"). See the
                      fps variable for a list of of available fingerprint
                      types.
         """
         fptype = fptype.lower()
-        if fptype=="daylight":
-            fp = Fingerprint(Chem.DaylightFingerprint(self.Mol))
+        if fptype=="rdkit":
+            fp = Fingerprint(Chem.RDKFingerprint(self.Mol))
+        elif fptype=="layered":
+            fp = Fingerprint(Chem.LayeredFingerprint(self.Mol))            
         elif fptype=="maccs":
             fp = Fingerprint(Chem.MACCSkeys.GenMACCSKeys(self.Mol))
         elif fptype=="atompairs":
@@ -559,7 +575,7 @@ class Fingerprint(object):
     def __init__(self, fingerprint):
         self.fp = fingerprint
     def __or__(self, other):
-        return DataStructs.FingerprintSimilarity(self.fp, other.fp)
+        return rdkit.DataStructs.FingerprintSimilarity(self.fp, other.fp)
     def __getattr__(self, attr):
         if attr == "bits":
             # Create a bits attribute on-the-fly

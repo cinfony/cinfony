@@ -3,11 +3,11 @@ import os
 import sys
 import unittest
 
-ironable = rdkit = cdk = obabel = None
+ironable = rdk = cdk = obabel = None
 if sys.platform[:4] == "java":
     from cinfony import cdk, obabel
-elif sys.platform[:3] == "cli":
-    from cinfony import ironable
+##elif sys.platform[:3] == "cli":
+##    from cinfony import ironable
 else:
     try:
         from cinfony import cdk
@@ -18,10 +18,11 @@ else:
     except ImportError:
         pass
     try:
-        from cinfony import rdkit
+        from cinfony import rdk
     except ImportError:
         pass
     try:
+        import ironclad
         import pybel as obabel
     except ImportError:
         pass
@@ -412,7 +413,7 @@ class TestIronable(TestJybel):
     toolkit = ironable
 
 class TestRDKit(TestToolkit):
-    toolkit = rdkit
+    toolkit = rdk
     tanimotoresult = 1/3.
     Ndescs = 176
     Natoms = 9
@@ -462,14 +463,14 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdkit':TestRDKit}
+    lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit}
     testcases = [TestCDK, TestOBabel, TestRDKit]
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         testcases = [TestCDK, TestJybel]
-    elif sys.platform[:3] == "cli":
-        lookup['obabel'] = TestIronable
-        testcases = [TestIronable]
+##    elif sys.platform[:3] == "cli":
+##        lookup['obabel'] = TestIronable
+##        testcases = [TestIronable]
     if len(sys.argv) > 1:
         testcases = [lookup[x] for x in sys.argv[1:]]
 
