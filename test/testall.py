@@ -397,7 +397,7 @@ class TestRDKit(TestToolkit):
     Natoms = 9
     tpsaname = "TPSA"
     Nbits = 12
-    Nfpbits = 6
+    Nfpbits = 64
     datakeys = ['NSC']
 
     def testRSconversiontoMOL2(self):
