@@ -126,7 +126,8 @@ class Outputfile(object):
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format.lower()
-        if not overwrite and os.path.isfile(filename):
+        self.filename = filename
+        if not overwrite and os.path.isfile(self.filename):
             raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         if not format in outformats:
             raise ValueError("%s is not a recognised Webel format" % format)

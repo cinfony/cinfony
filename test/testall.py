@@ -3,11 +3,11 @@ import os
 import sys
 import unittest
 
-ironable = rdk = cdk = obabel = None
+ironable = rdk = cdk = obabel = webel = None
 if sys.platform[:4] == "java":
-    from cinfony import cdk, obabel
-##elif sys.platform[:3] == "cli":
-##    from cinfony import ironable
+    from cinfony import cdk, obabel, webel
+elif sys.platform[:3] == "cli":
+    from cinfony import ironable, webel
 else:
     try:
         from cinfony import cdk
@@ -21,11 +21,12 @@ else:
         from cinfony import rdk
     except ImportError:
         pass
-    try:
-        import ironclad
-        import pybel as obabel
-    except ImportError:
-        pass
+    from cinfony import webel
+##    try:
+##        import ironclad
+##        import pybel as obabel
+##    except ImportError:
+##        pass
 
 
 # For compatability with Python2.3
@@ -174,29 +175,6 @@ M  END
         data, result = test.split("\n"), as_mol.split("\n")
         self.assertEqual(len(data), len(result))
         self.assertEqual(data[-2], result[-2].rstrip()) # M  END
-
-    def testRSconversiontoMOL2(self):
-        """Convert to mol2"""
-        as_mol2 = self.mols[0].write("mol2")
-        print as_mol2
-        test = """@<TRIPOS>MOLECULE
-*****
- 4 3 0 0 0
-SMALL
-GASTEIGER
-Energy = 0
-
-@<TRIPOS>ATOM
-      1 C1          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-      2 C2          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-      3 C3          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-      4 C4          0.0000    0.0000    0.0000 C.3     1  <1>         0.0000
-@<TRIPOS>BOND
-     1     1     2    1
-     2     2     3    1
-     3     3     4    1
-"""
-        self.assertEqual(as_mol2, test)
 
     def testRSstringrepr(self):
         """Test the string representation of a molecule"""
@@ -419,13 +397,139 @@ class TestRDKit(TestToolkit):
     Natoms = 9
     tpsaname = "TPSA"
     Nbits = 12
-    Nfpbits = 64
+    Nfpbits = 6
     datakeys = ['NSC']
 
     def testRSconversiontoMOL2(self):
         """No conversion to MOL2 done"""
         pass
 
+class TestWebel(TestToolkit):
+    toolkit = webel
+    tanimotoresult = 0.375
+    Ndescs = 141
+    Natoms = 9
+    tpsaname = "TPSADescriptor_TopoPSA"
+    Nbits = 4
+    Nfpbits = 1
+    datakeys = ['NSC']
+
+    def setUp(self):
+        self.mols = [self.toolkit.readstring("smi", "CCCC"),
+                     self.toolkit.readstring("smi", "CCCN")]
+
+    def testselfconversion(self):
+        """Test that the toolkit can eat its own dog-food."""
+##        newmol = self.toolkit.Molecule(self.head[0])
+##        self.assertEqual(newmol._exchange,
+##                         self.head[0]._exchange)
+        newmol = self.toolkit.Molecule(self.mols[0])
+        self.assertEqual(newmol._exchange,
+                         self.mols[0]._exchange)
+    def testAattributes(self):
+        """Not testing atom attributes"""
+    def testAstringrepr(self):
+        """Not testing atom repr"""
+    def testAiteration(self):
+        """Not testing the ability to iterate over the atoms"""
+    def testAddh(self):
+        """Not testing adding/removing hydrogens"""
+    def testLocalOpt(self):
+        """Not testing local opt"""
+    def testMake3D(self):
+        """Not generating 3D coordinates"""
+    def testMDaccess(self):
+        """Not changing the value of a field"""
+    def testMDglobalaccess(self):
+        """Not checking out the keys"""
+    def testMDdelete(self):
+        """Not deleting some keys"""
+    def testRFmissingfile(self):
+        """Not testing that reading from a non-existent file raises an error."""
+    def testRFformaterror(self):
+        """Not testing that invalid formats raise an error"""
+    def testRSgetprops(self):
+        """Get the values of the properties."""
+        self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
+        self.assertEqual(self.mols[1].formula, "C3H9N")
+        self.assertRaises(AttributeError, self.RSaccesstest)
+    def testDraw(self):
+        """Create a 2D depiction"""
+        self.mols[0].draw(show=False,
+                          filename="%s.png" % self.toolkit.__name__)
+        self.mols[0].draw(show=False) # Just making sure that it doesn't raise an Error
+    def testRSformaterror(self):
+        """Test that invalid formats raise an error"""
+        self.assertRaises(ValueError, self.toolkit.readstring, "noel", "jkjk")
+    def testSMARTS(self):
+        """Searching for ethyl groups in triethylamine"""
+        mol = self.toolkit.readstring("smi", "CCN(CC)CC")
+        smarts = self.toolkit.Smarts("[#6][#6]")
+        ans = smarts.match(mol)
+        self.assertTrue(ans)
+    def testRFoutputfile(self):
+        """Test the Outputfile class"""
+        self.assertRaises(ValueError, self.toolkit.Outputfile, "noel", "testoutput.txt")
+        outputfile = self.toolkit.Outputfile("sdf", "testoutput.txt")
+        for mol in self.mols:
+            outputfile.write(mol)
+        outputfile.close()
+        self.assertRaises(IOError, outputfile.write, mol)
+        self.assertRaises(IOError, self.toolkit.Outputfile, "sdf", "testoutput.txt")
+        input = open("testoutput.txt", "r")
+        numdollar = len([x for x in input.readlines()
+                         if x.rstrip() == "$$$$"])
+        input.close()
+        os.remove("testoutput.txt")
+        self.assertEqual(numdollar, 2)
+    def testattributes(self):
+        """Test attributes like informats, descs and so on"""
+        informats, outformats = self.toolkit.informats, self.toolkit.outformats
+        self.assertNotEqual(len(self.toolkit.informats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.outformats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.getdescs()), 0)
+        self.assertNotEqual(len(self.toolkit.fps), 0)
+    def testRSconversiontoMOL(self):
+        """Convert to mol"""
+        as_mol = self.mols[0].write("mol")
+        test = """C4H10
+APtclcactv01251010412D 0   0.00000     0.00000
+
+ 14 13  0  0  0  0  0  0  0  0999 V2000
+    2.8660   -0.2500    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    3.7321    0.2500    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.0000    0.2500    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    4.5981   -0.2500    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    2.3100    0.7869    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.4631    0.5600    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    1.6900   -0.2869    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    2.4675   -0.7249    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.2646   -0.7249    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    4.1306    0.7249    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    3.3335    0.7249    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    4.2881   -0.7869    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    5.1350   -0.5600    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+    4.9081    0.2869    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0
+  1  3  1  0  0  0  0
+  1  2  1  0  0  0  0
+  2  4  1  0  0  0  0
+  3  5  1  0  0  0  0
+  3  6  1  0  0  0  0
+  3  7  1  0  0  0  0
+  1  8  1  0  0  0  0
+  1  9  1  0  0  0  0
+  2 10  1  0  0  0  0
+  2 11  1  0  0  0  0
+  4 12  1  0  0  0  0
+  4 13  1  0  0  0  0
+  4 14  1  0  0  0  0
+M  END
+$$$$"""
+        data, result = test.split("\n"), as_mol.split("\n")
+        self.assertEqual(len(data), len(result))
+        self.assertEqual(data[-2], result[-2].rstrip()) # M  END
+        
+        
 class TestCDK(TestToolkit):
     toolkit = cdk
     tanimotoresult = 0.571
@@ -439,11 +543,9 @@ class TestCDK(TestToolkit):
     def testSMARTS(self):
         """No SMARTS testing done"""
         pass
-
     def testLocalOpt(self):
         """No local opt testing done"""
         pass
-
     def testMake3D(self):
         """No 3D coordinate generation done"""
         pass
@@ -463,8 +565,9 @@ if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
         os.remove("testoutput.txt")
 
-    lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit}
-    testcases = [TestCDK, TestOBabel, TestRDKit]
+    lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
+              'webel': TestWebel}
+    testcases = [TestCDK, TestOBabel, TestRDKit, TestWebel]
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         testcases = [TestCDK, TestJybel]
