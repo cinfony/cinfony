@@ -245,7 +245,7 @@ class Molecule(object):
             return (1, self.write("mol"))
         else:
             return (0, self.write("smi"))
-    
+
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
         
@@ -286,24 +286,33 @@ class Molecule(object):
         """        
         if format not in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
-        if filename == None:
-            if format == "smi":
-                sg = cdk.smiles.SmilesGenerator()
-                # Set flag or else c1ccccc1 will be written as C1CCCCC1
-                sg.setUseAromaticityFlag(True)
-                return sg.createSMILES(self.Molecule)
+        
+        if filename is not None and not overwrite and os.path.isfile(filename):
+            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename            
+
+        if format == "smi":
+            sg = cdk.smiles.SmilesGenerator()
+            # Set flag or else c1ccccc1 will be written as C1CCCCC1
+            sg.setUseAromaticityFlag(True)
+            smiles = sg.createSMILES(self.Molecule)
+            if filename:
+                output = open(filename, "w")
+                print >> output, smiles
+                output.close()
+                return
             else:
-                writer = java.io.StringWriter()
+                return smiles
         else:
-            if not overwrite and os.path.isfile(filename):
-                raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename            
-            writer = java.io.FileWriter(java.io.File(filename))
-        molwriter = _outformats[format](writer)
-        molwriter.writeMolecule(self.Molecule)
-        molwriter.close()
-        writer.close()
-        if filename == None:
-            return writer.toString()
+            if filename is None:
+                writer = java.io.StringWriter()
+            else:
+                writer = java.io.FileWriter(java.io.File(filename))
+            molwriter = _outformats[format](writer)
+            molwriter.write(self.Molecule)
+            molwriter.close()
+            writer.close()
+            if filename == None:
+                return writer.toString()
 
     def calcfp(self, fp="daylight"):
         """Calculate a molecular fingerprint.
@@ -516,33 +525,33 @@ class Atom(object):
         c = self.coords
         return "Atom: %d (%.2f %.2f %.2f)" % (self.atomicnum, c[0], c[1], c[2])
 
-##class Smarts(object):
-##    """A Smarts Pattern Matcher
-##
-##    Required parameters:
-##       smartspattern
-##    
-##    Methods:
-##       findall()
-##    
-##    Example:
-##    >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
-##    >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
-##    >>> print smarts.findall(mol) 
-##    [(1, 2), (4, 5), (6, 7)]
-##    """
-##    def __init__(self, smartspattern):
-##        """Initialise with a SMARTS pattern."""
-##        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
-##        
-##    def findall(self, molecule):
-##        """Find all matches of the SMARTS pattern to a particular molecule.
-##        
-##        Required parameters:
-##           molecule
-##        """
-##        match = self.smarts.matches(molecule.Molecule)
-##        return list(self.smarts.getUniqueMatchingAtoms())
+class Smarts(object):
+    """A Smarts Pattern Matcher
+
+    Required parameters:
+       smartspattern
+    
+    Methods:
+       findall()
+    
+    Example:
+    >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
+    >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
+    >>> print smarts.findall(mol) 
+    [(1, 2), (4, 5), (6, 7)]
+    """
+    def __init__(self, smartspattern):
+        """Initialise with a SMARTS pattern."""
+        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
+        
+    def findall(self, molecule):
+        """Find all matches of the SMARTS pattern to a particular molecule.
+        
+        Required parameters:
+           molecule
+        """
+        match = self.smarts.matches(molecule.Molecule)
+        return list(self.smarts.getUniqueMatchingAtoms())
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object

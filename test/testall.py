@@ -4,29 +4,19 @@ import sys
 import unittest
 
 ironable = rdk = cdk = obabel = webel = None
-if sys.platform[:4] == "java":
-    from cinfony import cdk, obabel, webel
-elif sys.platform[:3] == "cli":
-    from cinfony import ironable, webel
-else:
-    try:
-        from cinfony import cdk
-    except ImportError:
-        pass
-    try:
-        from cinfony import obabel
-    except ImportError:
-        pass
-    try:
-        from cinfony import rdk
-    except ImportError:
-        pass
-    from cinfony import webel
-##    try:
-##        import ironclad
-##        import pybel as obabel
-##    except ImportError:
-##        pass
+try:
+    from cinfony import cdk
+except ImportError:
+    pass
+try:
+    from cinfony import obabel
+except ImportError:
+    pass
+try:
+    from cinfony import rdk
+except ImportError:
+    pass
+from cinfony import webel
 
 
 # For compatability with Python2.3
@@ -540,9 +530,6 @@ class TestCDK(TestToolkit):
     Nfpbits = 4 # The CDK uses a true java.util.Bitset
     datakeys = ['NSC', 'cdk:Remark', 'cdk:Title']
 
-    def testSMARTS(self):
-        """No SMARTS testing done"""
-        pass
     def testLocalOpt(self):
         """No local opt testing done"""
         pass
