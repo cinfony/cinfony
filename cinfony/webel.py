@@ -100,7 +100,6 @@ def readstring(format, string):
         smiles = nci(_quo(string), "smiles").rstrip()
     else:
         smiles = string
-    print smiles
     if format == "inchikey":
         return [Molecule(smile) for smile in smiles.split("\n")]
     else:
@@ -263,7 +262,6 @@ class Molecule(object):
             format = "std" + format
             output = nci(_quo(self.smiles), "%s" % format).rstrip()
         else:
-            print "file?format=%s" % format
             output = nci(_quo(self.smiles), "file?format=%s" % format).rstrip()
 
         if filename:

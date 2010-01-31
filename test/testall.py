@@ -378,7 +378,7 @@ class TestJybel(TestOBabel):
         pass
 
 class TestIronable(TestJybel):
-    toolkit = ironable
+    pass
 
 class TestRDKit(TestToolkit):
     toolkit = rdk
@@ -554,13 +554,16 @@ if __name__=="__main__":
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
               'webel': TestWebel}
-    testcases = [TestCDK, TestOBabel, TestRDKit, TestWebel]
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
-        testcases = [TestCDK, TestJybel]
-##    elif sys.platform[:3] == "cli":
-##        lookup['obabel'] = TestIronable
-##        testcases = [TestIronable]
+        del lookup['rdk']
+    elif sys.platform[:3] == "cli":
+        lookup['obabel'] = TestIronable
+        del lookup['rdk']
+        del lookup['cdk']
+
+    testcases = lookup.values()
+
     if len(sys.argv) > 1:
         testcases = [lookup[x] for x in sys.argv[1:]]
 

@@ -25,6 +25,7 @@ def _formatstodict(list):
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
 _obconv = ob.OBConversion()
+_builder = ob.OBBuilder()
 informats = _formatstodict(_obconv.GetSupportedInputFormat())
 """A dictionary of supported input formats"""
 outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
@@ -33,17 +34,21 @@ outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
+def _getpluginnames(ptype):
+    plugins = ob.VectorString()
+    ob.OBPlugin.ListAsVector(ptype, None, plugins)
+    return [x.split()[0] for x in plugins]
 
-descs = ['LogP', 'MR', 'TPSA']
+descs = _getpluginnames("descriptors")
 """A list of supported descriptors"""
 _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
-fps = ['FP2', 'FP3', 'FP4']
+fps = _getpluginnames("fingerprints")
 """A list of supported fingerprint types"""
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
-forcefields = ['uff', 'mmff94', 'ghemical']
+forcefields = [x.lower() for x in _getpluginnames("forcefields")]
 """A list of supported forcefields"""
 _forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
-operations = ['Gen3D']
+operations = _getpluginnames("ops")
 """A list of supported operations"""
 _operations = _getplugins(ob.OBOp.FindType, operations)
 
@@ -74,9 +79,9 @@ def readfile(format, filename):
     obconversion = ob.OBConversion()
     formatok = obconversion.SetInFormat(format)
     if not formatok:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError("%s is not a recognised OpenBabel format" % format)
     if not os.path.isfile(filename):
-        raise IOError, "No such file: '%s'" % filename
+        raise IOError("No such file: '%s'" % filename)
     obmol = ob.OBMol()
     notatend = obconversion.ReadFile(obmol,filename)
     while notatend:
@@ -103,24 +108,29 @@ def readstring(format, string):
 
     formatok = obconversion.SetInFormat(format)
     if not formatok:
-        raise ValueError,"%s is not a recognised OpenBabel format" % format
+        raise ValueError("%s is not a recognised OpenBabel format" % format)
 
     success = obconversion.ReadString(obmol, string)
     if not success:
-        raise IOError, "Failed to convert '%s' to format '%s'" % (
-            string, format)
+        raise IOError("Failed to convert '%s' to format '%s'" % (
+            string, format))
     return Molecule(obmol)
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
    
+    Although it's possible to write a single molecule to a file by
+    calling the write() method of a molecule, if multiple molecules
+    are to be written to the same file you should use the Outputfile
+    class.
+    
     Required parameters:
        format - see the outformats variable for a list of available
                 output formats
        filename
 
     Optional parameters:
-       overwite -- if the output file already exists, should it
+       overwrite -- if the output file already exists, should it
                    be overwritten? (default is False)
                    
     Methods:
@@ -131,11 +141,11 @@ class Outputfile(object):
         self.format = format
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         self.obConversion = ob.OBConversion()
         formatok = self.obConversion.SetOutFormat(self.format)
         if not formatok:
-            raise ValueError,"%s is not a recognised OpenBabel format" % format
+            raise ValueError("%s is not a recognised OpenBabel format" % format)
         self.total = 0 # The total number of molecules written to the file
     
     def write(self, molecule):
@@ -145,7 +155,7 @@ class Outputfile(object):
            molecule
         """
         if not self.filename:
-            raise IOError, "Outputfile instance is closed."
+            raise IOError("Outputfile instance is closed.")
 
         if self.total==0:
             self.obConversion.WriteFile(molecule.OBMol, self.filename)
@@ -222,7 +232,7 @@ class Molecule(object):
         if unitcell:
             return unitcell.Downcast[ob.OBUnitCell]()
         else:
-            raise AttributeError, "Molecule has no attribute 'unitcell'"
+            raise AttributeError("Molecule has no attribute 'unitcell'")
     @property
     def _exchange(self):
         if self.OBMol.HasNonZeroCoords():
@@ -256,7 +266,7 @@ class Molecule(object):
             try:
                 desc = _descdict[descname]
             except KeyError:
-                raise ValueError, "%s is not a recognised Open Babel descriptor type" % descname
+                raise ValueError("%s is not a recognised Open Babel descriptor type" % descname)
             ans[descname] = desc.Predict(self.OBMol)
         return ans
     
@@ -272,7 +282,7 @@ class Molecule(object):
         try:
             fingerprinter = _fingerprinters[fptype]
         except KeyError:
-            raise ValueError, "%s is not a recognised Open Babel Fingerprint type" % fptype
+            raise ValueError("%s is not a recognised Open Babel Fingerprint type" % fptype)
         fingerprinter.GetFingerprint(self.OBMol, fp)
         return Fingerprint(fp)
 
@@ -295,11 +305,11 @@ class Molecule(object):
         obconversion = ob.OBConversion()
         formatok = obconversion.SetOutFormat(format)
         if not formatok:
-            raise ValueError,"%s is not a recognised OpenBabel format" % format
+            raise ValueError("%s is not a recognised OpenBabel format" % format)
 
         if filename:
             if not overwrite and os.path.isfile(filename):
-                raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
+                raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
             obconversion.WriteFile(self.OBMol,filename)
             obconversion.CloseOutFile()
         else:
@@ -321,7 +331,9 @@ class Molecule(object):
         if self.dim != 3:
             self.make3D(forcefield)
         ff = _forcefields[forcefield]
-        ff.Setup(self.OBMol)
+        success = ff.Setup(self.OBMol)
+        if not success:
+            return
         ff.SteepestDescent(steps)
         ff.GetCoordinates(self.OBMol)
     
@@ -349,7 +361,7 @@ class Molecule(object):
         to improve the coordinates further.
         """
         forcefield = forcefield.lower()
-        _operations['Gen3D'].Do(self.OBMol)
+        _builder.Build(self.OBMol)
         self.addh()
         self.localopt(forcefield, steps)
 
@@ -386,7 +398,7 @@ class Molecule(object):
                             "generation and depiction. OASA is part of BKChem. "
                             "See installation instructions for more "
                             "information.")
-            raise ImportError, errormessage
+            raise ImportError(errormessage)
         mol = oasa.molecule()
         for atom in self.atoms:
             v = mol.create_vertex()
@@ -474,7 +486,7 @@ class Molecule(object):
                                     "Library not found, but is required for image "
                                     "display. See installation instructions for "
                                     "more information.")
-                    raise ImportError, errormessage
+                    raise ImportError(errormessage)
                 root = tk.Tk()
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
@@ -495,7 +507,7 @@ class Atom(object):
        OBAtom -- an Open Babel OBAtom
         
     Attributes:
-       atomicmass, atomicnum, cidx, coordidx, exactmass,
+       atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
        implicitvalence, isotope, partialcharge, spin, type,
        valence, vector.
@@ -620,7 +632,7 @@ class Smarts(object):
         self.obsmarts = ob.OBSmartsPattern()
         success = self.obsmarts.Init(smartspattern)
         if not success:
-            raise IOError, "Invalid SMARTS pattern"
+            raise IOError("Invalid SMARTS pattern")
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
         
@@ -664,7 +676,7 @@ class MoleculeData(object):
                                                or x.GetDataType()==ob.openbabelcsharp.CommentData]
     def _testforkey(self, key):
         if not key in self:
-            raise KeyError, "'%s'" % key
+            raise KeyError("'%s'" % key)
     def keys(self):
         return [x.GetAttribute() for x in self._data()]
     def values(self):
