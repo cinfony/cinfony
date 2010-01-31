@@ -6,7 +6,7 @@ import unittest
 ironable = rdk = cdk = obabel = webel = None
 try:
     from cinfony import cdk
-except ImportError:
+except (ImportError, KeyError):
     pass
 try:
     from cinfony import obabel
@@ -143,7 +143,7 @@ class TestToolkit(myTestCase):
         """Convert the SMILES of benzene to itself"""
         benzene = "c1ccccc1"
         mol = self.toolkit.readstring("smi", benzene)
-        smi = mol.write("smi")
+        smi = mol.write("smi").rstrip()
         self.assertEqual(smi, benzene)
 
     def testRSconversiontoMOL(self):

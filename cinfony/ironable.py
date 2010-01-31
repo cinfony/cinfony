@@ -218,9 +218,9 @@ class Molecule(object):
     title = property(_gettitle, _settitle)
     @property
     def unitcell(self):
-        unitcell = self.OBMol.GetData(System.UInt32(ob.openbabel.UnitCell))
+        unitcell = self.OBMol.GetData(System.UInt32(ob.openbabelcsharp.UnitCell))
         if unitcell:
-            return unitcell.ToUnitCell()
+            return unitcell.Downcast[ob.OBUnitCell]()
         else:
             raise AttributeError, "Molecule has no attribute 'unitcell'"
     @property
@@ -268,7 +268,7 @@ class Molecule(object):
                      fps variable for a list of of available fingerprint
                      types.
         """
-        fp = ob.vectorUnsignedInt()
+        fp = ob.VectorUInt()
         try:
             fingerprinter = _fingerprinters[fptype]
         except KeyError:
@@ -660,8 +660,8 @@ class MoleculeData(object):
     def __init__(self, obmol):
         self._mol = obmol
     def _data(self):
-        return [x for x in self._mol.GetData() if x.GetDataType()==ob.openbabel.PairData
-                                               or x.GetDataType()==ob.openbabel.CommentData]
+        return [x for x in self._mol.GetData() if x.GetDataType()==ob.openbabelcsharp.PairData
+                                               or x.GetDataType()==ob.openbabelcsharp.CommentData]
     def _testforkey(self, key):
         if not key in self:
             raise KeyError, "'%s'" % key
@@ -695,7 +695,7 @@ class MoleculeData(object):
         return self._mol.GetData(key).GetValue()
     def __setitem__(self, key, value):
         if key in self:
-            pairdata = self._mol.GetData(key).ToPairData()
+            pairdata = self._mol.GetData(key).Downcast[ob.OBPairData]()
             pairdata.SetValue(str(value))
         else:
             pairdata = ob.OBPairData()
