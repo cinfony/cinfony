@@ -10,7 +10,7 @@ except (ImportError, KeyError):
     pass
 try:
     from cinfony import obabel
-except ImportError:
+except (ImportError, AttributeError):
     pass
 try:
     from cinfony import rdk

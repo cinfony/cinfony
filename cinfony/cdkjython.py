@@ -620,50 +620,50 @@ class MoleculeData(object):
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
 
-class _Canvas(javax.swing.JPanel):
-    def __init__(self, mol):
-        self.mol = mol
-        
-        self.frame = javax.swing.JFrame()
-        r2dm = cdk.renderer.Renderer2DModel()
-        self.renderer = cdk.renderer.Renderer2D(r2dm)
-        screenSize = java.awt.Dimension(300, 300)
-        self.setPreferredSize(screenSize)
-        r2dm.setBackgroundDimension(screenSize)
-        self.setBackground(r2dm.getBackColor())
-
-        r2dm.setDrawNumbers(False)
-        r2dm.setUseAntiAliasing(True)
-        r2dm.setColorAtomsByType(True)
-        r2dm.setShowImplicitHydrogens(True)
-        r2dm.setShowAromaticity(True)
-        r2dm.setShowReactionBoxes(False)
-        r2dm.setKekuleStructure(False)
-
-        scale = 0.9
-        gt = cdk.geometry.GeometryTools
-        gt.translateAllPositive(self.mol, r2dm.getRenderingCoordinates())
-        gt.scaleMolecule(self.mol, self.getPreferredSize(),
-                         scale, r2dm.getRenderingCoordinates())
-        gt.center(self.mol, self.getPreferredSize(),
-                  r2dm.getRenderingCoordinates())
-
-        self.frame.getContentPane().add(self)
-        self.frame.pack()
-
-    def paint(self, g):
-        # From http://www.jython.org/docs/subclassing.html
-        javax.swing.JPanel.paint(self, g) 
-        self.renderer.paintMolecule(self.mol, g, False, True)
-
-    def popup(self):
-        self.frame.visible = True
-
-    def writetofile(self, filename):
-        img = self.createImage(300, 300)
-        snapGraphics = img.getGraphics()
-        self.paint(snapGraphics)        
-        javax.imageio.ImageIO.write(img, "png", java.io.File(filename))
+##class _Canvas(javax.swing.JPanel):
+##    def __init__(self, mol):
+##        self.mol = mol
+##        
+##        self.frame = javax.swing.JFrame()
+##        r2dm = cdk.renderer.Renderer2DModel()
+##        self.renderer = cdk.renderer.Renderer2D(r2dm)
+##        screenSize = java.awt.Dimension(300, 300)
+##        self.setPreferredSize(screenSize)
+##        r2dm.setBackgroundDimension(screenSize)
+##        self.setBackground(r2dm.getBackColor())
+##
+##        r2dm.setDrawNumbers(False)
+##        r2dm.setUseAntiAliasing(True)
+##        r2dm.setColorAtomsByType(True)
+##        r2dm.setShowImplicitHydrogens(True)
+##        r2dm.setShowAromaticity(True)
+##        r2dm.setShowReactionBoxes(False)
+##        r2dm.setKekuleStructure(False)
+##
+##        scale = 0.9
+##        gt = cdk.geometry.GeometryTools
+##        gt.translateAllPositive(self.mol, r2dm.getRenderingCoordinates())
+##        gt.scaleMolecule(self.mol, self.getPreferredSize(),
+##                         scale, r2dm.getRenderingCoordinates())
+##        gt.center(self.mol, self.getPreferredSize(),
+##                  r2dm.getRenderingCoordinates())
+##
+##        self.frame.getContentPane().add(self)
+##        self.frame.pack()
+##
+##    def paint(self, g):
+##        # From http://www.jython.org/docs/subclassing.html
+##        javax.swing.JPanel.paint(self, g) 
+##        self.renderer.paintMolecule(self.mol, g, False, True)
+##
+##    def popup(self):
+##        self.frame.visible = True
+##
+##    def writetofile(self, filename):
+##        img = self.createImage(300, 300)
+##        snapGraphics = img.getGraphics()
+##        self.paint(snapGraphics)        
+##        javax.imageio.ImageIO.write(img, "png", java.io.File(filename))
 
 ##>>> readstring("smi", "CCC").calcfp().bits
 ##[542, 637, 742]
