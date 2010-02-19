@@ -20,8 +20,8 @@ import StringIO
 
 from jpype import *
 
-jvm = os.environ['JPYPE_JVM']
-cp = os.environ['CLASSPATH']
+_jvm = os.environ['JPYPE_JVM']
+_cp = os.environ['CLASSPATH']
 startJVM(jvm, "-Djava.class.path=" + cp)
 
 try:
@@ -39,7 +39,7 @@ except ImportError:
 
 cdk = JPackage("org").openscience.cdk
 try:
-    testmol = cdk.Molecule()
+    _testmol = cdk.Molecule()
 except TypeError:
     raise ImportError, "The CDK Jar file cannot be found."
 
@@ -55,7 +55,7 @@ def _getdescdict():
             descdict[name] = desc
     return descdict
 
-_descdict = descdict = _getdescdict()
+_descdict = _getdescdict()
 descs = _descdict.keys()
 """A list of supported descriptors"""
 fps = ["daylight", "graph"]
@@ -63,12 +63,12 @@ fps = ["daylight", "graph"]
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
-informats = dict([(x, _formats[x]) for x in ['smi', 'sdf', 'mol']])
+informats = dict([(_x, _formats[x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(x, _formats[x]) for x in _outformats.keys() + ['smi']])
+outformats = dict([(_x, _formats[x]) for _x in _outformats.keys() + ['smi']])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 """A list of supported forcefields"""
@@ -78,7 +78,7 @@ _isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
 _bondtypes = {1: cdk.CDKConstants.BONDORDER_SINGLE,
               2: cdk.CDKConstants.BONDORDER_DOUBLE,
               3: cdk.CDKConstants.BONDORDER_TRIPLE}
-_revbondtypes = dict([(y,x) for (x,y) in _bondtypes.iteritems()])
+_revbondtypes = dict([(_y,_x) for (_x,_y) in _bondtypes.iteritems()])
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.

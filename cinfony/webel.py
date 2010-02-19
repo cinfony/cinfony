@@ -1,6 +1,8 @@
 """
 webel - A Cinfony module that runs entirely on web services
 
+webel can be used from all of CPython, Jython and IronPython. 
+
 Global variables:
   informats - a dictionary of supported input formats
   outformats - a dictionary of supported output formats

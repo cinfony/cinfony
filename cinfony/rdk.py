@@ -43,9 +43,9 @@ descs = descDict.keys()
 
 _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
             'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
-informats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi']])
+informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi']])
 """A dictionary of supported input formats"""
-outformats = dict([(x, _formats[x]) for x in ['mol', 'sdf', 'smi', 'iso']])
+outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi', 'iso']])
 """A dictionary of supported output formats"""
 
 _forcefields = {'uff': AllChem.UFFOptimizeMolecule}

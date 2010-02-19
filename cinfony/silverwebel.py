@@ -1,5 +1,5 @@
 """
-webel - A Cinfony module that runs entirely on web services
+silverwebel - A Cinfony module for Silverlight that runs on web services
 
 Global variables:
   informats - a dictionary of supported input formats
@@ -96,6 +96,8 @@ def readstring(format, string):
                 input formats
        string
 
+    Note: For InChIKeys a list of molecules is returned.
+
     Example:
     >>> input = "C1=CC=CS1"
     >>> mymol = readstring("smi", input)   
@@ -108,10 +110,13 @@ def readstring(format, string):
         smiles = nci(_quo(string), "smiles").rstrip()
     else:
         smiles = string
-    mol = Molecule(smiles)
-    if format == "name":
-        mol.title = string
-    return mol
+    if format == "inchikey":
+        return [Molecule(smile) for smile in smiles.split("\n")]
+    else:
+        mol = Molecule(smiles)
+        if format == "name":
+            mol.title = string
+        return mol
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
@@ -136,7 +141,8 @@ class Outputfile(object):
     """
     def __init__(self, format, filename, overwrite=False):
         self.format = format.lower()
-        if not overwrite and os.path.isfile(filename):
+        self.filename = filename
+        if not overwrite and os.path.isfile(self.filename):
             raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         if not format in outformats:
             raise ValueError("%s is not a recognised Webel format" % format)
@@ -150,11 +156,7 @@ class Outputfile(object):
         """
         if self.file.closed:
             raise IOError("Outputfile instance is closed.")
-        if self.format == "smi":
-            output = molecule.smiles
-        else:
-            output = nci(_quo(molecule.smiles), "file?format=%s" % self.format).rstrip()
-        
+        output = molecule.write(self.format)
         print >> self.file, output
 
     def close(self):
@@ -266,6 +268,9 @@ class Molecule(object):
             except urllib2.URLError, e:
                 if e.code == 404:
                     output = []
+        elif format in ['inchi', 'inchikey']:
+            format = "std" + format
+            output = nci(_quo(self.smiles), "%s" % format).rstrip()
         else:
             output = nci(_quo(self.smiles), "file?format=%s" % format).rstrip()
 
