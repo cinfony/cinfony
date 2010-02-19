@@ -18,13 +18,6 @@ except ImportError:
     pass
 from cinfony import webel
 
-
-# For compatability with Python2.3
-try:
-    from sets import Set as set
-except ImportError:
-    pass
-
 class myTestCase(unittest.TestCase):
     """Additional methods not present in Jython 2.2"""
     # Taken from unittest.py in Python 2.5 distribution
@@ -345,21 +338,21 @@ class TestOBabel(TestToolkit):
     def importtest(self):
         self.mols[0].draw(show=True, usecoords=True)
 
-    def testDrawdependencies(self):
-        "Testing the draw dependencies"
-        t = self.toolkit.tk
-        self.toolkit.tk = None
-        self.mols[0].draw(show=False, usecoords=True,
-                          filename="%s_b.png" % self.toolkit.__name__)
-        self.assertRaises(ImportError,
-                          self.importtest)
-        self.toolkit.tk = t
-
-        t = self.toolkit.oasa
-        self.toolkit.oasa = None
-        self.assertRaises(ImportError,
-                          self.importtest)
-
+##    def testDrawdependencies(self):
+##        "Testing the draw dependencies"
+##        t = self.toolkit.tk
+##        self.toolkit.tk = None
+##        self.mols[0].draw(show=False, usecoords=True,
+##                          filename="%s_b.png" % self.toolkit.__name__)
+##        self.assertRaises(ImportError,
+##                          self.importtest)
+##        self.toolkit.tk = t
+##
+##        t = self.toolkit.oasa
+##        self.toolkit.oasa = None
+##        self.assertRaises(ImportError,
+##                          self.importtest)
+##
     def testRSgetprops(self):
         """Get the values of the properties."""
         self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)

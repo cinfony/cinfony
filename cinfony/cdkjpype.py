@@ -22,7 +22,7 @@ from jpype import *
 
 _jvm = os.environ['JPYPE_JVM']
 _cp = os.environ['CLASSPATH']
-startJVM(jvm, "-Djava.class.path=" + cp)
+startJVM(_jvm, "-Djava.class.path=" + _cp)
 
 try:
     import oasa
@@ -63,12 +63,12 @@ fps = ["daylight", "graph"]
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
-informats = dict([(_x, _formats[x]) for _x in ['smi', 'sdf', 'mol']])
+informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(_x, _formats[x]) for _x in _outformats.keys() + ['smi']])
+outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 """A list of supported forcefields"""

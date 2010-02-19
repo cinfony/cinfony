@@ -37,12 +37,12 @@ fps = ["daylight", "graph"]
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
-informats = dict([(_x, _formats[x]) for _x in ['smi', 'sdf', 'mol']])
+informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(_x, _formats[x]) for _x in _outformats.keys() + ['smi']])
+outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 """A list of supported forcefields"""
@@ -370,13 +370,10 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False,
-             usecoords=False):
+    def draw(self, update=False, usecoords=False):
         """Create a 2D depiction of the molecule.
 
         Optional parameters:
-          show -- display on screen (default is True)
-          filename -- write to file (default is None)
           update -- update the coordinates of the atoms to those
                     determined by the structure diagram generator
                     (default is False)
@@ -407,14 +404,14 @@ class Molecule(object):
                                     coords.x, coords.y))
 
         mol.removeh()        
-        canvas = _Canvas(mol.Molecule)
-        
-        if filename:
-            canvas.writetofile(filename)
-        if show:
-            canvas.popup()
-        else:
-            canvas.frame.dispose()
+##        canvas = _Canvas(mol.Molecule)
+##        
+##        if filename:
+##            canvas.writetofile(filename)
+##        if show:
+##            canvas.popup()
+##        else:
+##            canvas.frame.dispose()
         
 
 ##    def localopt(self, forcefield="MMFF94", steps=100):

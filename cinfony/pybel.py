@@ -53,7 +53,7 @@ _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
 fps = _getpluginnames("fingerprints")
 """A list of supported fingerprint types"""
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
-forcefields = [x.lower() for x in _getpluginnames("forcefields")]
+forcefields = [_x.lower() for _x in _getpluginnames("forcefields")]
 """A list of supported forcefields"""
 _forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
 operations = _getpluginnames("ops")

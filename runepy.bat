@@ -1,4 +1,8 @@
-call D:\Tools\cinfony\dist\cinfony.bat 
-set PATH=D:\Tools\cinfony\dist\DLL;D:\Tools\RDKit\trunk\bin;C:\Python25;D:\Tools\jython2.2.1;C:\Tcl\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\ATI Technologies\ATI.ACE\;C:\Program Files\IDM Computer Solutions\UltraEdit-32;C:\Program Files\jython-2.1;C:\PROGRA~1\ATT\Graphviz\bin;C:\Program Files\Hummingbird\Connectivity\11.00\Accessories\;;C:\Program Files\doxygen\bin;C:\Program Files\Microsoft SQL Server\90\Tools\binn\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Subversion;C:\Program Files\swigwin-1.3.31;C:\Tcl\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\ATI Technologies\ATI.ACE\;C:\Program Files\IDM Computer Solutions\UltraEdit-32;C:\Program Files\jython-2.1;C:\PROGRA~1\ATT\Graphviz\bin;C:\Program Files\Hummingbird\Connectivity\11.00\Accessories\;;C:\Program Files\doxygen\bin;C:\Program Files\Microsoft SQL Server\90\Tools\binn\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\Subversion;C:\Program Files\R\R-2.3.1\bin;C:\cygwin\bin;C:\Program Files\Gnuplot\bin;C:\Program Files\Ghostgum\gsview;C:\Program Files\Adobe\Acrobat 7.0\Reader;C:\bin;D:\cinfony;C:\Program Files\OpenBabel-2.2.0
+call C:\Tools\cinfony\cinfony-0.9\cinfony.bat 
 rem python25 C:\Python25\Scripts\epydoc.py --no-private --no-sourcecode cinfony
-python25 C:\Python25\Scripts\epydoc.py --no-private cinfony 
+C:\Python26\python C:\Python26\Scripts\epydoc.py --no-private --name Cinfony --url http://cinfony.googlecode.com cinfony 
+C:\Python26\python C:\Python26\Scripts\epydoc.py --pdf --no-private --name Cinfony --url http://cinfony.googlecode.com cinfony 
+
+
+rem Note: Only four on-screen errors for org.openbabel, System, System.Net and
+rem       org.openscience.cdk
