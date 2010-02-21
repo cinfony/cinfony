@@ -25,7 +25,6 @@ def _formatstodict(list):
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
 _obconv = ob.OBConversion()
-_builder = ob.OBBuilder()
 informats = _formatstodict(_obconv.GetSupportedInputFormat())
 """A dictionary of supported input formats"""
 outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
@@ -34,21 +33,22 @@ outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
-def _getpluginnames(ptype):
-    plugins = ob.vectorString()
-    ob.OBPlugin.ListAsVector(ptype, None, plugins)
-    return [x.split()[0] for x in plugins]
+##def _getpluginnames(ptype): # Doesn't work from Jython!
+##    plugins = ob.vectorString()
+##    ob.OBPlugin.ListAsVector(ptype, None, plugins)
+##    return [x.split()[0] for x in plugins]
 
-descs = _getpluginnames("descriptors")
+descs = ['HBA1', 'HBA2', 'HBD', 'InChI', 'L5', 'logP', 'MR',
+         'MW', 'nF', 'nHal', 's', 'smarts', 'spinMult', 'title', 'TPSA']
 """A list of supported descriptors"""
 _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
-fps = _getpluginnames("fingerprints")
+fps = ['FP2', 'FP3', 'FP4', 'MACCS']
 """A list of supported fingerprint types"""
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
-forcefields = _getpluginnames("forcefields")
+forcefields = ['ghemical', 'mmff94', 'mmff94s', 'uff']
 """A list of supported forcefields"""
 _forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
-operations = _getpluginnames("ops")
+operations = ['AddPolarH', 'fillUC', 'gen3D', 'nodative']
 """A list of supported operations"""
 _operations = _getplugins(ob.OBOp.FindType, operations)
 
@@ -361,7 +361,7 @@ class Molecule(object):
         to improve the coordinates further.
         """
         forcefield = forcefield.lower()
-        _builder.Build(self.OBMol)
+        _operations['Gen3D'].Do(self.OBMol)
         self.addh()
         self.localopt(forcefield, steps)
 
