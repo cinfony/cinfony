@@ -273,7 +273,11 @@ class Molecule(object):
             output = nci(_quo(self.smiles), "%s" % format).rstrip()
         elif format == 'iupac':
             format = format + "_name"
-            output = nci(_quo(self.smiles), "%s" % format).rstrip()
+            try:
+                output = nci(_quo(self.smiles), "%s" % format).rstrip()
+            except urllib2.URLError, e:
+                if e.code == 404:
+                    output = ""
         else:
             output = nci(_quo(self.smiles), "file?format=%s" % format).rstrip()
 
