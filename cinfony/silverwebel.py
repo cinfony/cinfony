@@ -31,7 +31,7 @@ outformats = {"smi":"SMILES", "cdxml":"ChemDraw XML", "inchi":"InChI",
               "mol":"Symyx mol", "mol2":"Tripos Sybyl MOL2",
               "mrv":"ChemAxon MRV", "pdb":"Protein Data Bank",
               "sdf3000":"Symyx SDF3000", "sln":"Sybl line notation",
-              "xyz":"XYZ"}
+              "xyz":"XYZ", "iupac":"IUPAC name"}
 """A dictionary of supported output formats"""
 
 fps = ["std", "maccs", "estate"]
@@ -270,6 +270,9 @@ class Molecule(object):
                     output = []
         elif format in ['inchi', 'inchikey']:
             format = "std" + format
+            output = nci(_quo(self.smiles), "%s" % format).rstrip()
+        elif format == 'iupac':
+            format = format + "_name"
             output = nci(_quo(self.smiles), "%s" % format).rstrip()
         else:
             output = nci(_quo(self.smiles), "file?format=%s" % format).rstrip()
