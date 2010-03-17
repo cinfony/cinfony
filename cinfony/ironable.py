@@ -1,5 +1,5 @@
 """
-pybel - A Cinfony module for accessing OpenBabel from CPython
+ironable - A Cinfony module for accessing OpenBabel from IronPython
 
 Global variables:
   ob - the underlying SWIG bindings for OpenBabel
@@ -169,7 +169,7 @@ class Outputfile(object):
         self.filename = None
 
 class Molecule(object):
-    """Represent a Pybel Molecule.
+    """Represent an Ironable Molecule.
 
     Required parameter:
        OBMol -- an Open Babel OBMol or any type of cinfony Molecule
@@ -501,7 +501,7 @@ class Molecule(object):
                 os.remove(filename)
 
 class Atom(object):
-    """Represent a Pybel atom.
+    """Represent an Ironable atom.
 
     Required parameter:
        OBAtom -- an Open Babel OBAtom
