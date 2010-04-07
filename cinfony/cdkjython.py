@@ -322,10 +322,6 @@ class Molecule(object):
                      fps variable for a list of of available fingerprint
                      types.
         """        
-        # if fp == "substructure":
-        #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
-        #        cdk.fingerprint.StandardSubstructureSets.getFunctionalGroupSubstructureSet()
-        #        )
         fp = fp.lower()
         if fp == "graph":
             fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
@@ -370,87 +366,25 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self, update=False, usecoords=False):
-        """Create a 2D depiction of the molecule.
+    def draw(self):
+        """Create 2D coordinates for the molecule.
 
-        Optional parameters:
-          update -- update the coordinates of the atoms to those
-                    determined by the structure diagram generator
-                    (default is False)
-          usecoords -- don't calculate 2D coordinates, just use
-                       the current coordinates (default is False)
+        Note that depiction is not currently possible with the CDK 1.2.x
+        series, but will be available with CDK 1.4.x.
         """
         mol = Molecule(self.Molecule.clone())
         cdk.aromaticity.CDKHueckelAromaticityDetector.detectAromaticity(mol.Molecule)
         
-        if not usecoords:            
-            # Do the SDG
-            sdg = cdk.layout.StructureDiagramGenerator()
-            sdg.setMolecule(mol.Molecule)
-            sdg.generateCoordinates()
-            mol = Molecule(sdg.getMolecule())
-            if update:
-                for atom, newatom in zip(self.atoms, mol.atoms):
-                    coords = newatom.Atom.getPoint2d()
-                    atom.Atom.setPoint3d(javax.vecmath.Point3d(
-                                         coords.x, coords.y, 0.0))
+        # Do the SDG
+        sdg = cdk.layout.StructureDiagramGenerator()
+        sdg.setMolecule(mol.Molecule)
+        sdg.generateCoordinates()
+        mol = Molecule(sdg.getMolecule())
+        for atom, newatom in zip(self.atoms, mol.atoms):
+            coords = newatom.Atom.getPoint2d()
+            atom.Atom.setPoint3d(javax.vecmath.Point3d(
+                                 coords.x, coords.y, 0.0))
             
-        else:
-            if self.atoms[0].Atom.getPoint2d() is None:
-                # Use the 3D coords to set the 2D coords
-                for atom, newatom in zip(self.atoms, mol.atoms):
-                    coords = atom.Atom.getPoint3d()
-                    newatom.Atom.setPoint2d(javax.vecmath.Point2d(
-                                    coords.x, coords.y))
-
-        mol.removeh()        
-##        canvas = _Canvas(mol.Molecule)
-##        
-##        if filename:
-##            canvas.writetofile(filename)
-##        if show:
-##            canvas.popup()
-##        else:
-##            canvas.frame.dispose()
-        
-
-##    def localopt(self, forcefield="MMFF94", steps=100):
-##        forcefield = forcefield.lower()
-##        
-##        geoopt = cdk.modeling.forcefield.GeometricMinimizer()
-##        geoopt.setMolecule(self.Molecule, False)
-##        points = [t.Atom.point3d for t in self.atoms]
-##        coords = [(t.x, t.y, t.z) for t in points]
-##        print coords
-##        if forcefield == "MMFF94":
-##            ff = cdk.modeling.forcefield.MMFF94Energy(self.Molecule,
-##                                geoopt.getPotentialParameterSet())
-##        # geoopt.setMMFF94Tables()
-##        geoopt.steepestDescentsMinimization(coords, forcefield)
-##
-##    def make3D(self, forcefield="MMFF94", steps=50):
-##        """Generate 3D coordinates.
-##        
-##        Optional parameters:
-##           forcefield -- default is "MMFF94"
-##           steps -- default is 50
-##
-##        Hydrogens are added, coordinates are generated and a quick
-##        local optimization is carried out with 50 steps and the
-##        MMFF94 forcefield. Call localopt() if you want
-##        to improve the coordinates further.
-##        """
-##        forcefield = forcefield.lower()
-##        if forcefield not in forcefields:
-##            print "hey"
-##            pass
-##        self.addh()
-##        th3d = cdk.modeling.builder3d.TemplateHandler3D.getInstance()
-##        mb3d = cdk.modeling.builder3d.ModelBuilder3D.getInstance(
-##            th3d, forcefield)
-##        self.Molecule = mb3d.generate3DCoordinates(self.Molecule, False)
-##        self.localopt(forcefield, steps)
-
 class Fingerprint(object):
     """A Molecular Fingerprint.
     
@@ -616,68 +550,6 @@ class MoleculeData(object):
         self._mol.setProperty(key, str(value))
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
-
-##class _Canvas(javax.swing.JPanel):
-##    def __init__(self, mol):
-##        self.mol = mol
-##        
-##        self.frame = javax.swing.JFrame()
-##        r2dm = cdk.renderer.Renderer2DModel()
-##        self.renderer = cdk.renderer.Renderer2D(r2dm)
-##        screenSize = java.awt.Dimension(300, 300)
-##        self.setPreferredSize(screenSize)
-##        r2dm.setBackgroundDimension(screenSize)
-##        self.setBackground(r2dm.getBackColor())
-##
-##        r2dm.setDrawNumbers(False)
-##        r2dm.setUseAntiAliasing(True)
-##        r2dm.setColorAtomsByType(True)
-##        r2dm.setShowImplicitHydrogens(True)
-##        r2dm.setShowAromaticity(True)
-##        r2dm.setShowReactionBoxes(False)
-##        r2dm.setKekuleStructure(False)
-##
-##        scale = 0.9
-##        gt = cdk.geometry.GeometryTools
-##        gt.translateAllPositive(self.mol, r2dm.getRenderingCoordinates())
-##        gt.scaleMolecule(self.mol, self.getPreferredSize(),
-##                         scale, r2dm.getRenderingCoordinates())
-##        gt.center(self.mol, self.getPreferredSize(),
-##                  r2dm.getRenderingCoordinates())
-##
-##        self.frame.getContentPane().add(self)
-##        self.frame.pack()
-##
-##    def paint(self, g):
-##        # From http://www.jython.org/docs/subclassing.html
-##        javax.swing.JPanel.paint(self, g) 
-##        self.renderer.paintMolecule(self.mol, g, False, True)
-##
-##    def popup(self):
-##        self.frame.visible = True
-##
-##    def writetofile(self, filename):
-##        img = self.createImage(300, 300)
-##        snapGraphics = img.getGraphics()
-##        self.paint(snapGraphics)        
-##        javax.imageio.ImageIO.write(img, "png", java.io.File(filename))
-
-##>>> readstring("smi", "CCC").calcfp().bits
-##[542, 637, 742]
-##>>> readstring("smi", "CCC").calcfp("graph").bits
-##[595, 742, 927]
-##>>> readstring("smi", "CC=C").calcfp().bits
-##[500, 588, 637, 742]
-##>>> readstring("smi", "CC=C").calcfp("graph").bits
-##[595, 742, 927]
-##>>> readstring("smi", "C").calcfp().bits
-##[742]
-##>>> readstring("smi", "CC").calcfp().bits
-##[637, 742]
-
-# >>> readstring("smi", "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-# CCCCCCCCCCCCCC").calcdesc(["lipinskifailures"])
-# {'lipinskifailures': 1}
 
 if __name__=="__main__": #pragma: no cover
     mol = readstring("smi", "CCCC")

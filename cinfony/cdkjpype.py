@@ -348,10 +348,6 @@ class Molecule(object):
                      fps variable for a list of of available fingerprint
                      types.
         """        
-        # if fp == "substructure":
-        #    fingerprinter = cdk.fingerprint.SubstructureFingerprinter(
-        #        cdk.fingerprint.StandardSubstructureSets.getFunctionalGroupSubstructureSet()
-        #        )
         fp = fp.lower()
         if fp == "graph":
             fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
@@ -409,7 +405,6 @@ class Molecule(object):
         OASA is used for depiction. Tkinter and Python
         Imaging Library are required for image display.
         """
-        web = False # Disable the use of ChemBioGrid web services
         writetofile = filename is not None
 
         if not usecoords:            
@@ -431,74 +426,67 @@ class Molecule(object):
                 filedes = None
             else:
                 filedes, filename = tempfile.mkstemp()
-            if not web:
-                # Create OASA molecule
-                if not oasa:
-                    errormessage = ("OASA not found, but is required for 2D structure "
-                            "depiction. OASA is part of BKChem. "
-                            "See installation instructions for more "
-                            "information.")
-                    raise ImportError, errormessage                
-                mol = oasa.molecule()
-                atomnos = []
-                for newatom in newmol.atoms:
-                    if not usecoords:
+
+            # Create OASA molecule
+            if not oasa:
+                errormessage = ("OASA not found, but is required for 2D structure "
+                        "depiction. OASA is part of BKChem. "
+                        "See installation instructions for more "
+                        "information.")
+                raise ImportError, errormessage                
+            mol = oasa.molecule()
+            atomnos = []
+            for newatom in newmol.atoms:
+                if not usecoords:
+                    coords = newatom.Atom.getPoint2d()
+                else:
+                    coords = newatom.Atom.getPoint3d()
+                    if not coords:
                         coords = newatom.Atom.getPoint2d()
-                    else:
-                        coords = newatom.Atom.getPoint3d()
-                        if not coords:
-                            coords = newatom.Atom.getPoint2d()
-                    v = mol.create_vertex()
-                    v.charge = newatom.formalcharge
-                    v.symbol = _isofact.getElement(newatom.atomicnum).getSymbol()
-                    mol.add_vertex(v)
-                    v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
-                for i in range(self.Molecule.getBondCount()):
-                    bond = self.Molecule.getBond(i)
-                    bo = _revbondtypes[bond.getOrder()]
-                    atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms().iterator()]
-                    e = mol.create_edge()
-                    e.order = bo
-                    if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
-                        e.type = "h"
-                    elif bond.getStereo() == cdk.CDKConstants.STEREO_BOND_UP:
-                        e.type = "w"
-                    mol.add_edge(atoms[0], atoms[1], e)
-                mol.remove_unimportant_hydrogens()
-                maxx = max([v.x for v in mol.vertices])
-                minx = min([v.x for v in mol.vertices])
-                maxy = max([v.y for v in mol.vertices])
-                miny = min([v.y for v in mol.vertices])
-                maxcoord = max(maxx - minx, maxy - miny)
-                for v in mol.vertices:
-                    if str(v.x) == "-1.#IND":
-                        v.x = minx
-                    if str(v.y) == "-1.#IND":
-                        v.y = miny
-                fontsize = 16
-                bondwidth = 6
-                linewidth = 2
-                if maxcoord > 270: # 300  - margin * 2
-                    for v in mol.vertices:                       
-                        v.x *= 270. / maxcoord
-                        v.y *= 270. / maxcoord
-                    fontsize *= math.sqrt(270. / maxcoord)
-                    bondwidth *= math.sqrt(270. / maxcoord)
-                    linewidth *= math.sqrt(270. / maxcoord)
-                # print "Debug#", [str(a.x) for a in mol.vertices if not a.x >-100]
-                
-                canvas = oasa.cairo_out.cairo_out()
-                canvas.show_hydrogens_on_hetero = True
-                canvas.font_size = fontsize
-                canvas.bond_width = bondwidth
-                canvas.line_width = linewidth
-                canvas.mol_to_cairo(mol, filename)
-            else:
-                encodesmiles = base64.urlsafe_b64encode(bz2.compress(self.write("smi")))
-                imagedata = urllib.urlopen("http://www.chembiogrid.org/cheminfo/rest/depict/" +
-                                       encodesmiles).read()
-                if writetofile:
-                    print >> open(filename, "wb"), imagedata
+                v = mol.create_vertex()
+                v.charge = newatom.formalcharge
+                v.symbol = _isofact.getElement(newatom.atomicnum).getSymbol()
+                mol.add_vertex(v)
+                v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
+            for i in range(self.Molecule.getBondCount()):
+                bond = self.Molecule.getBond(i)
+                bo = _revbondtypes[bond.getOrder()]
+                atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms().iterator()]
+                e = mol.create_edge()
+                e.order = bo
+                if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
+                    e.type = "h"
+                elif bond.getStereo() == cdk.CDKConstants.STEREO_BOND_UP:
+                    e.type = "w"
+                mol.add_edge(atoms[0], atoms[1], e)
+            mol.remove_unimportant_hydrogens()
+            maxx = max([v.x for v in mol.vertices])
+            minx = min([v.x for v in mol.vertices])
+            maxy = max([v.y for v in mol.vertices])
+            miny = min([v.y for v in mol.vertices])
+            maxcoord = max(maxx - minx, maxy - miny)
+            for v in mol.vertices:
+                if str(v.x) == "-1.#IND":
+                    v.x = minx
+                if str(v.y) == "-1.#IND":
+                    v.y = miny
+            fontsize = 16
+            bondwidth = 6
+            linewidth = 2
+            if maxcoord > 270: # 300  - margin * 2
+                for v in mol.vertices:                       
+                    v.x *= 270. / maxcoord
+                    v.y *= 270. / maxcoord
+                fontsize *= math.sqrt(270. / maxcoord)
+                bondwidth *= math.sqrt(270. / maxcoord)
+                linewidth *= math.sqrt(270. / maxcoord)
+            
+            canvas = oasa.cairo_out.cairo_out()
+            canvas.show_hydrogens_on_hetero = True
+            canvas.font_size = fontsize
+            canvas.bond_width = bondwidth
+            canvas.line_width = linewidth
+            canvas.mol_to_cairo(mol, filename)
             if show:
                 if not tk:
                     errormessage = ("Tkinter or Python Imaging "
@@ -510,10 +498,7 @@ class Molecule(object):
                 root.title((hasattr(self, "title") and self.title)
                            or self.__str__().rstrip())
                 frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                if web:
-                    image = PIL.open(StringIO.StringIO(imagedata))
-                else:
-                    image = PIL.open(filename)
+                image = PIL.open(filename)
                 imagedata = piltk.PhotoImage(image)
                 label = tk.Label(frame, image=imagedata).pack()
                 quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
@@ -521,43 +506,6 @@ class Molecule(object):
             if filedes:
                 os.close(filedes)
                 os.remove(filename)
-
-##    def localopt(self, forcefield="MMFF94", steps=100):
-##        forcefield = forcefield.lower()
-##        
-##        geoopt = cdk.modeling.forcefield.GeometricMinimizer()
-##        geoopt.setMolecule(self.Molecule, False)
-##        points = [t.Atom.point3d for t in self.atoms]
-##        coords = [(t.x, t.y, t.z) for t in points]
-##        print coords
-##        if forcefield == "MMFF94":
-##            ff = cdk.modeling.forcefield.MMFF94Energy(self.Molecule,
-##                                geoopt.getPotentialParameterSet())
-##        # geoopt.setMMFF94Tables()
-##        geoopt.steepestDescentsMinimization(coords, forcefield)
-##
-##    def make3D(self, forcefield="MMFF94", steps=50):
-##        """Generate 3D coordinates.
-##        
-##        Optional parameters:
-##           forcefield -- default is "MMFF94"
-##           steps -- default is 50
-##
-##        Hydrogens are added, coordinates are generated and a quick
-##        local optimization is carried out with 50 steps and the
-##        MMFF94 forcefield. Call localopt() if you want
-##        to improve the coordinates further.
-##        """
-##        forcefield = forcefield.lower()
-##        if forcefield not in forcefields:
-##            print "hey"
-##            pass
-##        self.addh()
-##        th3d = cdk.modeling.builder3d.TemplateHandler3D.getInstance()
-##        mb3d = cdk.modeling.builder3d.ModelBuilder3D.getInstance(
-##            th3d, forcefield)
-##        self.Molecule = mb3d.generate3DCoordinates(self.Molecule, False)
-##        self.localopt(forcefield, steps)
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
@@ -724,23 +672,6 @@ class MoleculeData(object):
         self._mol.setProperty(key, str(value))
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
-
-##>>> readstring("smi", "CCC").calcfp().bits
-##[542, 637, 742]
-##>>> readstring("smi", "CCC").calcfp("graph").bits
-##[595, 742, 927]
-##>>> readstring("smi", "CC=C").calcfp().bits
-##[500, 588, 637, 742]
-##>>> readstring("smi", "CC=C").calcfp("graph").bits
-##[595, 742, 927]
-##>>> readstring("smi", "C").calcfp().bits
-##[742]
-##>>> readstring("smi", "CC").calcfp().bits
-##[637, 742]
-
-# >>> readstring("smi", "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-# CCCCCCCCCCCCCC").calcdesc(["lipinskifailures"])
-# {'lipinskifailures': 1}
 
 if __name__=="__main__": #pragma: no cover
     mol = readstring("smi", "CCCC")
