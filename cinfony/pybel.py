@@ -409,8 +409,11 @@ class Molecule(object):
             raise ImportError(errormessage)
         mol = oasa.molecule()
         for atom in self.atoms:
-            v = mol.create_vertex()
-            v.symbol = etab.GetSymbol(atom.atomicnum)
+            v = mol.create_vertex()            
+            if atom.OBAtom.GetType() == "Du":
+                v.symbol = "R"
+            else:
+                v.symbol = etab.GetSymbol(atom.atomicnum)
             v.charge = atom.formalcharge
             if usecoords:
                 v.x, v.y, v.z = atom.coords[0] * 30., atom.coords[1] * 30., 0.0
