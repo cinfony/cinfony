@@ -512,7 +512,7 @@ $$$$"""
         
 class TestCDK(TestToolkit):
     toolkit = cdk
-    tanimotoresult = 0.571
+    tanimotoresult = 0.375
     Natoms = 15
     tpsaname = "tpsa"
     Nbits = 4

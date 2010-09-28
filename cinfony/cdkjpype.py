@@ -49,7 +49,8 @@ def _getdescdict():
     for desc in de.getDescriptorInstances():
         spec = desc.getSpecification()
         descclass = de.getDictionaryClass(spec)
-        if "proteinDescriptor" not in descclass:
+        # If desclass is None, you should report to CDK
+        if descclass is None or "proteinDescriptor" not in descclass:
             # Using str() for unicode conversion
             name = str(spec.getSpecificationReference().split("#")[-1])
             descdict[name] = desc
@@ -65,7 +66,7 @@ _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
-_outformats = {'mol': cdk.io.MDLWriter,
+_outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
 outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
@@ -454,9 +455,10 @@ class Molecule(object):
                 atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms().iterator()]
                 e = mol.create_edge()
                 e.order = bo
-                if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
+                stereoEnum = JClass("org.openscience.cdk.interfaces.IBond$Stereo")
+                if bond.getStereo() == stereoEnum.DOWN:
                     e.type = "h"
-                elif bond.getStereo() == cdk.CDKConstants.STEREO_BOND_UP:
+                elif bond.getStereo() == stereoEnum.UP:
                     e.type = "w"
                 mol.add_edge(atoms[0], atoms[1], e)
             mol.remove_unimportant_hydrogens()
