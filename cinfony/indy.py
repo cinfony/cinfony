@@ -29,10 +29,12 @@ fps = ["sim", "sub", "sub-res", "sub-tau", "full"]
 """A list of supported fingerprint types"""
 
 _formats = {'smi': "SMILES", 'can': "Canonical SMILES", "rdf": "MDL RDF file",
-            'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
+            'mol': "MDL MOL file", 'sdf': "MDL SDF file",
+            'cml': "Chemical Markup Language"}
 informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'rdf', 'smi']])
 """A dictionary of supported input formats"""
-outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi', 'can']])
+outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi', 'can',
+                                                 'cml']])
 """A dictionary of supported output formats"""
 
 def readfile(format, filename):
@@ -195,6 +197,8 @@ class Molecule(object):
     @property
     def data(self): return MoleculeData(self.Mol)
     @property
+    def formula(self): return self.Mol.grossFormula()
+    @property
     def molwt(self): return self.Mol.molecularWeight()
     def _gettitle(self):
         return self.Mol.name()
@@ -202,18 +206,24 @@ class Molecule(object):
     title = property(_gettitle, _settitle)
     @property
     def _exchange(self):
-        if self.Mol.GetNumConformers() == 0:
+        if not self.Mol.hasZCoord():
             return (0, self.write("can"))
-        else:
+        else: # If 3D
             return (1, self.write("mol"))
 
     def addh(self):
         """Add hydrogens."""
-        self.Mol = Chem.AddHs(self.Mol)
+        try:
+            self.Mol.unfoldHydrogens()
+        except IndigoException:
+            pass
         
     def removeh(self):
         """Remove hydrogens."""
-        self.Mol = Chem.RemoveHs(self.Mol)
+        try:
+            self.Mol.foldHydrogens()
+        except IndigoException:
+            pass
         
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
@@ -242,7 +252,12 @@ class Molecule(object):
         elif format=="mol":
             result = self.Mol.molfile()
         elif format=="cml":
-            result = self.Mol.cml()        
+            result = self.Mol.cml()
+        elif format=="sdf":
+            # No sdf method so use a writeBuffer() as described by Dmitry
+            buf = indigo.writeBuffer()
+            buf.sdfAppend(self.Mol)
+            result = buf.toString()
         else:
             raise ValueError,"%s is not a recognised Indigo format" % format
         if filename:
@@ -298,7 +313,7 @@ class Molecule(object):
             raise ValueError, "%s is not a recognised Indigo Fingerprint type" % fptype
         return fp
 
-    def draw(self, show=True, filename=None, update=True, usecoords=False):
+    def draw(self, show=True, filename=None, update=False, usecoords=False):
         """Create a 2D depiction of the molecule.
 
         Optional parameters:
@@ -313,9 +328,12 @@ class Molecule(object):
         Aggdraw is used for 2D depiction. Tkinter and
         Python Imaging Library are required for image display.
         """
-        if not usecoords: # coordinates are updated!!
-            print "Coordinates updated! FIXME!"
-            self.Mol.layout()
+        if update:
+            mol = self.Mol
+        else: # Use self.Mol.clone() when fixed
+            mol = Molecule(self).Mol
+        if not usecoords:
+            mol.layout()
         if show or filename:
             renderer = IndigoRenderer(indigo)
             indigo.setOption("render-output-format", "png")
@@ -330,7 +348,7 @@ class Molecule(object):
             else:
                 filedes, filename = tempfile.mkstemp()
                 
-            renderer.renderToFile(self.Mol, filename)
+            renderer.renderToFile(mol, filename)
                 
             if show:
                 if not tk:
@@ -370,17 +388,12 @@ class Atom(object):
     def __init__(self, Atom):
         self.Atom = Atom
     @property
-    def atomicnum(self): return self.Atom.atomNumber()
+    def atomicnum(self): return self.Atom.atomicNumber()
     @property
     def coords(self):
-        owningmol = self.Atom.GetOwningMol()
-        if owningmol.GetNumConformers() == 0:
-            raise AttributeError, "Atom has no coordinates (0D structure)"
-        idx = self.Atom.GetIdx()
-        atomcoords = owningmol.GetConformer().GetAtomPosition(idx)
-        return (atomcoords[0], atomcoords[1], atomcoords[2])
+        return tuple(self.Atom.xyz())
     @property
-    def formalcharge(self): return self.Atom.GetFormalCharge()
+    def formalcharge(self): return self.Atom.charge()
 
     def __str__(self):
         if hasattr(self, "coords"):
@@ -421,8 +434,15 @@ class Smarts(object):
         Required parameters:
            molecule
         """
-        match = indigo.matchSubstructure(self.smarts, molecule.Mol)
-        return []
+        matcher = indigo.substructureMatcher(molecule.Mol)
+        matches = list(matcher.iterateMatches(self.smarts))
+        ans = []
+        for match in matches:
+            a = []
+            for queryatom in self.smarts.iterateAtoms():
+                a.append(match.mapAtom(queryatom).index())
+            ans.append(tuple(a))
+        return ans
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
@@ -473,7 +493,7 @@ class MoleculeData(object):
         return self._mol.hasProperty(key)
     def __delitem__(self, key):
         self._testforkey(key)
-        self._mol.ClearProp(key)
+        self._mol.removeProperty(key)
     def clear(self):
         for key in self:
             del self[key]
