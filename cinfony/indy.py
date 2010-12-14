@@ -11,10 +11,19 @@ Global variables:
 """
 
 import os
+import sys
 import tempfile
 
-from indigo import Indigo, IndigoException
-from indigo_renderer import IndigoRenderer
+if sys.platform[:3] == "cli":
+    import clr
+    clr.AddReference("indigo-cs.dll")
+    clr.AddReference("indigo-renderer-cs.dll")
+if sys.platform[:3] == "cli" or sys.platform[:4] == "java":
+    from com.gga.indigo import Indigo, IndigoException, IndigoRenderer
+else:
+    from indigo import Indigo, IndigoException
+    from indigo_renderer import IndigoRenderer
+    
 indigo = Indigo()
 
 # PIL and Tkinter
@@ -213,17 +222,11 @@ class Molecule(object):
 
     def addh(self):
         """Add hydrogens."""
-        try:
-            self.Mol.unfoldHydrogens()
-        except IndigoException:
-            pass
+        self.Mol.unfoldHydrogens()
         
     def removeh(self):
         """Remove hydrogens."""
-        try:
-            self.Mol.foldHydrogens()
-        except IndigoException:
-            pass
+        self.Mol.foldHydrogens()
         
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
@@ -330,8 +333,8 @@ class Molecule(object):
         """
         if update:
             mol = self.Mol
-        else: # Use self.Mol.clone() when fixed
-            mol = Molecule(self).Mol
+        else:
+            mol = self.Mol.clone()
         if not usecoords:
             mol.layout()
         if show or filename:
@@ -529,14 +532,14 @@ class Fingerprint(object):
         self.fp = fingerprint
     def __or__(self, other):
         return indigo.similarity(self.fp, other.fp, "tanimoto")
-    def __getattr__(self, attr):
-        if attr == "bits":
-            # Create a bits attribute on-the-fly
-            return _findbits([ord(x) for x in self.fp.toBuffer()], 8)
-        else:
-            raise AttributeError, "Fingerprint has no attribute %s" % attr
+    def _buffer_to_int(self):
+        stringrep = self.fp.toString()
+        return [int(stringrep[i:i+1]) for i in range(0, len(stringrep), 1)]
+    @property
+    def bits(self):
+        return _findbits(self._buffer_to_int(), 8)
     def __str__(self):
-        return str([ord(x) for x in self.fp.toBuffer()])
+        return str(self._buffer_to_int())
 
 def _findbits(fp, bitsperint):
     """Find which bits are set in a list/vector.
