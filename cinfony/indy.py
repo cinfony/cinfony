@@ -15,11 +15,12 @@ import sys
 import tempfile
 
 if sys.platform[:3] == "cli":
+    indigonet = os.environ["INDIGONET"]
     import clr
-    clr.AddReference("indigo-cs.dll")
-    clr.AddReference("indigo-renderer-cs.dll")
+    clr.AddReferenceToFileAndPath(indigonet + "\\indigo-cs.dll")
+    clr.AddReferenceToFileAndPath(indigonet + "\\indigo-renderer-cs.dll")    
 if sys.platform[:3] == "cli" or sys.platform[:4] == "java":
-    from com.gga.indigo import Indigo, IndigoException, IndigoRenderer
+    from com.ggasoftware.indigo import Indigo, IndigoException, IndigoRenderer
 else:
     from indigo import Indigo, IndigoException
     from indigo_renderer import IndigoRenderer
@@ -40,7 +41,8 @@ fps = ["sim", "sub", "sub-res", "sub-tau", "full"]
 _formats = {'smi': "SMILES", 'can': "Canonical SMILES", "rdf": "MDL RDF file",
             'mol': "MDL MOL file", 'sdf': "MDL SDF file",
             'cml': "Chemical Markup Language"}
-informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'rdf', 'smi']])
+informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'rdf', 'smi',
+                                                'cml']])
 """A dictionary of supported input formats"""
 outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi', 'can',
                                                  'cml']])
@@ -97,7 +99,14 @@ def readfile(format, filename):
         def smi_reader():
             for mol in iterator:
                 yield Molecule(mol)
-        return smi_reader()    
+        return smi_reader()
+    elif format=="cml":
+        iterator = iterateCMLFile(filename)
+        def cml_reader():
+            for mol in iterator:
+                yield Molecule(mol)
+        return cml_reader()    
+    
     else:
         raise ValueError, "%s is not a recognised RDKit format" % format
 
@@ -116,7 +125,7 @@ def readstring(format, string):
     5
     """
     format = format.lower()    
-    if format not in ["mol", "smi"]:
+    if format not in informats:
         raise ValueError,"%s is not a recognised Indigo format" % format
 
     try:
@@ -149,11 +158,16 @@ class Outputfile(object):
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
-        if format=="sdf":
+        if self.format in ["sdf", "cml", "rdf", "smi"]:
             self._writer = indigo.writeFile(self.filename)
         else:
-            raise ValueError,"%s is not a recognised RDKit format" % format
+            raise ValueError,"%s is not supported for multimolecule output" % format
         self.total = 0 # The total number of molecules written to the file
+
+        if self.format == "cml":
+            self._writer.cmlHeader()
+        elif self.format == "rdf":
+            self._writer.rdfHeader()
     
     def write(self, molecule):
         """Write a molecule to the output file.
@@ -164,11 +178,21 @@ class Outputfile(object):
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
 
-        self._writer.sdfAppend(molecule.Mol)
+        if self.format == "sdf":
+            self._writer.sdfAppend(molecule.Mol)
+        elif self.format == "rdf":
+            self._writer.rdfAppend(molecule.Mol)
+        elif self.format == "cml":
+            self._writer.cmlAppend(molecule.Mol)
+        elif self.format == "smi":
+            self._writer.smilesAppend(molecule.Mol)
         self.total += 1
 
     def close(self):
         """Close the Outputfile to further writing."""
+        if self.format == "cml":
+            self._writer.cmlFooter()
+        self._writer.close()
         self.filename = None
         del self._writer
 
