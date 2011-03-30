@@ -1,13 +1,11 @@
 """
-rdkit - A Cinfony module for accessing the RDKit from CPython
+indy - A Cinfony module for accessing Indigo from CPython, Jython or IronPython
 
 Global variables:
-  Chem and AllChem - the underlying RDKit Python bindings
+  indigo - the underlying Indigo() object
   informats - a dictionary of supported input formats
   outformats - a dictionary of supported output formats
-  descs - a list of supported descriptors
   fps - a list of supported fingerprint types
-  forcefields - a list of supported forcefields
 """
 
 import os
@@ -108,7 +106,7 @@ def readfile(format, filename):
         return cml_reader()    
     
     else:
-        raise ValueError, "%s is not a recognised RDKit format" % format
+        raise ValueError, "%s is not a recognised Indigo format" % format
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -197,10 +195,10 @@ class Outputfile(object):
         del self._writer
 
 class Molecule(object):
-    """Represent an rdkit Molecule.
+    """Represent an Indigo Molecule.
 
     Required parameter:
-       Mol -- an RDKit Mol or any type of cinfony Molecule
+       Mol -- an Indigo Mol or any type of cinfony Molecule
       
     Attributes:
        atoms, data, molwt, title
@@ -209,7 +207,7 @@ class Molecule(object):
        addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
        write() 
       
-    The underlying RDKit Mol can be accessed using the attribute:
+    The underlying Indigo Molecule can be accessed using the attribute:
        Mol
     """
     _cinfony = True
@@ -226,7 +224,7 @@ class Molecule(object):
         self.Mol = Mol
 
     @property
-    def atoms(self): return [Atom(rdkatom) for rdkatom in self.Mol.iterateAtoms()]
+    def atoms(self): return [Atom(atom) for atom in self.Mol.iterateAtoms()]
     @property
     def data(self): return MoleculeData(self.Mol)
     @property
@@ -306,32 +304,32 @@ class Molecule(object):
     def __str__(self):
         return self.write()
 
-    def calcdesc(self, descnames=[]):
-        """Calculate descriptor values.
-
-        Optional parameter:
-           descnames -- a list of names of descriptors
-
-        If descnames is not specified, all available descriptors are
-        calculated. See the descs variable for a list of available
-        descriptors.
-        """
-        if not descnames:
-            descnames = descs
-        ans = {}
-        for descname in descnames:
-            try:
-                desc = descDict[descname]
-            except KeyError:
-                raise ValueError, "%s is not a recognised RDKit descriptor type" % descname
-            ans[descname] = desc(self.Mol)
-        return ans
+##    def calcdesc(self, descnames=[]):
+##        """Calculate descriptor values.
+##
+##        Optional parameter:
+##           descnames -- a list of names of descriptors
+##
+##        If descnames is not specified, all available descriptors are
+##        calculated. See the descs variable for a list of available
+##        descriptors.
+##        """
+##        if not descnames:
+##            descnames = descs
+##        ans = {}
+##        for descname in descnames:
+##            try:
+##                desc = descDict[descname]
+##            except KeyError:
+##                raise ValueError, "%s is not a recognised RDKit descriptor type" % descname
+##            ans[descname] = desc(self.Mol)
+##        return ans
 
     def calcfp(self, fptype="sim"):
         """Calculate a molecular fingerprint.
         
         Optional parameters:
-           fptype -- the fingerprint type (default is "rdkit"). See the
+           fptype -- the fingerprint type (default is "sim"). See the
                      fps variable for a list of of available fingerprint
                      types.
         """
@@ -402,15 +400,15 @@ class Molecule(object):
                 os.remove(filename)                
 
 class Atom(object):
-    """Represent an rdkit Atom.
+    """Represent an Indigo Atom.
 
     Required parameters:
-       Atom -- an RDKit Atom
+       Atom -- an Indigo Atom
      
     Attributes:
         atomicnum, coords, formalcharge
     
-    The original RDKit Atom can be accessed using the attribute:
+    The original Indigo Atom can be accessed using the attribute:
        Atom
     """
     
@@ -477,7 +475,7 @@ class MoleculeData(object):
     """Store molecule data in a dictionary-type object
     
     Required parameters:
-      Mol -- an RDKit Mol 
+      Mol -- an Indigo Mol 
 
     Methods and accessor methods are like those of a dictionary except
     that the data is retrieved on-the-fly from the underlying Mol.
