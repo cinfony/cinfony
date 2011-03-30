@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-ironable = rdk = cdk = obabel = webel = None
+indy = ironable = rdk = cdk = obabel = webel = None
 try:
     from cinfony import cdk
 except (ImportError, KeyError):
@@ -16,7 +16,8 @@ try:
     from cinfony import rdk
 except ImportError:
     pass
-from cinfony import webel
+##from cinfony import webel
+from cinfony import indy
 
 class myTestCase(unittest.TestCase):
     """Additional methods not present in Jython 2.2"""
@@ -385,6 +386,35 @@ class TestRDKit(TestToolkit):
         """No conversion to MOL2 done"""
         pass
 
+class TestIndigo(TestToolkit):
+    toolkit = indy
+    tanimotoresult = 1/3.
+    Natoms = 15
+    tpsaname = "TPSA"
+    Nbits = 3
+    Nfpbits = 934
+    datakeys = ['NSC']
+
+    def testRSconversiontoMOL2(self):
+        """No conversion to MOL2 done"""
+        pass
+
+    def testRFdesc(self):
+        """No descriptors"""
+        pass
+
+    def testattributes(self):
+        """Test attributes like informats, descs and so on"""
+        informats, outformats = self.toolkit.informats, self.toolkit.outformats
+        self.assertNotEqual(len(self.toolkit.informats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.outformats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.fps), 0)
+
+    def testLocalOpt(self):
+        """No forcefields"""
+        pass
+
+
 class TestWebel(TestToolkit):
     toolkit = webel
     tanimotoresult = 0.375
@@ -542,7 +572,7 @@ if __name__=="__main__":
         os.remove("testoutput.txt")
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
-              'webel': TestWebel}
+              'webel': TestWebel, 'indy': TestIndigo}
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         del lookup['rdk']
