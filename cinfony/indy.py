@@ -288,7 +288,9 @@ class Molecule(object):
         else:
             raise ValueError,"%s is not a recognised Indigo format" % format
         if filename:
-            print >> open(filename, "w"), result
+            output = open(filename, "w")
+            output.write(result)
+            output.close()
         else:
             return result
 
@@ -365,7 +367,7 @@ class Molecule(object):
             renderer = IndigoRenderer(indigo)
             indigo.setOption("render-output-format", "png")
             indigo.setOption("render-margins", 10, 10)
-            indigo.setOption("render-coloring", True)
+            indigo.setOption("render-coloring", "True")
             indigo.setOption("render-image-size", 300, 300)
             indigo.setOption("render-background-color", "1.0, 1.0, 1.0")
             if self.title:
