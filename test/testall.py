@@ -6,7 +6,7 @@ import unittest
 ironable = rdk = cdk = obabel = webel = None
 try:
     from cinfony import cdk
-except (ImportError, KeyError):
+except (RuntimeError, ImportError, KeyError):
     pass
 try:
     from cinfony import obabel

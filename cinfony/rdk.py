@@ -15,7 +15,8 @@ import os
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import MolDrawing
-from rdkit.Chem.AvailDescriptors import descDict
+from rdkit.Chem import Descriptors
+_descDict = dict(Descriptors._descList)
 
 import rdkit.DataStructs
 import rdkit.Chem.MACCSkeys
@@ -38,7 +39,7 @@ except ImportError:
 
 fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
 """A list of supported fingerprint types"""
-descs = descDict.keys()
+descs = _descDict.keys()
 """A list of supported descriptors"""
 
 _formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
@@ -183,7 +184,7 @@ class Molecule(object):
        Mol -- an RDKit Mol or any type of cinfony Molecule
       
     Attributes:
-       atoms, data, molwt, title
+       atoms, data, formula, molwt, title
     
     Methods:
        addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
@@ -210,7 +211,9 @@ class Molecule(object):
     @property
     def data(self): return MoleculeData(self.Mol)
     @property
-    def molwt(self): return descDict['MolWt'](self.Mol)
+    def molwt(self): return Descriptors.MolWt(self.Mol)
+    @property
+    def formula(self): return Descriptors.MolecularFormula(self.Mol)    
     def _gettitle(self):
         # Note to self: maybe should implement the get() method for self.data
         if "_Name" in self.data:
@@ -294,7 +297,7 @@ class Molecule(object):
         ans = {}
         for descname in descnames:
             try:
-                desc = descDict[descname]
+                desc = _descDict[descname]
             except KeyError:
                 raise ValueError, "%s is not a recognised RDKit descriptor type" % descname
             ans[descname] = desc(self.Mol)
