@@ -1,0 +1,4 @@
+*.pyc
+*.class
+test/*.png
+*.bak
