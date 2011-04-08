@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-ironable = rdk = cdk = obabel = webel = None
+ironable = rdk = cdk = obabel = webel = opsin = None
 try:
     from cinfony import cdk
 except (RuntimeError, ImportError, KeyError):
@@ -14,6 +14,10 @@ except (ImportError, AttributeError):
     pass
 try:
     from cinfony import rdk
+except ImportError:
+    pass
+try:
+    from cinfony import opsin
 except ImportError:
     pass
 from cinfony import webel
@@ -38,6 +42,32 @@ class myTestCase(unittest.TestCase):
         if round(second-first, places) != 0:
             raise self.failureException, \
                   (msg or '%r != %r within %r places' % (first, second, places))
+
+class TestOpsin(myTestCase):
+    toolkit = opsin
+    
+    def testconversion(self):
+        """Convert from acetylsaliclyic acid to other formats"""
+        mol = self.toolkit.readstring("iupac", "benzene")
+        self.assertEqual(mol.write("smi"), "C1=CC=CC=C1")
+        self.assertEqual(mol.write("inchi"), "InChI=1/C6H6/c1-2-4-6-5-3-1/h1-6H")
+        cml = mol.write("cml")
+    def testnoconversion(self):
+        """A failed conversion - should raise IOError"""
+        self.assertRaises(IOError, self.toolkit.readstring, "iupac", "Nosuchname")
+    def testnoformats(self):
+        """No such format - should raise ValueError"""
+        self.assertRaises(ValueError, self.toolkit.readstring, "noel", "benzene")
+    def testwritefile(self):
+        """Test writing a file"""
+        if os.path.isfile("tmp.cml"):
+            os.remove("tmp.cml")
+        mol = self.toolkit.readstring("iupac", "benzene")
+        mol.write("cml", "tmp.cml")
+        self.assertTrue(os.path.isfile("tmp.cml"))
+        self.assertRaises(IOError, mol.write, "cml", "tmp.cml")
+        mol.write("cml", "tmp.cml", overwrite=True)
+        os.remove("tmp.cml")
 
 class TestToolkit(myTestCase):
     
@@ -542,7 +572,7 @@ if __name__=="__main__":
         os.remove("testoutput.txt")
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
-              'webel': TestWebel}
+              'webel': TestWebel, 'opsin': TestOpsin}
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         del lookup['rdk']
@@ -550,6 +580,7 @@ if __name__=="__main__":
         lookup['obabel'] = TestIronable
         del lookup['rdk']
         del lookup['cdk']
+        del lookup['opsin']
 
     testcases = lookup.values()
 
