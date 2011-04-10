@@ -82,12 +82,14 @@ def readfile(format, filename):
         raise ValueError("%s is not a recognised OpenBabel format" % format)
     if not os.path.isfile(filename):
         raise IOError("No such file: '%s'" % filename)
+    def filereader():
     obmol = ob.OBMol()
     notatend = obconversion.ReadFile(obmol,filename)
     while notatend:
         yield Molecule(obmol)
         obmol = ob.OBMol()
         notatend = obconversion.Read(obmol)
+    return filereader()
 
 def readstring(format, string):
     """Read in a molecule from a string.
