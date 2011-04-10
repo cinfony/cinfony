@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-ironable = rdk = cdk = obabel = webel = opsin = None
+indy = ironable = rdk = cdk = obabel = webel = opsin = None
 try:
     from cinfony import cdk
 except (RuntimeError, ImportError, KeyError):
@@ -18,6 +18,10 @@ except ImportError:
     pass
 try:
     from cinfony import opsin
+except ImportError:
+    pass
+try:
+    from cinfony import indy
 except ImportError:
     pass
 from cinfony import webel
@@ -415,6 +419,35 @@ class TestRDKit(TestToolkit):
         """No conversion to MOL2 done"""
         pass
 
+class TestIndigo(TestToolkit):
+    toolkit = indy
+    tanimotoresult = 1/3.
+    Natoms = 15
+    tpsaname = "TPSA"
+    Nbits = 3
+    Nfpbits = 934
+    datakeys = ['NSC']
+
+    def testRSconversiontoMOL2(self):
+        """No conversion to MOL2 done"""
+        pass
+
+    def testRFdesc(self):
+        """No descriptors"""
+        pass
+
+    def testattributes(self):
+        """Test attributes like informats, descs and so on"""
+        informats, outformats = self.toolkit.informats, self.toolkit.outformats
+        self.assertNotEqual(len(self.toolkit.informats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.outformats.keys()), 0)
+        self.assertNotEqual(len(self.toolkit.fps), 0)
+
+    def testLocalOpt(self):
+        """No forcefields"""
+        pass
+
+
 class TestWebel(TestToolkit):
     toolkit = webel
     tanimotoresult = 0.375
@@ -572,7 +605,7 @@ if __name__=="__main__":
         os.remove("testoutput.txt")
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
-              'webel': TestWebel, 'opsin': TestOpsin}
+              'webel': TestWebel, 'opsin': TestOpsin, 'indy': TestIndigo}
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         del lookup['rdk']
