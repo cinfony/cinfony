@@ -20,8 +20,9 @@ import StringIO
 
 from jpype import *
 
-_jvm = os.environ['JPYPE_JVM']
-_cp = os.environ['CLASSPATH']
+if not isJVMStarted():
+    _jvm = os.environ['JPYPE_JVM']
+    _cp = os.environ['CLASSPATH']
 startJVM(_jvm, "-Djava.class.path=" + _cp)
 
 try:
