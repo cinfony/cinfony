@@ -34,22 +34,21 @@ outformats = _formatstodict(_obconv.GetSupportedOutputFormat())
 def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
-##def _getpluginnames(ptype): # Doesn't work from Jython!
-##    plugins = ob.vectorString()
-##    ob.OBPlugin.ListAsVector(ptype, None, plugins)
-##    return [x.split()[0] for x in plugins]
+def _getpluginnames(ptype):
+    plugins = ob.vectorString()
+    ob.OBPlugin.ListAsVector(ptype, None, plugins)
+    return [plugins.get(i).split()[0] for i in range(plugins.size())]
 
-descs = ['HBA1', 'HBA2', 'HBD', 'InChI', 'L5', 'logP', 'MR',
-         'MW', 'nF', 'nHal', 's', 'smarts', 'spinMult', 'title', 'TPSA']
+descs = _getpluginnames("descriptors")
 """A list of supported descriptors"""
 _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
-fps = ['FP2', 'FP3', 'FP4', 'MACCS']
+fps = _getpluginnames("fingerprints")
 """A list of supported fingerprint types"""
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
-forcefields = ['ghemical', 'mmff94', 'mmff94s', 'uff']
+forcefields = [_x.lower() for _x in _getpluginnames("forcefields")]
 """A list of supported forcefields"""
 _forcefields = _getplugins(ob.OBForceField.FindType, forcefields)
-operations = ['AddPolarH', 'fillUC', 'gen3D', 'nodative']
+operations = _getpluginnames("ops")
 """A list of supported operations"""
 _operations = _getplugins(ob.OBOp.FindType, operations)
 
