@@ -3,7 +3,11 @@ import os
 import sys
 import unittest
 
-indy = ironable = rdk = cdk = obabel = webel = opsin = None
+pybel = indy = ironable = rdk = cdk = obabel = webel = opsin = None
+try:
+    import pybel # From Open Babel
+except ImportError:
+    pass
 try:
     from cinfony import cdk
 except (RuntimeError, ImportError, KeyError):
@@ -24,17 +28,20 @@ try:
     from cinfony import indy
 except ImportError:
     pass
-from cinfony import webel
+try:
+    from cinfony import webel
+except ImportError:
+    pass
 
 class myTestCase(unittest.TestCase):
     """Additional methods not present in Jython 2.2"""
     # Taken from unittest.py in Python 2.5 distribution
     def assertFalse(self, expr, msg=None):
         "Fail the test if the expression is true."
-        if expr: raise self.failureException, msg
+        if expr: raise self.failureException(msg)
     def assertTrue(self, expr, msg=None):
         """Fail the test unless the expression is true."""
-        if not expr: raise self.failureException, msg
+        if not expr: raise self.failureException(msg)
     def assertAlmostEqual(self, first, second, places=7, msg=None):
         """Fail if the two objects are unequal as determined by their
            difference rounded to the given number of decimal places
@@ -44,8 +51,8 @@ class myTestCase(unittest.TestCase):
            as significant digits (measured from the most signficant digit).
         """
         if round(second-first, places) != 0:
-            raise self.failureException, \
-                  (msg or '%r != %r within %r places' % (first, second, places))
+            raise self.failureException(
+                  (msg or '%r != %r within %r places' % (first, second, places)))
 
 class TestOpsin(myTestCase):
     toolkit = opsin
@@ -202,14 +209,14 @@ M  END
         self.assertEqual(len(self.mols), 2)
 
     def RFreaderror(self):
-        mol = self.toolkit.readfile("sdf", "nosuchfile.sdf").next()
+        mol = next(self.toolkit.readfile("sdf", "nosuchfile.sdf"))
 
     def testRFmissingfile(self):
         """Test that reading from a non-existent file raises an error."""
         self.assertRaises(IOError, self.RFreaderror)
 
     def RFformaterror(self):
-        mol = self.toolkit.readfile("noel", "head.sdf").next()
+        mol = next(self.toolkit.readfile("noel", "head.sdf"))
     
     def testRFformaterror(self):
         """Test that invalid formats raise an error"""
@@ -357,7 +364,7 @@ class TestOBabel(TestToolkit):
 
     def testunitcell(self):
         """Testing unit cell access"""
-        mol = self.toolkit.readfile("cif", "hashizume.cif").next()
+        mol = next(self.toolkit.readfile("cif", "hashizume.cif"))
         cell = mol.unitcell
         self.assertAlmostEqual(cell.GetAlpha(), 92.9, 1)
 
@@ -405,6 +412,9 @@ class TestJybel(TestOBabel):
 
 class TestIronable(TestJybel):
     pass
+
+class TestPybel(TestOBabel):
+    toolkit = pybel
 
 class TestRDKit(TestToolkit):
     toolkit = rdk
@@ -605,7 +615,8 @@ if __name__=="__main__":
         os.remove("testoutput.txt")
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
-              'webel': TestWebel, 'opsin': TestOpsin, 'indy': TestIndigo}
+              'webel': TestWebel, 'opsin': TestOpsin, 'indy': TestIndigo,
+              'pybel':TestPybel}
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         del lookup['rdk']
@@ -615,12 +626,13 @@ if __name__=="__main__":
         del lookup['cdk']
         del lookup['opsin']
 
-    testcases = lookup.values()
+    # Only run Pybel tests if specifically asked
+    testcases = list(lookup.values()).remove(TestPybel)
 
     if len(sys.argv) > 1:
         testcases = [lookup[x] for x in sys.argv[1:]]
 
     for testcase in testcases:
-        print "\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10)
+        print("\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10))
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)
         unittest.TextTestRunner(verbosity=2).run(myunittest)
