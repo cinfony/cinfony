@@ -16,7 +16,8 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import MolDrawing
 from rdkit.Chem import Descriptors
-_descDict = dict(Descriptors._descList)
+
+_descDict = dict(Descriptors.descList)
 
 import rdkit.DataStructs
 import rdkit.Chem.MACCSkeys
@@ -34,6 +35,7 @@ except:
 # Aggdraw
 try:
     import aggdraw
+    from rdkit.Chem.Draw import aggCanvas
 except ImportError:
     aggdraw = None
 
@@ -361,11 +363,9 @@ class Molecule(object):
                 raise ImportError, errormessage
               
             Chem.Kekulize(self.Mol)
-            MolDrawing.registerCanvas('agg')
             img = PIL.new("RGBA",(300,300),"white")
-            canvas = aggdraw.Draw(img)                
-            canvas.setantialias(True)
-            drawer = MolDrawing.MolDrawing(canvas)
+            canvas = aggCanvas.Canvas(img)                
+            drawer = MolDrawing(canvas)
             drawer.wedgeDashedBonds = True
             drawer.AddMol(self.Mol, confId = confId)
             canvas.flush()
