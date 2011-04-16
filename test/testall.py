@@ -26,7 +26,7 @@ except ImportError:
     pass
 try:
     from cinfony import indy
-except ImportError:
+except (IOError, ImportError):
     pass
 try:
     from cinfony import webel
