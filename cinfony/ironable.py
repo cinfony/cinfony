@@ -83,12 +83,12 @@ def readfile(format, filename):
     if not os.path.isfile(filename):
         raise IOError("No such file: '%s'" % filename)
     def filereader():
-    obmol = ob.OBMol()
-    notatend = obconversion.ReadFile(obmol,filename)
-    while notatend:
-        yield Molecule(obmol)
         obmol = ob.OBMol()
-        notatend = obconversion.Read(obmol)
+        notatend = obconversion.ReadFile(obmol,filename)
+        while notatend:
+            yield Molecule(obmol)
+            obmol = ob.OBMol()
+            notatend = obconversion.Read(obmol)
     return filereader()
 
 def readstring(format, string):
@@ -230,7 +230,7 @@ class Molecule(object):
     title = property(_gettitle, _settitle)
     @property
     def unitcell(self):
-        unitcell = self.OBMol.GetData(System.UInt32(ob.openbabelcsharp.UnitCell))
+        unitcell = self.OBMol.GetData(System.UInt32(ob.openbabel_csharp.UnitCell))
         if unitcell:
             return unitcell.Downcast[ob.OBUnitCell]()
         else:
@@ -554,8 +554,8 @@ class MoleculeData(object):
     def __init__(self, obmol):
         self._mol = obmol
     def _data(self):
-        return [x for x in self._mol.GetData() if x.GetDataType()==ob.openbabelcsharp.PairData
-                                               or x.GetDataType()==ob.openbabelcsharp.CommentData]
+        return [x for x in self._mol.GetData() if x.GetDataType()==ob.openbabel_csharp.PairData
+                                               or x.GetDataType()==ob.openbabel_csharp.CommentData]
     def _testforkey(self, key):
         if not key in self:
             raise KeyError("'%s'" % key)
