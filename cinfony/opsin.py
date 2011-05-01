@@ -67,14 +67,19 @@ class Molecule(object):
     The underlying OpsinResult can be accessed using the attribute:
        OpsinResult
     """
+    _cinfony = True
     
     def __init__(self, OpsinResult):
+        if hasattr(OpsinResult, "_cinfony"):
+            raise IOError, "An opsin Molecule cannot be created from another Cinfony Molecule"
             
         self.OpsinResult = OpsinResult
         
     def __str__(self):
         return self.write()
-
+    @property
+    def _exchange(self):
+        return (0, self.write("smi"))
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
         
