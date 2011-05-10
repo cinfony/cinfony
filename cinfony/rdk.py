@@ -44,11 +44,13 @@ fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
 descs = _descDict.keys()
 """A list of supported descriptors"""
 
-_formats = {'smi': "SMILES", 'iso': "Isomeric SMILES",
+_formats = {'smi': "SMILES",
+            'can': "Canonical SMILES",
             'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
 informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi']])
 """A dictionary of supported input formats"""
-outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi', 'iso']])
+outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'can', 'sdf',
+                                                 'smi']])
 """A dictionary of supported output formats"""
 
 _forcefields = {'uff': AllChem.UFFOptimizeMolecule}
@@ -156,7 +158,7 @@ class Outputfile(object):
         if format=="sdf":
             self._writer = Chem.SDWriter(self.filename)
         elif format=="smi":
-            self._writer = Chem.SmilesWriter(self.filename)
+            self._writer = Chem.SmilesWriter(self.filename, isomericSmiles=True)
         else:
             raise ValueError,"%s is not a recognised RDKit format" % format
         self.total = 0 # The total number of molecules written to the file
@@ -227,7 +229,7 @@ class Molecule(object):
     @property
     def _exchange(self):
         if self.Mol.GetNumConformers() == 0:
-            return (0, self.write("iso"))
+            return (0, self.write("smi"))
         else:
             return (1, self.write("mol"))
 
@@ -259,10 +261,10 @@ class Molecule(object):
         if filename:
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
-        if format=="smi":
-            result = Chem.MolToSmiles(self.Mol)
-        elif format=="iso":
-            result = Chem.MolToSmiles(self.Mol, isomericSmiles=True)
+        elif format=="smi":
+            result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=False)
+        elif format=="can":
+            result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=Ture)
         elif format=="mol":
             result = Chem.MolToMolBlock(self.Mol)
         else:
