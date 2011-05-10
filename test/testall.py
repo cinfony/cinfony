@@ -354,7 +354,7 @@ class TestOBabel(TestToolkit):
     Natoms = 15
     tpsaname = "TPSA"
     Nfpbits = 32
-    datakeys = ['NSC', 'Comment']
+    datakeys = ['NSC', 'Comment', 'OpenBabel Symmetry Classes']
 
     def testFP_FP3(self):
         "Checking the results from FP3"
