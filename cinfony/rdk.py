@@ -261,10 +261,10 @@ class Molecule(object):
         if filename:
             if not overwrite and os.path.isfile(filename):
                 raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
-        elif format=="smi":
+        if format=="smi":
             result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=False)
         elif format=="can":
-            result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=Ture)
+            result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=True)
         elif format=="mol":
             result = Chem.MolToMolBlock(self.Mol)
         else:
@@ -358,7 +358,7 @@ class Molecule(object):
                 AllChem.Compute2DCoords(self.Mol, clearConfs = False)
         if show or filename:
             if not aggdraw:
-                errormessage = ("Aggdraw not found, but is required for 2D"
+                errormessage = ("Aggdraw not found, but is required for 2D "
                                 "structure depiction. "
                                 "See installation instructions for more "
                                 "information.")
