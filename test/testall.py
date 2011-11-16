@@ -33,6 +33,11 @@ try:
 except ImportError:
     pass
 
+try: # Define next() for Jython 2.5
+    next
+except (NameError):
+    next = lambda x: x.next()
+
 class myTestCase(unittest.TestCase):
     """Additional methods not present in Jython 2.2"""
     # Taken from unittest.py in Python 2.5 distribution
