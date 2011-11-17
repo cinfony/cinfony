@@ -17,7 +17,9 @@ import os.path
 import System
 import clr
 obdotnet = os.environ["OBDOTNET"]
-clr.AddReferenceToFileAndPath(obdotnet + "\\OBDotNet.dll")
+if obdotnet[0] == '"': # Remove trailing quotes
+    obdotnet = obdotnet[1:-1]
+clr.AddReferenceToFileAndPath(os.path.join(obdotnet, "OBDotNet.dll"))
 import OpenBabel as ob
 
 def _formatstodict(list):
