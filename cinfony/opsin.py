@@ -16,6 +16,8 @@ else: # CPython
     import jpype
     if not jpype.isJVMStarted():
         _jvm = os.environ['JPYPE_JVM']
+        if _jvm[0] == '"': # Handle trailing quotes
+            _jvm = _jvm[1:-1]
         _cp = os.environ['CLASSPATH']
         jpype.startJVM(_jvm, "-Djava.class.path=" + _cp)
     opsin = jpype.JPackage("uk").ac.cam.ch.wwmm.opsin
