@@ -14,7 +14,7 @@ except (RuntimeError, ImportError, KeyError):
     pass
 try:
     from cinfony import obabel
-except (ImportError, AttributeError):
+except (ImportError, AttributeError, KeyError):
     pass
 try:
     from cinfony import rdk
@@ -26,7 +26,7 @@ except (ImportError, KeyError):
     pass
 try:
     from cinfony import indy
-except (IOError, ImportError):
+except (IOError, ImportError, KeyError):
     pass
 try:
     from cinfony import webel
@@ -635,4 +635,4 @@ if __name__=="__main__":
     for testcase in testcases:
         print("\n\n\nTESTING %s\n%s\n\n" % (testcase.__name__, "== "*10))
         myunittest = unittest.defaultTestLoader.loadTestsFromTestCase(testcase)
-        unittest.TextTestRunner(verbosity=2).run(myunittest)
+        unittest.TextTestRunner(verbosity=1).run(myunittest)
