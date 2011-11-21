@@ -27,19 +27,6 @@ if not isJVMStarted():
     _cp = os.environ['CLASSPATH']
     startJVM(_jvm, "-Djava.class.path=" + _cp)
 
-try:
-    import oasa
-    import oasa.cairo_out
-except ImportError:
-    oasa = None
-
-try:
-    import Tkinter as tk
-    import Image as PIL
-    import ImageTk as piltk
-except ImportError:
-    tk = None
-
 cdk = JPackage("org").openscience.cdk
 try:
     _testmol = cdk.Molecule()
