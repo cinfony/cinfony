@@ -22,6 +22,8 @@ from jpype import *
 
 if not isJVMStarted():
     _jvm = os.environ['JPYPE_JVM']
+    if _jvm[0] == '"': # Remove trailing quotes
+        _jvm = _jvm[1:-1]    
     _cp = os.environ['CLASSPATH']
     startJVM(_jvm, "-Djava.class.path=" + _cp)
 
@@ -66,7 +68,7 @@ _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
-_outformats = {'mol': cdk.io.MDLWriter,
+_outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
 outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
@@ -390,21 +392,13 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self, show=True, filename=None, update=False,
-             usecoords=False):
+    def draw(self):
         """Create a 2D depiction of the molecule.
 
-        Optional parameters:
-          show -- display on screen (default is True)
-          filename -- write to file (default is None)
-          update -- update the coordinates of the atoms to those
-                    determined by the structure diagram generator
-                    (default is False)
-          usecoords -- don't calculate 2D coordinates, just use
-                       the current coordinates (default is False)
-
-        OASA is used for depiction. Tkinter and Python
-        Imaging Library are required for image display.
+        There is no option to display or write an image file of
+        the depiction. For this, you should use the CDK from
+        Jython or else the depiction engine of one of the other
+        toolkits.
         """
         writetofile = filename is not None
 
@@ -435,78 +429,8 @@ class Molecule(object):
                         "See installation instructions for more "
                         "information.")
                 raise ImportError, errormessage                
-            mol = oasa.molecule()
-            atomnos = []
-            for newatom in newmol.atoms:
-                if not usecoords:
-                    coords = newatom.Atom.getPoint2d()
-                else:
-                    coords = newatom.Atom.getPoint3d()
-                    if not coords:
-                        coords = newatom.Atom.getPoint2d()
-                v = mol.create_vertex()
-                v.charge = newatom.formalcharge
-                v.symbol = _isofact.getElement(newatom.atomicnum).getSymbol()
-                mol.add_vertex(v)
-                v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
-            for i in range(self.Molecule.getBondCount()):
-                bond = self.Molecule.getBond(i)
-                bo = _revbondtypes[bond.getOrder()]
-                atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms().iterator()]
-                e = mol.create_edge()
-                e.order = bo
-                if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
-                    e.type = "h"
-                elif bond.getStereo() == cdk.CDKConstants.STEREO_BOND_UP:
-                    e.type = "w"
-                mol.add_edge(atoms[0], atoms[1], e)
-            mol.remove_unimportant_hydrogens()
-            maxx = max([v.x for v in mol.vertices])
-            minx = min([v.x for v in mol.vertices])
-            maxy = max([v.y for v in mol.vertices])
-            miny = min([v.y for v in mol.vertices])
-            maxcoord = max(maxx - minx, maxy - miny)
-            for v in mol.vertices:
-                if str(v.x) == "-1.#IND":
-                    v.x = minx
-                if str(v.y) == "-1.#IND":
-                    v.y = miny
-            fontsize = 16
-            bondwidth = 6
-            linewidth = 2
-            if maxcoord > 270: # 300  - margin * 2
-                for v in mol.vertices:                       
-                    v.x *= 270. / maxcoord
-                    v.y *= 270. / maxcoord
-                fontsize *= math.sqrt(270. / maxcoord)
-                bondwidth *= math.sqrt(270. / maxcoord)
-                linewidth *= math.sqrt(270. / maxcoord)
-            
-            canvas = oasa.cairo_out.cairo_out()
-            canvas.show_hydrogens_on_hetero = True
-            canvas.font_size = fontsize
-            canvas.bond_width = bondwidth
-            canvas.line_width = linewidth
-            canvas.mol_to_cairo(mol, filename)
-            if show:
-                if not tk:
-                    errormessage = ("Tkinter or Python Imaging "
-                                    "Library not found, but is required for image "
-                                    "display. See installation instructions for "
-                                    "more information.")
-                    raise ImportError, errormessage                    
-                root = tk.Tk()
-                root.title((hasattr(self, "title") and self.title)
-                           or self.__str__().rstrip())
-                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                image = PIL.open(filename)
-                imagedata = piltk.PhotoImage(image)
-                label = tk.Label(frame, image=imagedata).pack()
-                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
-                root.mainloop()
-            if filedes:
-                os.close(filedes)
-                os.remove(filename)
+
+
 
 class Fingerprint(object):
     """A Molecular Fingerprint.

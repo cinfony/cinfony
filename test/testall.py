@@ -607,8 +607,12 @@ class TestCDK(TestToolkit):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
-##    def testRFoutputfile(self):
-##        pass
+    def testDraw(self):
+        """Create a 2D depiction"""
+        if sys.platform[:4] == "java": # Not supported for cdkjpype
+            self.mols[0].draw(show=False,
+                              filename="%s.png" % self.toolkit.__name__)
+            self.mols[0].draw(show=False) # Just making sure that it doesn't raise an Error
 
 if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
