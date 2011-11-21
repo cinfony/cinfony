@@ -22,8 +22,6 @@ from jpype import *
 
 if not isJVMStarted():
     _jvm = os.environ['JPYPE_JVM']
-    if _jvm[0] == '"': # Remove trailing quotes if present
-        _jvm = _jvm[1:-1]
     _cp = os.environ['CLASSPATH']
     startJVM(_jvm, "-Djava.class.path=" + _cp)
 
@@ -41,7 +39,6 @@ except ImportError:
     tk = None
 
 cdk = JPackage("org").openscience.cdk
-javax = JPackage("javax")
 try:
     _testmol = cdk.Molecule()
 except TypeError:
@@ -69,7 +66,7 @@ _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
-_outformats = {'mol': cdk.io.MDLV2000Writer,
+_outformats = {'mol': cdk.io.MDLWriter,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
 outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
@@ -409,57 +406,107 @@ class Molecule(object):
         OASA is used for depiction. Tkinter and Python
         Imaging Library are required for image display.
         """
-        mol = Molecule(self.Molecule.clone())
-        cdk.aromaticity.CDKHueckelAromaticityDetector.detectAromaticity(mol.Molecule)
+        writetofile = filename is not None
 
-        if not usecoords:
+        if not usecoords:            
             # Do the SDG
             sdg = cdk.layout.StructureDiagramGenerator()
-            sdg.setMolecule(mol.Molecule)
-            sdg.generateCoordinates()
-            mol = Molecule(sdg.getMolecule())
+            sdg.setMolecule(self.Molecule)
+            sdg.generateExperimentalCoordinates()
+            newmol = Molecule(sdg.getMolecule())
             if update:
-                for atom, newatom in zip(self.atoms, mol.atoms):
+                for atom, newatom in zip(self.atoms, newmol.atoms):
                     coords = newatom.Atom.getPoint2d()
                     atom.Atom.setPoint3d(javax.vecmath.Point3d(
-                                         coords.x, coords.y, 0.0))
+                                         coords.x, coords.y, 0.0))    
         else:
-           if self.atoms[0].Atom.getPoint2d() is None:
-                # Use the 3D coords to set the 2D coords
-                for atom, newatom in zip(self.atoms, mol.atoms):
-                    coords = atom.Atom.getPoint3d()
-                    newatom.Atom.setPoint2d(javax.vecmath.Point2d(
-                                    coords.x, coords.y))
+            newmol = self
+            
+        if writetofile or show:
+            if writetofile:
+                filedes = None
+            else:
+                filedes, filename = tempfile.mkstemp()
 
-        mol.removeh()        
-
-        panel = javax.swing.JPanel()
-        frame = javax.swing.JFrame()
-        generators = java.util.ArrayList()
-        generators.add(cdk.renderer.generators.BasicSceneGenerator())
-        generators.add(cdk.renderer.generators.BasicBondGenerator())
-        generators.add(cdk.renderer.generators.RingGenerator())
-        generators.add(cdk.renderer.generators.BasicAtomGenerator())
-        renderer = cdk.renderer.AtomContainerRenderer(generators,
-                                        cdk.renderer.font.AWTFontManager())
-
-        drawArea = java.awt.Rectangle(300, 300)
-        convert = JObject(mol.Molecule, "org.openscience.cdk.interfaces.IAtomContainer")
-        renderer.setup(convert, drawArea)
-        image = java.awt.image.BufferedImage(300, 300,
-                        java.awt.image.BufferedImage.TYPE_INT_RGB)
-        screenSize = java.awt.Dimension(300, 300)
-        panel.setPreferredSize(screenSize)
-        panel.setBackground(java.awt.Color.WHITE)
-        frame.getContentPane().add(panel)
-        frame.pack()
-        frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
-        frame.visible = True
-
-## The problem is that we cannot implement the paint method        
-##        javax.swing.JPanel.paint(self, g) 
-##        self.renderer.paint(self.mol, cdk.renderer.visitor.AWTDrawVisitor(g),
-##                            java.awt.Rectangle(300, 300), True);        
+            # Create OASA molecule
+            if not oasa:
+                errormessage = ("OASA not found, but is required for 2D structure "
+                        "depiction. OASA is part of BKChem. "
+                        "See installation instructions for more "
+                        "information.")
+                raise ImportError, errormessage                
+            mol = oasa.molecule()
+            atomnos = []
+            for newatom in newmol.atoms:
+                if not usecoords:
+                    coords = newatom.Atom.getPoint2d()
+                else:
+                    coords = newatom.Atom.getPoint3d()
+                    if not coords:
+                        coords = newatom.Atom.getPoint2d()
+                v = mol.create_vertex()
+                v.charge = newatom.formalcharge
+                v.symbol = _isofact.getElement(newatom.atomicnum).getSymbol()
+                mol.add_vertex(v)
+                v.x, v.y, v.z = coords.x * 30., coords.y * 30., 0.0
+            for i in range(self.Molecule.getBondCount()):
+                bond = self.Molecule.getBond(i)
+                bo = _revbondtypes[bond.getOrder()]
+                atoms = [self.Molecule.getAtomNumber(x) for x in bond.atoms().iterator()]
+                e = mol.create_edge()
+                e.order = bo
+                if bond.getStereo() == cdk.CDKConstants.STEREO_BOND_DOWN:
+                    e.type = "h"
+                elif bond.getStereo() == cdk.CDKConstants.STEREO_BOND_UP:
+                    e.type = "w"
+                mol.add_edge(atoms[0], atoms[1], e)
+            mol.remove_unimportant_hydrogens()
+            maxx = max([v.x for v in mol.vertices])
+            minx = min([v.x for v in mol.vertices])
+            maxy = max([v.y for v in mol.vertices])
+            miny = min([v.y for v in mol.vertices])
+            maxcoord = max(maxx - minx, maxy - miny)
+            for v in mol.vertices:
+                if str(v.x) == "-1.#IND":
+                    v.x = minx
+                if str(v.y) == "-1.#IND":
+                    v.y = miny
+            fontsize = 16
+            bondwidth = 6
+            linewidth = 2
+            if maxcoord > 270: # 300  - margin * 2
+                for v in mol.vertices:                       
+                    v.x *= 270. / maxcoord
+                    v.y *= 270. / maxcoord
+                fontsize *= math.sqrt(270. / maxcoord)
+                bondwidth *= math.sqrt(270. / maxcoord)
+                linewidth *= math.sqrt(270. / maxcoord)
+            
+            canvas = oasa.cairo_out.cairo_out()
+            canvas.show_hydrogens_on_hetero = True
+            canvas.font_size = fontsize
+            canvas.bond_width = bondwidth
+            canvas.line_width = linewidth
+            canvas.mol_to_cairo(mol, filename)
+            if show:
+                if not tk:
+                    errormessage = ("Tkinter or Python Imaging "
+                                    "Library not found, but is required for image "
+                                    "display. See installation instructions for "
+                                    "more information.")
+                    raise ImportError, errormessage                    
+                root = tk.Tk()
+                root.title((hasattr(self, "title") and self.title)
+                           or self.__str__().rstrip())
+                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+                image = PIL.open(filename)
+                imagedata = piltk.PhotoImage(image)
+                label = tk.Label(frame, image=imagedata).pack()
+                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+                root.mainloop()
+            if filedes:
+                os.close(filedes)
+                os.remove(filename)
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
@@ -630,5 +677,11 @@ class MoleculeData(object):
 if __name__=="__main__": #pragma: no cover
     mol = readstring("smi", "CCCC")
     print mol
-    mol.draw()
 
+    for mol in readfile("sdf", "head.sdf"):
+        pass
+    #mol = readstring("smi","CCN(CC)CC") # triethylamine
+    #smarts = Smarts("[#6][#6]")
+    # print smarts.findall(mol)
+    mol = readstring("smi", "CC=O")
+    # d = mol.calcdesc()
