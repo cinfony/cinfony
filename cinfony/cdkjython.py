@@ -420,6 +420,7 @@ class _Canvas(javax.swing.JPanel):
         generators = []
         generators.append(cdk.renderer.generators.BasicSceneGenerator())
         generators.append(cdk.renderer.generators.BasicBondGenerator())
+        generators.append(cdk.renderer.generators.RingGenerator())
         generators.append(cdk.renderer.generators.BasicAtomGenerator())
         self.renderer = cdk.renderer.AtomContainerRenderer(generators,
                                         cdk.renderer.font.AWTFontManager())
