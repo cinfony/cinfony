@@ -586,7 +586,7 @@ $$$$"""
         
 class TestCDK(TestToolkit):
     toolkit = cdk
-    tanimotoresult = 0.571
+    tanimotoresult = 0.375
     Natoms = 15
     tpsaname = "tpsa"
     Nfpbits = 4 # The CDK uses a true java.util.Bitset

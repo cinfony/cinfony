@@ -39,7 +39,7 @@ _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
-_outformats = {'mol': cdk.io.MDLWriter,
+_outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
 outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
@@ -366,24 +366,91 @@ class Molecule(object):
                 pass
         return ans    
 
-    def draw(self):
-        """Create 2D coordinates for the molecule.
+    def draw(self, show=True, filename=None, update=False,
+             usecoords=False):
+        """Create a 2D depiction of the molecule.
 
-        Note that depiction is not currently possible with the CDK 1.2.x
-        series, but will be available with CDK 1.4.x.
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
         """
         mol = Molecule(self.Molecule.clone())
         cdk.aromaticity.CDKHueckelAromaticityDetector.detectAromaticity(mol.Molecule)
+
+        if not usecoords:
+            # Do the SDG
+            sdg = cdk.layout.StructureDiagramGenerator()
+            sdg.setMolecule(mol.Molecule)
+            sdg.generateCoordinates()
+            mol = Molecule(sdg.getMolecule())
+            if update:
+                for atom, newatom in zip(self.atoms, mol.atoms):
+                    coords = newatom.Atom.getPoint2d()
+                    atom.Atom.setPoint3d(javax.vecmath.Point3d(
+                                         coords.x, coords.y, 0.0))
+        else:
+           if self.atoms[0].Atom.getPoint2d() is None:
+                # Use the 3D coords to set the 2D coords
+                for atom, newatom in zip(self.atoms, mol.atoms):
+                    coords = atom.Atom.getPoint3d()
+                    newatom.Atom.setPoint2d(javax.vecmath.Point2d(
+                                    coords.x, coords.y))
+
+        mol.removeh()        
+        canvas = _Canvas(mol.Molecule)
         
-        # Do the SDG
-        sdg = cdk.layout.StructureDiagramGenerator()
-        sdg.setMolecule(mol.Molecule)
-        sdg.generateCoordinates()
-        mol = Molecule(sdg.getMolecule())
-        for atom, newatom in zip(self.atoms, mol.atoms):
-            coords = newatom.Atom.getPoint2d()
-            atom.Atom.setPoint3d(javax.vecmath.Point3d(
-                                 coords.x, coords.y, 0.0))
+        if filename:
+            canvas.writetofile(filename)
+        if show:
+            canvas.popup()
+        else:
+            canvas.frame.dispose()
+
+
+class _Canvas(javax.swing.JPanel):
+    def __init__(self, mol):
+        self.mol = mol
+        
+        self.frame = javax.swing.JFrame()
+        generators = []
+        generators.append(cdk.renderer.generators.BasicSceneGenerator())
+        generators.append(cdk.renderer.generators.BasicBondGenerator())
+        generators.append(cdk.renderer.generators.BasicAtomGenerator())
+        self.renderer = cdk.renderer.AtomContainerRenderer(generators,
+                                        cdk.renderer.font.AWTFontManager())
+
+        drawArea = java.awt.Rectangle(300, 300)
+        self.renderer.setup(mol, drawArea)        
+        image = java.awt.image.BufferedImage(300, 300,
+                        java.awt.image.BufferedImage.TYPE_INT_RGB)
+        screenSize = java.awt.Dimension(300, 300)
+        self.setPreferredSize(screenSize)
+        self.setBackground(java.awt.Color.WHITE)
+        self.frame.getContentPane().add(self)
+        self.frame.pack()
+        self.frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
+
+    def paint(self, g):
+        javax.swing.JPanel.paint(self, g) 
+        self.renderer.paint(self.mol, cdk.renderer.visitor.AWTDrawVisitor(g),
+                            java.awt.Rectangle(300, 300), True);
+
+    def popup(self):
+        self.frame.visible = True
+
+    def writetofile(self, filename):
+        img = self.createImage(300, 300)
+        g2 = img.getGraphics() # Graphics2D
+        g2.setColor(java.awt.Color.WHITE)
+        g2.fillRect(0, 0, 300, 300)
+        self.paint(g2)        
+        javax.imageio.ImageIO.write(img, "png", java.io.File(filename))
+        
             
 class Fingerprint(object):
     """A Molecular Fingerprint.
@@ -552,13 +619,7 @@ class MoleculeData(object):
         return dict(self.iteritems()).__repr__()
 
 if __name__=="__main__": #pragma: no cover
-    mol = readstring("smi", "CCCC")
-    print mol
-
-    for mol in readfile("sdf", "head.sdf"):
-        pass
-    #mol = readstring("smi","CCN(CC)CC") # triethylamine
-    #smarts = Smarts("[#6][#6]")
-    # print smarts.findall(mol)
-    mol = readstring("smi", "CC=O")
-    # d = mol.calcdesc()
+    mol = readstring("smi", "CC(=O)Cl")
+    mol.title = "Noel"
+    mol.draw()
+    
