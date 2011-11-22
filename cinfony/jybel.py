@@ -19,6 +19,8 @@ import org.openbabel as ob
 import java.lang.System
 java.lang.System.loadLibrary("openbabel_java")
 
+import javax
+
 def _formatstodict(list):
     list = [list.get(i) for i in range(list.size())]
     broken = [x.replace("[Read-only]", "").replace("[Write-only]","").split(" -- ") for x in list]
@@ -378,9 +380,62 @@ class Molecule(object):
     def __str__(self):
         return self.write()
 
-    def draw(self):
-        """Create 2D coordinates for the molecule."""
-        _operations['gen2D'].Do(self.OBMol)
+    def draw(self, show=True, filename=None, update=False, usecoords=False):
+        """Create a 2D depiction of the molecule.
+
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
+
+        Tkinter and Python Imaging Library are required for image display.
+        """
+        if not "png2" in outformats:
+            errormessage = ("PNG output format not found. You should compile "
+                            "Open Babel with PNG support. See installation "
+                            "instructions for more information.")
+            raise ImportError(errormessage)
+
+        # Need to copy to avoid removing hydrogens from self
+        workingmol = Molecule(ob.OBMol(self.OBMol))
+        workingmol.removeh()
+
+        if not usecoords:
+            _operations['gen2D'].Do(workingmol.OBMol)
+        if update == True:
+            if workingmol.OBMol.NumAtoms() != self.OBMol.NumAtoms():
+                errormessage = ("It is not possible to update the original molecule "
+                                "with the calculated coordinates, as the original "
+                                "molecule contains explicit hydrogens for which no "
+                                "coordinates have been calculated.")
+                raise RunTimeError(errormessage)
+            else:
+                for i in range(workingmol.OBMol.NumAtoms()):
+                    self.OBMol.GetAtom(i + 1).SetVector(workingmol.OBMol.GetAtom(i + 1).GetVector())
+
+        if filename:
+            filedes = None
+        else:
+            filedes, filename = tempfile.mkstemp()
+        
+        workingmol.write("png2", filename=filename, overwrite=True)
+        
+        if show:
+            image = javax.imageio.ImageIO.read(java.io.File(filename))
+            frame = javax.swing.JFrame(visible=1)
+            frame.getContentPane().add(javax.swing.JLabel(javax.swing.ImageIcon(image)))
+            frame.setSize(400,250)
+            frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
+            frame.show()
+            
+        if filedes:
+            os.close(filedes)
+            os.remove(filename)
+
 
 class Atom(object):
     """Represent a Jybel atom.

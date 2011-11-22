@@ -383,21 +383,6 @@ class TestOBabel(TestToolkit):
     def importtest(self):
         self.mols[0].draw(show=True, usecoords=True)
 
-##    def testDrawdependencies(self):
-##        "Testing the draw dependencies"
-##        t = self.toolkit.tk
-##        self.toolkit.tk = None
-##        self.mols[0].draw(show=False, usecoords=True,
-##                          filename="%s_b.png" % self.toolkit.__name__)
-##        self.assertRaises(ImportError,
-##                          self.importtest)
-##        self.toolkit.tk = t
-##
-##        t = self.toolkit.oasa
-##        self.toolkit.oasa = None
-##        self.assertRaises(ImportError,
-##                          self.importtest)
-##
     def testRSgetprops(self):
         """Get the values of the properties."""
         self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
@@ -406,16 +391,12 @@ class TestOBabel(TestToolkit):
         self.assertRaises(AttributeError, self.RSaccesstest)
 
 class TestJybel(TestOBabel):
-    def testDrawdependencies(self):
-        "No testing the draw dependencies"
-        pass
+    pass
 
+class TestIronable(TestJybel):
     def testDraw(self):
         """No creating a 2D depiction"""
         pass
-
-class TestIronable(TestJybel):
-    pass
 
 class TestPybel(TestOBabel):
     toolkit = pybel
@@ -607,12 +588,8 @@ class TestCDK(TestToolkit):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
-    def testDraw(self):
-        """Create a 2D depiction"""
-        if sys.platform[:4] == "java": # Not supported for cdkjpype
-            self.mols[0].draw(show=False,
-                              filename="%s.png" % self.toolkit.__name__)
-            self.mols[0].draw(show=False) # Just making sure that it doesn't raise an Error
+##    def testRFoutputfile(self):
+##        pass
 
 if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):

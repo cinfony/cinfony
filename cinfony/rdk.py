@@ -13,8 +13,7 @@ Global variables:
 import os
 
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import MolDrawing
+from rdkit.Chem import AllChem, Draw
 from rdkit.Chem import Descriptors
 
 _descDict = dict(Descriptors.descList)
@@ -344,52 +343,34 @@ class Molecule(object):
           usecoords -- don't calculate 2D coordinates, just use
                        the current coordinates (default is False)
 
-        Aggdraw is used for 2D depiction. Tkinter and
+        Aggdraw or Cairo is used for 2D depiction. Tkinter and
         Python Imaging Library are required for image display.
         """
-        if usecoords:
-            confId = 0
-        else:
-            if update:
-                AllChem.Compute2DCoords(self.Mol)
-                confId = 0
-            else:
-                confId = self.Mol.GetNumConformers()
-                AllChem.Compute2DCoords(self.Mol, clearConfs = False)
-        if show or filename:
-            if not aggdraw:
-                errormessage = ("Aggdraw not found, but is required for 2D "
-                                "structure depiction. "
-                                "See installation instructions for more "
-                                "information.")
-                raise ImportError, errormessage
-              
-            Chem.Kekulize(self.Mol)
-            img = PIL.new("RGBA",(300,300),"white")
-            canvas = aggCanvas.Canvas(img)                
-            drawer = MolDrawing(canvas)
-            drawer.wedgeDashedBonds = True
-            drawer.AddMol(self.Mol, confId = confId)
-            canvas.flush()
-        
-            if filename: # Note: overwrite is allowed          
-                img.save(filename)
-            if show:
-                if not tk:
-                    errormessage = ("Tkinter or Python Imaging "
-                                    "Library not found, but is required for image "
-                                    "display. See installation instructions for "
-                                    "more information.")
-                    raise ImportError, errormessage                  
-                root = tk.Tk()
-                root.title((hasattr(self, "title") and self.title)
-                           or self.__str__().rstrip())
-                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                imagedata = PILtk.PhotoImage(img)
-                label = tk.Label(frame, image=imagedata).pack()
-                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
-                root.mainloop()
-            Chem.SanitizeMol(self.Mol)
+        if not usecoords and update:
+            AllChem.Compute2DCoords(self.Mol)
+            usecoords = True
+        mol = Chem.Mol(self.Mol.ToBinary()) # Clone
+        if not usecoords:
+            AllChem.Compute2DCoords(mol)
+               
+        if filename: # Note: overwrite is allowed          
+            Draw.MolToFile(mol, filename)
+        if show:
+            if not tk:
+                errormessage = ("Tkinter or Python Imaging "
+                                "Library not found, but is required for image "
+                                "display. See installation instructions for "
+                                "more information.")
+                raise ImportError(errormessage)
+            img = Draw.MolToImage(mol)
+            root = tk.Tk()
+            root.title((hasattr(self, "title") and self.title)
+                       or self.__str__().rstrip())
+            frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+            imagedata = PILtk.PhotoImage(img)
+            label = tk.Label(frame, image=imagedata).pack()
+            quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+            root.mainloop()
 
     def localopt(self, forcefield = "uff", steps = 500):
         """Locally optimize the coordinates.
