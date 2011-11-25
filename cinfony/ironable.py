@@ -13,9 +13,18 @@ Global variables:
 import os
 import math
 import os.path
+import tempfile
 
 import System
 import clr
+clr.AddReference('System.Windows.Forms')
+clr.AddReference('System.Drawing')
+ 
+from System.Windows.Forms import (
+    Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
+    )
+from System.Drawing import Image, Size
+
 obdotnet = os.environ["OBDOTNET"]
 if obdotnet[0] == '"': # Remove trailing quotes
     obdotnet = obdotnet[1:-1]
@@ -380,9 +389,83 @@ class Molecule(object):
     def __str__(self):
         return self.write()
 
-    def draw(self):
+    def nodraw(self):
         """Create 2D coordinates for the molecule."""
         _operations['gen2D'].Do(self.OBMol)
+        ## Note to self:
+        ## Probably can be changed to be fully featured if desired:
+        ## see http://www.daniweb.com/software-development/python/threads/191210/page11
+        ## for example...
+
+    def draw(self, show=True, filename=None, update=False, usecoords=False):
+        """Create a 2D depiction of the molecule.
+
+        Optional parameters:
+          show -- display on screen (default is True)
+          filename -- write to file (default is None)
+          update -- update the coordinates of the atoms to those
+                    determined by the structure diagram generator
+                    (default is False)
+          usecoords -- don't calculate 2D coordinates, just use
+                       the current coordinates (default is False)
+        """
+        if not "png2" in outformats:
+            errormessage = ("PNG output format not found. You should compile "
+                            "Open Babel with PNG support. See installation "
+                            "instructions for more information.")
+            raise ImportError(errormessage)
+
+        # Need to copy to avoid removing hydrogens from self
+        workingmol = Molecule(ob.OBMol(self.OBMol))
+        workingmol.removeh()
+
+        if not usecoords:
+            _operations['gen2D'].Do(workingmol.OBMol)
+        if update == True:
+            if workingmol.OBMol.NumAtoms() != self.OBMol.NumAtoms():
+                errormessage = ("It is not possible to update the original molecule "
+                                "with the calculated coordinates, as the original "
+                                "molecule contains explicit hydrogens for which no "
+                                "coordinates have been calculated.")
+                raise RuntimeError(errormessage)
+            else:
+                for i in range(workingmol.OBMol.NumAtoms()):
+                    self.OBMol.GetAtom(i + 1).SetVector(workingmol.OBMol.GetAtom(i + 1).GetVector())
+
+        if filename:
+            workingmol.write("png2", filename=filename, overwrite=True)
+
+        if show:
+            if not filename:
+                errormessage = ("It is only possible to show the molecule if you "
+                                "provide a filename. The reason for this is that I kept "
+                                "having problems when using temporary files.")
+                raise RuntimeError(errormessage)
+                
+            form = MyForm()
+            form.setup(filename, self.title)
+            Application.Run(form)
+            
+class MyForm(Form):
+    def __init__(self):
+        Form.__init__(self)
+
+    def setup(self, filename, title):
+        # adjust the form's client area size to the picture
+        self.ClientSize = Size(300, 300)
+        self.Text = title
+         
+        self.filename = filename
+        self.image = Image.FromFile(self.filename)
+        pictureBox = PictureBox()
+        # this will fit the image to the form
+        pictureBox.SizeMode = PictureBoxSizeMode.StretchImage
+        pictureBox.Image = self.image
+        # fit the picture box to the frame
+        pictureBox.Dock = DockStyle.Fill
+         
+        self.Controls.Add(pictureBox)
+        self.Show()
 
 class Atom(object):
     """Represent an Ironable atom.
@@ -602,5 +685,6 @@ class MoleculeData(object):
         return dict(self.iteritems()).__repr__()
  
 if __name__=="__main__": #pragma: no cover
-    import doctest
-    doctest.testmod(verbose=True)
+##    import doctest
+##    doctest.testmod(verbose=True)
+    readstring("smi", "CC(=O)Cl").draw()
