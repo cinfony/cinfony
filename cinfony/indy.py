@@ -204,7 +204,7 @@ class Molecule(object):
        atoms, data, molwt, title
     
     Methods:
-       addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
+       addh(), calcfp(), draw(), localopt(), removeh(),
        write() 
       
     The underlying Indigo Molecule can be accessed using the attribute:

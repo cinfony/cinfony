@@ -412,7 +412,7 @@ class Molecule(object):
                                 "with the calculated coordinates, as the original "
                                 "molecule contains explicit hydrogens for which no "
                                 "coordinates have been calculated.")
-                raise RunTimeError(errormessage)
+                raise RuntimeError(errormessage)
             else:
                 for i in range(workingmol.OBMol.NumAtoms()):
                     self.OBMol.GetAtom(i + 1).SetVector(workingmol.OBMol.GetAtom(i + 1).GetVector())
@@ -428,7 +428,7 @@ class Molecule(object):
             image = javax.imageio.ImageIO.read(java.io.File(filename))
             frame = javax.swing.JFrame(visible=1)
             frame.getContentPane().add(javax.swing.JLabel(javax.swing.ImageIcon(image)))
-            frame.setSize(400,250)
+            frame.setSize(300,300)
             frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
             frame.show()
             

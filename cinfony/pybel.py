@@ -412,7 +412,7 @@ class Molecule(object):
                                 "with the calculated coordinates, as the original "
                                 "molecule contains explicit hydrogens for which no "
                                 "coordinates have been calculated.")
-                raise RunTimeError(errormessage)
+                raise RuntimeError(errormessage)
             else:
                 for i in range(workingmol.OBMol.NumAtoms()):
                     self.OBMol.GetAtom(i + 1).SetVector(workingmol.OBMol.GetAtom(i + 1).GetVector())
