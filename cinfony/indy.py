@@ -1,3 +1,11 @@
+## Copyright (c) 2011, Noel O'Boyle
+## All rights reserved.
+##
+##  This file is part of Cinfony.
+##  The contents are covered by the terms of the GPL v3 license
+##  which is included in the file LICENSE_GPLv3.txt.
+
+
 """
 indy - A Cinfony module for accessing Indigo from CPython, Jython or IronPython
 

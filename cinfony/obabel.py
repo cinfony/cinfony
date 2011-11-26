@@ -1,3 +1,10 @@
+## Copyright (c) 2008-2011, Noel O'Boyle
+## All rights reserved.
+##
+##  This file is part of Cinfony.
+##  The contents are covered by the terms of the GPL v2 license
+##  which is included in the file LICENSE_GPLv2.txt.
+
 """
 obabel - A Cinfony module for accessing OpenBabel
 
