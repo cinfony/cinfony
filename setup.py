@@ -6,6 +6,13 @@ open source cheminformatics toolkits.
 
 doclines = __doc__.split("\n")
 
+# My code is BSD
+# Open Babel is GPL v2
+# OPSIN is Artistic License v2.0 (not viral)
+# CDK is LGPL (not viral)
+# RDKit is BSD
+# Indigo is GPL v3
+
 # Chosen from http://www.python.org/pypi?:action=list_classifiers
 classifiers = """\
 Development Status :: 4 - Beta
@@ -13,6 +20,7 @@ Environment :: Console
 Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved :: BSD License
+License :: OSI Approved :: GNU General Public License (GPL)
 Natural Language :: English
 Operating System :: OS Independent
 Programming Language :: Python
@@ -23,7 +31,7 @@ Topic :: Software Development :: Libraries :: Python Modules
 from distutils.core import setup
 setup(
     name = "cinfony",
-    version = "1.1b3",
+    version = "1.1rc1",
     url = "http://code.googlecode.com/p/cinfony",
     author = "Noel O'Boyle",
     author_email = "baoilleach@gmail.com",
