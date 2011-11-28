@@ -386,7 +386,7 @@ class Molecule(object):
             renderer.renderToFile(mol, filename)
                 
             if show:
-                if not tk:
+                if not PILtk:
                     errormessage = ("Tkinter or Python Imaging "
                                     "Library not found, but is required for image "
                                     "display. See installation instructions for "
