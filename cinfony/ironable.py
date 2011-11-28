@@ -449,11 +449,11 @@ class Molecule(object):
                                 "having problems when using temporary files.")
                 raise RuntimeError(errormessage)
                 
-            form = MyForm()
+            form = _MyForm()
             form.setup(filename, self.title)
             Application.Run(form)
             
-class MyForm(Form):
+class _MyForm(Form):
     def __init__(self):
         Form.__init__(self)
 
