@@ -23,8 +23,17 @@ import tempfile
 if sys.platform[:3] == "cli":
     indigonet = os.environ["INDIGONET"]
     import clr
+    clr.AddReference('System.Windows.Forms')
+    clr.AddReference('System.Drawing')
     clr.AddReferenceToFileAndPath(indigonet + "\\indigo-cs.dll")
-    clr.AddReferenceToFileAndPath(indigonet + "\\indigo-renderer-cs.dll")    
+    clr.AddReferenceToFileAndPath(indigonet + "\\indigo-renderer-cs.dll")
+    from System.Windows.Forms import (
+        Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
+        )
+    from System.Drawing import Image, Size        
+elif sys.platform[:4] == "java":
+    import java, javax
+    
 if sys.platform[:3] == "cli" or sys.platform[:4] == "java":
     from com.ggasoftware.indigo import Indigo, IndigoException, IndigoRenderer
 else:
@@ -360,8 +369,7 @@ class Molecule(object):
           usecoords -- don't calculate 2D coordinates, just use
                        the current coordinates (default is False)
 
-        Aggdraw is used for 2D depiction. Tkinter and
-        Python Imaging Library are required for image display.
+        Tkinter and Python Imaging Library are required for image display.
         """
         if update:
             mol = self.Mol
@@ -386,22 +394,42 @@ class Molecule(object):
             renderer.renderToFile(mol, filename)
                 
             if show:
-                if not PILtk:
-                    errormessage = ("Tkinter or Python Imaging "
-                                    "Library not found, but is required for image "
-                                    "display. See installation instructions for "
-                                    "more information.")
-                    raise ImportError, errormessage
-                
-                root = tk.Tk()
-                root.title((hasattr(self, "title") and self.title)
-                           or self.__str__().rstrip())
-                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-                image = PIL.open(filename)
-                imagedata = PILtk.PhotoImage(image)
-                label = tk.Label(frame, image=imagedata).pack()
-                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
-                root.mainloop()
+                if sys.platform[:4] == "java":
+                    image = javax.imageio.ImageIO.read(java.io.File(filename))
+                    frame = javax.swing.JFrame(visible=1)
+                    frame.getContentPane().add(javax.swing.JLabel(javax.swing.ImageIcon(image)))
+                    frame.setSize(300,300)
+                    frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
+                    frame.show()
+                    
+                elif sys.platform[:3] == "cli":
+                    if filedes:
+                        errormessage = ("It is only possible to show the molecule if you "
+                                        "provide a filename. The reason for this is that I kept "
+                                        "having problems when using temporary files.")
+                        raise RuntimeError(errormessage)
+                    form = _MyForm()
+                    form.setup(filename, self.title)
+                    Application.Run(form)                                    
+
+                else:                    
+                    if not PILtk:
+                        errormessage = ("Tkinter or Python Imaging "
+                                        "Library not found, but is required for image "
+                                        "display. See installation instructions for "
+                                        "more information.")
+                        raise ImportError, errormessage
+                    
+                    root = tk.Tk()
+                    root.title((hasattr(self, "title") and self.title)
+                               or self.__str__().rstrip())
+                    frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+                    image = PIL.open(filename)
+                    imagedata = PILtk.PhotoImage(image)
+                    label = tk.Label(frame, image=imagedata).pack()
+                    quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+                    root.mainloop()
+
 
             if filedes:
                 os.close(filedes)
@@ -612,6 +640,26 @@ def _compressbits(bitvector, wordsize=32):
 
     return ans
             
+class _MyForm(Form):
+    def __init__(self):
+        Form.__init__(self)
+
+    def setup(self, filename, title):
+        # adjust the form's client area size to the picture
+        self.ClientSize = Size(300, 300)
+        self.Text = title
+         
+        self.filename = filename
+        self.image = Image.FromFile(self.filename)
+        pictureBox = PictureBox()
+        # this will fit the image to the form
+        pictureBox.SizeMode = PictureBoxSizeMode.StretchImage
+        pictureBox.Image = self.image
+        # fit the picture box to the frame
+        pictureBox.Dock = DockStyle.Fill
+         
+        self.Controls.Add(pictureBox)
+        self.Show()
 
 if __name__=="__main__": #pragma: no cover
     import doctest
