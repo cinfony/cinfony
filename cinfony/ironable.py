@@ -32,10 +32,10 @@ from System.Windows.Forms import (
     )
 from System.Drawing import Image, Size
 
-obdotnet = os.environ["OBDOTNET"]
-if obdotnet[0] == '"': # Remove trailing quotes
-    obdotnet = obdotnet[1:-1]
-clr.AddReferenceToFileAndPath(os.path.join(obdotnet, "OBDotNet.dll"))
+_obdotnet = os.environ["OBDOTNET"]
+if _obdotnet[0] == '"': # Remove trailing quotes
+    _obdotnet = obdotnet[1:-1]
+clr.AddReferenceToFileAndPath(os.path.join(_obdotnet, "OBDotNet.dll"))
 import OpenBabel as ob
 
 def _formatstodict(list):

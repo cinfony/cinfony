@@ -21,12 +21,12 @@ import sys
 import tempfile
 
 if sys.platform[:3] == "cli":
-    indigonet = os.environ["INDIGONET"]
+    _indigonet = os.environ["INDIGONET"]
     import clr
     clr.AddReference('System.Windows.Forms')
     clr.AddReference('System.Drawing')
-    clr.AddReferenceToFileAndPath(indigonet + "\\indigo-cs.dll")
-    clr.AddReferenceToFileAndPath(indigonet + "\\indigo-renderer-cs.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-cs.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-renderer-cs.dll")
     from System.Windows.Forms import (
         Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
         )
@@ -408,9 +408,17 @@ class Molecule(object):
                                         "provide a filename. The reason for this is that I kept "
                                         "having problems when using temporary files.")
                         raise RuntimeError(errormessage)
-                    form = _MyForm()
-                    form.setup(filename, self.title)
-                    Application.Run(form)                                    
+                    form = Form()
+                    form.ClientSize = Size(300, 300)
+                    form.Text = self.title
+                    image = Image.FromFile(filename)
+                    box = PictureBox()
+                    box.SizeMode = PictureBoxSizeMode.StretchImage
+                    box.Image = image
+                    box.Dock = DockStyle.Fill
+                    form.Controls.Add(box)
+                    form.Show()
+                    Application.Run(form)
 
                 else:                    
                     if not PILtk:
@@ -639,27 +647,6 @@ def _compressbits(bitvector, wordsize=32):
         ans.append(compressed)
 
     return ans
-            
-class _MyForm(Form):
-    def __init__(self):
-        Form.__init__(self)
-
-    def setup(self, filename, title):
-        # adjust the form's client area size to the picture
-        self.ClientSize = Size(300, 300)
-        self.Text = title
-         
-        self.filename = filename
-        self.image = Image.FromFile(self.filename)
-        pictureBox = PictureBox()
-        # this will fit the image to the form
-        pictureBox.SizeMode = PictureBoxSizeMode.StretchImage
-        pictureBox.Image = self.image
-        # fit the picture box to the frame
-        pictureBox.Dock = DockStyle.Fill
-         
-        self.Controls.Add(pictureBox)
-        self.Show()
 
 if __name__=="__main__": #pragma: no cover
     import doctest
