@@ -393,38 +393,22 @@ class Molecule(object):
         the depiction. For this, you should use the CDK from
         Jython or else the depiction engine of one of the other
         toolkits.
+
+        There are no parameters. Calling this function is equivalent
+        to calling the draw() method of one of the other Cinfony modules
+        with parameters:
+           show=False, filename=None, update=True, usecoords=False
         """
-        writetofile = filename is not None
+        # Do the SDG
+        sdg = cdk.layout.StructureDiagramGenerator()
+        sdg.setMolecule(self.Molecule)
+        sdg.generateExperimentalCoordinates()
+        newmol = Molecule(sdg.getMolecule())
 
-        if not usecoords:            
-            # Do the SDG
-            sdg = cdk.layout.StructureDiagramGenerator()
-            sdg.setMolecule(self.Molecule)
-            sdg.generateExperimentalCoordinates()
-            newmol = Molecule(sdg.getMolecule())
-            if update:
-                for atom, newatom in zip(self.atoms, newmol.atoms):
-                    coords = newatom.Atom.getPoint2d()
-                    atom.Atom.setPoint3d(javax.vecmath.Point3d(
-                                         coords.x, coords.y, 0.0))    
-        else:
-            newmol = self
-            
-        if writetofile or show:
-            if writetofile:
-                filedes = None
-            else:
-                filedes, filename = tempfile.mkstemp()
-
-            # Create OASA molecule
-            if not oasa:
-                errormessage = ("OASA not found, but is required for 2D structure "
-                        "depiction. OASA is part of BKChem. "
-                        "See installation instructions for more "
-                        "information.")
-                raise ImportError, errormessage                
-
-
+        for atom, newatom in zip(self.atoms, newmol.atoms):
+            coords = newatom.Atom.getPoint2d()
+            atom.Atom.setPoint3d(javax.vecmath.Point3d(
+                                 coords.x, coords.y, 0.0))    
 
 class Fingerprint(object):
     """A Molecular Fingerprint.

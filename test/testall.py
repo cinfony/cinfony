@@ -588,8 +588,10 @@ class TestCDK(TestToolkit):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
-##    def testRFoutputfile(self):
-##        pass
+class TestCDKJPype(TestCDK):
+    def testDraw(self):
+        """No depiction supported I'm afraid"""
+        pass
 
 if __name__=="__main__":
     if os.path.isfile("testoutput.txt"):
@@ -606,6 +608,8 @@ if __name__=="__main__":
         del lookup['rdk']
         del lookup['cdk']
         del lookup['opsin']
+    else:
+        lookup['cdk'] = TestCDKJPype
 
     # Only run Pybel tests if specifically asked
     testcases = list(lookup.values()).remove(TestPybel)
