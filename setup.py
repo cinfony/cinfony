@@ -15,7 +15,7 @@ doclines = __doc__.split("\n")
 
 # Chosen from http://www.python.org/pypi?:action=list_classifiers
 classifiers = """\
-Development Status :: 4 - Beta
+Development Status :: 5 - Production/Stable
 Environment :: Console
 Intended Audience :: Science/Research
 Intended Audience :: Developers
@@ -31,8 +31,8 @@ Topic :: Software Development :: Libraries :: Python Modules
 from distutils.core import setup
 setup(
     name = "cinfony",
-    version = "1.1rc1",
-    url = "http://code.googlecode.com/p/cinfony",
+    version = "1.1",
+    url = "http://cinfony.googlecode.com",
     author = "Noel O'Boyle",
     author_email = "baoilleach@gmail.com",
     maintainer = "Noel O'Boyle",
