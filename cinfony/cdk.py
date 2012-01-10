@@ -74,7 +74,11 @@ def _getdescdict():
 _descdict = _getdescdict()
 descs = _descdict.keys()
 """A list of supported descriptors"""
-fps = ["daylight", "graph", "maccs"]
+_fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter()
+                            , "graph":cdk.fingerprint.GraphOnlyFingerprinter()
+                            , "maccs":cdk.fingerprint.MACCSFingerprinter()
+                            }
+fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL"}
@@ -367,12 +371,8 @@ class Molecule(object):
                      types.
         """
         fp = fp.lower()
-        if fp == "graph":
-            fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
-        elif fp == "daylight":
-            fingerprinter = cdk.fingerprint.Fingerprinter()
-        elif fp == "maccs":
-            fingerprinter = cdk.fingerprint.MACCSFingerprinter()
+        if fp in _fingerprinters:
+            fingerprinter = _fingerprinters[fp]
         else:
             raise ValueError, "%s is not a recognised CDK Fingerprint type" % fp
         return Fingerprint(fingerprinter.getFingerprint(self.Molecule))
