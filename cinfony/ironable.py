@@ -60,7 +60,7 @@ def _getpluginnames(ptype):
 descs = _getpluginnames("descriptors")
 """A list of supported descriptors"""
 _descdict = _getplugins(ob.OBDescriptor.FindType, descs)
-fps = _getpluginnames("fingerprints")
+fps = [_x.lower() for _x in _getpluginnames("fingerprints")]
 """A list of supported fingerprint types"""
 _fingerprinters = _getplugins(ob.OBFingerprint.FindFingerprint, fps)
 forcefields = [x.lower() for x in _getpluginnames("forcefields")]
@@ -299,6 +299,7 @@ class Molecule(object):
                      types.
         """
         fp = ob.VectorUInt()
+        fptype = fptype.lower()
         try:
             fingerprinter = _fingerprinters[fptype]
         except KeyError:
