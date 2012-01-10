@@ -18,11 +18,7 @@ Global variables:
   forcefields - a list of supported forcefields
 """
 import sys
-
 import os
-import urllib
-import StringIO
-import tempfile
 
 if sys.platform[:4] == "java":
     import org.openscience.cdk as cdk
@@ -35,10 +31,6 @@ if sys.platform[:4] == "java":
     NullPointerException = java.lang.NullPointerException
 
 else:
-    import bz2
-    import math
-    import base64
-
     from jpype import *
 
     if not isJVMStarted():
@@ -74,9 +66,9 @@ def _getdescdict():
 _descdict = _getdescdict()
 descs = _descdict.keys()
 """A list of supported descriptors"""
-_fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter()
-                            , "graph":cdk.fingerprint.GraphOnlyFingerprinter()
-                            , "maccs":cdk.fingerprint.MACCSFingerprinter()
+_fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter
+                            , "graph":cdk.fingerprint.GraphOnlyFingerprinter
+                            , "maccs":cdk.fingerprint.MACCSFingerprinter
                             }
 fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
@@ -372,7 +364,7 @@ class Molecule(object):
         """
         fp = fp.lower()
         if fp in _fingerprinters:
-            fingerprinter = _fingerprinters[fp]
+            fingerprinter = _fingerprinters[fp]()
         else:
             raise ValueError, "%s is not a recognised CDK Fingerprint type" % fp
         return Fingerprint(fingerprinter.getFingerprint(self.Molecule))
