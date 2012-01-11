@@ -14,9 +14,7 @@ Python implementation.
 """
 import sys
 
-if sys.platform[:4] == "java":
-    from jybel import *
-elif sys.platform[:3] == "cli":
+if sys.platform[:3] == "cli":
     from ironable import *
 else:
     from pybel import *

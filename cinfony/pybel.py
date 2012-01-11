@@ -20,16 +20,26 @@ Global variables:
 import math
 import os.path
 import tempfile
-import openbabel as ob
 
-try:
-    import Tkinter as tk
-    import Image as PIL
-    import ImageTk as piltk
-except ImportError: #pragma: no cover
-    tk = None
+if sys.platform[:4] == "java":
+    import org.openbabel as ob
+
+    import java.lang.System
+    java.lang.System.loadLibrary("openbabel_java")
+
+    import javax
+else:
+    import openbabel as ob
+    try:
+        import Tkinter as tk
+        import Image as PIL
+        import ImageTk as piltk
+    except ImportError: #pragma: no cover
+        tk = None
 
 def _formatstodict(list):
+    if sys.platform[:4] == "java":
+        list = [list.get(i) for i in range(list.size())]
     broken = [x.replace("[Read-only]", "").replace("[Write-only]","").split(" -- ") for x in list]
     broken = [(x,y.strip()) for x,y in broken]
     return dict(broken)
@@ -46,6 +56,8 @@ def _getplugins(findplugin, names):
 def _getpluginnames(ptype):
     plugins = ob.vectorString()
     ob.OBPlugin.ListAsVector(ptype, None, plugins)
+    if sys.platform[:4] == "java":
+        return [plugins.get(i).split()[0] for i in range(plugins.size())]
     return [x.split()[0] for x in plugins]
 
 descs = _getpluginnames("descriptors")
@@ -72,10 +84,10 @@ def readfile(format, filename):
     You can access the first molecule in a file using the next() method
     of the iterator:
         mol = readfile("smi", "myfile.smi").next()
-        
+
     You can make a list of the molecules in a file using:
         mols = list(readfile("smi", "myfile.smi"))
-        
+
     You can iterate over the molecules in a file as shown in the
     following code snippet:
     >>> atomtotal = 0
@@ -129,12 +141,12 @@ def readstring(format, string):
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
-   
+
     Although it's possible to write a single molecule to a file by
     calling the write() method of a molecule, if multiple molecules
     are to be written to the same file you should use the Outputfile
     class.
-    
+
     Required parameters:
        format - see the outformats variable for a list of available
                 output formats
@@ -143,7 +155,7 @@ class Outputfile(object):
     Optional parameters:
        overwrite -- if the output file already exists, should it
                    be overwritten? (default is False)
-                   
+
     Methods:
        write(molecule)
        close()
@@ -151,17 +163,17 @@ class Outputfile(object):
     def __init__(self, format, filename, overwrite=False):
         self.format = format
         self.filename = filename
+        if not overwrite and os.path.isfile(self.filename):
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         self.obConversion = ob.OBConversion()
         formatok = self.obConversion.SetOutFormat(self.format)
         if not formatok:
             raise ValueError("%s is not a recognised OpenBabel format" % format)
-        if not overwrite and os.path.isfile(self.filename):
-            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         self.total = 0 # The total number of molecules written to the file
-    
+
     def write(self, molecule):
         """Write a molecule to the output file.
-        
+
         Required parameters:
            molecule
         """
@@ -184,23 +196,23 @@ class Molecule(object):
 
     Required parameter:
        OBMol -- an Open Babel OBMol or any type of cinfony Molecule
- 
+
     Attributes:
-       atoms, charge, conformers, data, dim, energy, exactmass, formula, 
+       atoms, charge, conformers, data, dim, energy, exactmass, formula,
        molwt, spin, sssr, title, unitcell.
     (refer to the Open Babel library documentation for more info).
-    
+
     Methods:
        addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
-       write() 
-      
+       write()
+
     The underlying Open Babel molecule can be accessed using the attribute:
        OBMol
     """
     _cinfony = True
 
     def __init__(self, OBMol):
-        
+
         if hasattr(OBMol, "_cinfony"):
             a, b = OBMol._exchange
             if a == 0:
@@ -210,7 +222,7 @@ class Molecule(object):
             OBMol = mol.OBMol
 
         self.OBMol = OBMol
- 
+
     @property
     def atoms(self):
         return [ Atom(self.OBMol.GetAtom(i+1)) for i in range(self.OBMol.NumAtoms()) ]
@@ -241,6 +253,8 @@ class Molecule(object):
     def unitcell(self):
         unitcell = self.OBMol.GetData(ob.UnitCell)
         if unitcell:
+            if sys.platform[:4] == "java":
+                return ob.openbabel_java.toUnitCell(unitcell)
             return ob.toUnitCell(unitcell)
         else:
             raise AttributeError("Molecule has no attribute 'unitcell'")
@@ -253,7 +267,7 @@ class Molecule(object):
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
-        
+
         This allows constructions such as the following:
            for atom in mymol:
                print atom
@@ -280,10 +294,10 @@ class Molecule(object):
                 raise ValueError("%s is not a recognised Open Babel descriptor type" % descname)
             ans[descname] = desc.Predict(self.OBMol)
         return ans
-    
+
     def calcfp(self, fptype="FP2"):
         """Calculate a molecular fingerprint.
-        
+
         Optional parameters:
            fptype -- the fingerprint type (default is "FP2"). See the
                      fps variable for a list of of available fingerprint
@@ -300,7 +314,7 @@ class Molecule(object):
 
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
-        
+
         Optional parameters:
            format -- see the informats variable for a list of available
                      output formats (default is "smi")
@@ -329,7 +343,7 @@ class Molecule(object):
 
     def localopt(self, forcefield="mmff94", steps=500):
         """Locally optimize the coordinates.
-        
+
         Optional parameters:
            forcefield -- default is "mmff94". See the forcefields variable
                          for a list of available forcefields.
@@ -348,7 +362,7 @@ class Molecule(object):
             return
         ff.SteepestDescent(steps)
         ff.GetCoordinates(self.OBMol)
-    
+
 ##    def globalopt(self, forcefield="MMFF94", steps=1000):
 ##        if not (self.OBMol.Has2D() or self.OBMol.Has3D()):
 ##            self.make3D()
@@ -358,10 +372,10 @@ class Molecule(object):
 ##        if numrots > 0:
 ##            ff.WeightedRotorSearch(numrots, int(math.log(numrots + 1) * steps))
 ##        ff.GetCoordinates(self.OBMol)
-    
+
     def make3D(self, forcefield = "mmff94", steps = 50):
         """Generate 3D coordinates.
-        
+
         Optional parameters:
            forcefield -- default is "mmff94". See the forcefields variable
                          for a list of available forcefields.
@@ -384,7 +398,7 @@ class Molecule(object):
     def removeh(self):
         """Remove hydrogens."""
         self.OBMol.DeleteHydrogens()
-        
+
     def __str__(self):
         return self.write()
 
@@ -429,25 +443,33 @@ class Molecule(object):
             filedes = None
         else:
             filedes, filename = tempfile.mkstemp()
-        
+
         workingmol.write("png2", filename=filename, overwrite=True)
-        
+
         if show:
-            if not tk:
-                errormessage = ("Tkinter or Python Imaging "
-                                "Library not found, but is required for image "
-                                "display. See installation instructions for "
-                                "more information.")
-                raise ImportError(errormessage)
-            root = tk.Tk()
-            root.title((hasattr(self, "title") and self.title)
-                       or self.__str__().rstrip())
-            frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
-            image = PIL.open(filename)
-            imagedata = piltk.PhotoImage(image)
-            label = tk.Label(frame, image=imagedata).pack()
-            quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
-            root.mainloop()
+            if sys.platform[:4] == "java":
+                image = javax.imageio.ImageIO.read(java.io.File(filename))
+                frame = javax.swing.JFrame(visible=1)
+                frame.getContentPane().add(javax.swing.JLabel(javax.swing.ImageIcon(image)))
+                frame.setSize(300,300)
+                frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
+                frame.show()
+            else:
+                if not tk:
+                    errormessage = ("Tkinter or Python Imaging "
+                                    "Library not found, but is required for image "
+                                    "display. See installation instructions for "
+                                    "more information.")
+                    raise ImportError(errormessage)
+                root = tk.Tk()
+                root.title((hasattr(self, "title") and self.title)
+                           or self.__str__().rstrip())
+                frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
+                image = PIL.open(filename)
+                imagedata = piltk.PhotoImage(image)
+                label = tk.Label(frame, image=imagedata).pack()
+                quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
+                root.mainloop()
         if filedes:
             os.close(filedes)
             os.remove(filename)
@@ -457,7 +479,7 @@ class Atom(object):
 
     Required parameter:
        OBAtom -- an Open Babel OBAtom
-        
+
     Attributes:
        atomicmass, atomicnum, cidx, coords, coordidx, exactmass,
        formalcharge, heavyvalence, heterovalence, hyb, idx,
@@ -465,7 +487,7 @@ class Atom(object):
        valence, vector.
 
     (refer to the Open Babel library documentation for more info).
-    
+
     The original Open Babel atom can be accessed using the attribute:
        OBAtom
     """
@@ -525,6 +547,8 @@ def _findbits(fp, bitsperint):
     """
     ans = []
     start = 1
+    if sys.platform[:4] == "java":
+           fp = [fp.get(i) for i in range(fp.size())]
     for x in fp:
         i = start
         while x > 0:
@@ -534,10 +558,10 @@ def _findbits(fp, bitsperint):
             i += 1
         start += bitsperint
     return ans
-        
+
 class Fingerprint(object):
     """A Molecular Fingerprint.
-    
+
     Required parameters:
        fingerprint -- a vector calculated by OBFingerprint.FindFingerprint()
 
@@ -556,8 +580,10 @@ class Fingerprint(object):
         return ob.OBFingerprint.Tanimoto(self.fp, other.fp)
     @property
     def bits(self):
-        return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())    
+        return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())
     def __str__(self):
+        if sys.platform[:4] == "java":
+            return ", ".join([str(self.fp.get(i)) for i in range(self.fp.size())])
         return ", ".join([str(x) for x in self.fp])
 
 class Smarts(object):
@@ -565,14 +591,14 @@ class Smarts(object):
 
     Required parameters:
        smartspattern
-    
+
     Methods:
        findall(molecule)
-    
+
     Example:
     >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
-    >>> print smarts.findall(mol) 
+    >>> print smarts.findall(mol)
     [(1, 2), (4, 5), (6, 7)]
 
     The numbers returned are the indices (starting from 1) of the atoms
@@ -587,18 +613,21 @@ class Smarts(object):
             raise IOError("Invalid SMARTS pattern")
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
-        
+
         Required parameters:
            molecule
         """
         self.obsmarts.Match(molecule.OBMol)
+        if sys.platform[:4] == "java":
+            vector = self.obsmarts.GetUMapList()
+            return [vector.get(i) for i in range(vector.size())]
         return [x for x in self.obsmarts.GetUMapList()]
-        
+
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
-    
+
     Required parameters:
-      obmol -- an Open Babel OBMol 
+      obmol -- an Open Babel OBMol
 
     Methods and accessor methods are like those of a dictionary except
     that the data is retrieved on-the-fly from the underlying OBMol.
@@ -624,6 +653,12 @@ class MoleculeData(object):
     def __init__(self, obmol):
         self._mol = obmol
     def _data(self):
+        if sys.platform[:4] == "java":
+            data = self._mol.GetData()
+            data = [data.get(i) for i in range(data.size())]
+            return [ob.openbabel_java.toPairData(x) for x in data
+                    if x.GetDataType()==ob.openbabel_javaConstants.PairData or
+                    x.GetDataType()==ob.openbabel_javaConstants.CommentData]
         return [ob.toPairData(x) for x in self._mol.GetData() if x.GetDataType()==ob.PairData or x.GetDataType()==ob.CommentData]
     def _testforkey(self, key):
         if not key in self:
@@ -655,10 +690,15 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
+        if sys.platform[:4] == "java":
+            return ob.openbabel_java.toPairData(self._mol.GetData(key)).GetValue()
         return ob.toPairData(self._mol.GetData(key)).GetValue()
     def __setitem__(self, key, value):
         if key in self:
-            pairdata = ob.toPairData(self._mol.GetData(key))
+            if sys.platform[:4] == "java":
+                pairdata = ob.openbabel_java.toPairData(self._mol.GetData(key))
+            else:
+                pairdata = ob.toPairData(self._mol.GetData(key))
             pairdata.SetValue(str(value))
         else:
             pairdata = ob.OBPairData()
@@ -667,7 +707,7 @@ class MoleculeData(object):
             self._mol.CloneData(pairdata)
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
- 
+
 if __name__=="__main__": #pragma: no cover
     import doctest
     doctest.testmod(verbose=True)
