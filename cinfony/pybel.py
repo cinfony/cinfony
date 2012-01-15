@@ -17,6 +17,7 @@ Global variables:
   forcefields - a list of supported forcefields
 """
 
+import sys
 import math
 import os.path
 import tempfile
