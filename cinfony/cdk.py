@@ -69,6 +69,12 @@ descs = _descdict.keys()
 _fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter
                             , "graph":cdk.fingerprint.GraphOnlyFingerprinter
                             , "maccs":cdk.fingerprint.MACCSFingerprinter
+                            , "e-state":cdk.fingerprint.EStateFingerprinter
+                            , "extended":cdk.fingerprint.ExtendedFingerprinter
+                            , "hybridization":cdk.fingerprint.HybridizationFingerprinter
+                            , "klekota-roth":cdk.fingerprint.KlekotaRothFingerprinter
+                            , "pubchem":cdk.fingerprint.PubchemFingerprinter
+                            , "substructure":cdk.fingerprint.SubstructureFingerprinter
                             }
 fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
