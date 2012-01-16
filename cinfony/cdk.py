@@ -194,7 +194,7 @@ class Outputfile(object):
        close()
     """
     def __init__(self, format, filename, overwrite=False):
-        self.format = format
+        self.format = format.lower()
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
@@ -203,6 +203,9 @@ class Outputfile(object):
         if self.format == "smi":
             self._sg = cdk.smiles.SmilesGenerator()
             self._sg.setUseAromaticityFlag(True)
+            self._outputfile = open(self.filename, "w")
+        elif self.format in ('inchi', 'inchikey'):
+            self.inchifactory = cdk.inchi.InChIGeneratorFactory.getInstance()
             self._outputfile = open(self.filename, "w")
         else:
             self._writer = java.io.FileWriter(java.io.File(self.filename))
@@ -219,6 +222,13 @@ class Outputfile(object):
             raise IOError, "Outputfile instance is closed."
         if self.format == "smi":
             self._outputfile.write("%s\n" % self._sg.createSMILES(molecule.Molecule))
+        elif self.format in ('inchi', 'inchikey'):
+            gen = self.inchifactory.getInChIGenerator(molecule.Molecule)
+            if self.format == 'inchi':
+                inchi = gen.getInchi() + '\n'
+            else:
+                inchi = gen.getInchiKey() + '\n'
+            self._outputfile.write(inchi)
         else:
             self._molwriter.write(molecule.Molecule)
         self.total += 1
@@ -226,7 +236,7 @@ class Outputfile(object):
     def close(self):
         """Close the Outputfile to further writing."""
         self.filename = None
-        if self.format == "smi":
+        if self.format in ('smi','inchi', 'inchikey'):
             self._outputfile.close()
         else:
             self._molwriter.close()
