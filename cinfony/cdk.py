@@ -83,7 +83,7 @@ _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             "inchi":"InChI",
             "inchikey":"InChIKey"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
-informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
+informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol', 'inchi']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
@@ -124,6 +124,7 @@ def readfile(format, filename):
     >>> print atomtotal
     43
     """
+    format = format.lower()
     if not os.path.isfile(filename):
         raise IOError, "No such file: '%s'" % filename
     builder = cdk.DefaultChemObjectBuilder.getInstance()
@@ -137,6 +138,9 @@ def readfile(format, filename):
             java.io.FileInputStream(java.io.File(filename)),
             builder
             ))
+    elif format == 'inchi':
+        inputfile = open(filename, 'rb')
+        return (readstring('inchi', line.rstrip()) for line in inputfile)
     elif format in informats:
         reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
         chemfile = reader.read(cdk.ChemFile())
@@ -159,6 +163,7 @@ def readstring(format, string):
     >>> len(mymol.atoms)
     5
     """
+    format = format.lower()
     if format=="smi":
         sp = cdk.smiles.SmilesParser(cdk.DefaultChemObjectBuilder.getInstance())
         try:
@@ -169,6 +174,10 @@ def readstring(format, string):
                 ex = ex.message()
             raise IOError, ex
         return Molecule(ans)
+    elif format == 'inchi':
+        factory = cdk.inchi.InChIGeneratorFactory.getInstance()
+        intostruct = factory.getInChIToStructure(string,cdk.DefaultChemObjectBuilder.getInstance())
+        return Molecule(intostruct.getAtomContainer())
     elif format in informats:
         reader = _informats[format](java.io.StringReader(string))
         chemfile = reader.read(cdk.ChemFile())
