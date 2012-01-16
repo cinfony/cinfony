@@ -7,7 +7,7 @@
 ##  which is included in the file LICENSE_GPLv2.txt.
 
 """
-pybel - A Cinfony module for accessing OpenBabel from CPython
+pybel - A Cinfony module for accessing OpenBabel from CPython and Jython
 
 Global variables:
   ob - the underlying SWIG bindings for OpenBabel
