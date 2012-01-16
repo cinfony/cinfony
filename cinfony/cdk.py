@@ -79,14 +79,16 @@ _fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter
 fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
-            'mol2': "MOL2", 'mol': "MDL MOL"}
+            'mol2': "MOL2", 'mol': "MDL MOL",
+            'inchi':"IUPAC International Chemical Identifier",
+            'inchikey':"IUPAC International Chemical Identifier"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
+outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi', 'inchi', 'inchikey']])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 """A list of supported forcefields"""
@@ -330,6 +332,7 @@ class Molecule(object):
         To write multiple molecules to the same file you should use
         the Outputfile class.
         """
+        format = format.lower()
         if format not in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
 
@@ -348,6 +351,14 @@ class Molecule(object):
                 return
             else:
                 return smiles
+        elif format in ('inchi', 'inchikey'):
+            factory = cdk.inchi.InChIGeneratorFactory.getInstance()
+            gen = factory.getInChIGenerator(self.Molecule)
+            if format == 'inchi':
+                return gen.getInchi() + '\n'
+            else:
+                return gen.getInchiKey() + '\n'
+
         else:
             if filename is None:
                 writer = java.io.StringWriter()
