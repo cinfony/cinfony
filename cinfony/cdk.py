@@ -200,12 +200,7 @@ class Outputfile(object):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
         if not format in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
-        if self.format == "smi":
-            self._sg = cdk.smiles.SmilesGenerator()
-            self._sg.setUseAromaticityFlag(True)
-            self._outputfile = open(self.filename, "w")
-        elif self.format in ('inchi', 'inchikey'):
-            self.inchifactory = cdk.inchi.InChIGeneratorFactory.getInstance()
+        if self.format in ('smi','inchi', 'inchikey'):
             self._outputfile = open(self.filename, "w")
         else:
             self._writer = java.io.FileWriter(java.io.File(self.filename))
@@ -220,15 +215,8 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-        if self.format == "smi":
-            self._outputfile.write("%s\n" % self._sg.createSMILES(molecule.Molecule))
-        elif self.format in ('inchi', 'inchikey'):
-            gen = self.inchifactory.getInChIGenerator(molecule.Molecule)
-            if self.format == 'inchi':
-                inchi = gen.getInchi() + '\n'
-            else:
-                inchi = gen.getInchiKey() + '\n'
-            self._outputfile.write(inchi)
+        if self.format in ('smi','inchi', 'inchikey'):
+            self._outputfile.write("%s\n" % molecule.write(format))
         else:
             self._molwriter.write(molecule.Molecule)
         self.total += 1
