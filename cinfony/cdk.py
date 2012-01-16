@@ -80,8 +80,8 @@ fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL",
-            'inchi':"IUPAC International Chemical Identifier",
-            'inchikey':"IUPAC International Chemical Identifier"}
+            "inchi":"InChI",
+            "inchikey":"InChIKey"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
 informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
 """A dictionary of supported input formats"""
@@ -365,9 +365,9 @@ class Molecule(object):
             factory = cdk.inchi.InChIGeneratorFactory.getInstance()
             gen = factory.getInChIGenerator(self.Molecule)
             if format == 'inchi':
-                return gen.getInchi() + '\n'
+                return gen.getInchi()
             else:
-                return gen.getInchiKey() + '\n'
+                return gen.getInchiKey()
 
         else:
             if filename is None:
