@@ -18,11 +18,7 @@ Global variables:
   forcefields - a list of supported forcefields
 """
 import sys
-
 import os
-import urllib
-import StringIO
-import tempfile
 
 if sys.platform[:4] == "java":
     import org.openscience.cdk as cdk
@@ -35,10 +31,6 @@ if sys.platform[:4] == "java":
     NullPointerException = java.lang.NullPointerException
 
 else:
-    import bz2
-    import math
-    import base64
-
     from jpype import *
 
     if not isJVMStarted():
@@ -74,17 +66,29 @@ def _getdescdict():
 _descdict = _getdescdict()
 descs = _descdict.keys()
 """A list of supported descriptors"""
-fps = ["daylight", "graph", "maccs"]
+_fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter
+                            , "graph":cdk.fingerprint.GraphOnlyFingerprinter
+                            , "maccs":cdk.fingerprint.MACCSFingerprinter
+                            , "estate":cdk.fingerprint.EStateFingerprinter
+                            , "extended":cdk.fingerprint.ExtendedFingerprinter
+                            , "hybridization":cdk.fingerprint.HybridizationFingerprinter
+                            , "klekota-roth":cdk.fingerprint.KlekotaRothFingerprinter
+                            , "pubchem":cdk.fingerprint.PubchemFingerprinter
+                            , "substructure":cdk.fingerprint.SubstructureFingerprinter
+                            }
+fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
 _formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
-            'mol2': "MOL2", 'mol': "MDL MOL"}
+            'mol2': "MOL2", 'mol': "MDL MOL",
+            "inchi":"InChI",
+            "inchikey":"InChIKey"}
 _informats = {'sdf': cdk.io.MDLV2000Reader, 'mol': cdk.io.MDLV2000Reader}
-informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol']])
+informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol', 'inchi']])
 """A dictionary of supported input formats"""
 _outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi']])
+outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi', 'inchi', 'inchikey']])
 """A dictionary of supported output formats"""
 forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
 """A list of supported forcefields"""
@@ -120,6 +124,7 @@ def readfile(format, filename):
     >>> print atomtotal
     43
     """
+    format = format.lower()
     if not os.path.isfile(filename):
         raise IOError, "No such file: '%s'" % filename
     builder = cdk.DefaultChemObjectBuilder.getInstance()
@@ -133,6 +138,9 @@ def readfile(format, filename):
             java.io.FileInputStream(java.io.File(filename)),
             builder
             ))
+    elif format == 'inchi':
+        inputfile = open(filename, 'rb')
+        return (readstring('inchi', line.rstrip()) for line in inputfile)
     elif format in informats:
         reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
         chemfile = reader.read(cdk.ChemFile())
@@ -155,6 +163,7 @@ def readstring(format, string):
     >>> len(mymol.atoms)
     5
     """
+    format = format.lower()
     if format=="smi":
         sp = cdk.smiles.SmilesParser(cdk.DefaultChemObjectBuilder.getInstance())
         try:
@@ -165,6 +174,10 @@ def readstring(format, string):
                 ex = ex.message()
             raise IOError, ex
         return Molecule(ans)
+    elif format == 'inchi':
+        factory = cdk.inchi.InChIGeneratorFactory.getInstance()
+        intostruct = factory.getInChIToStructure(string,cdk.DefaultChemObjectBuilder.getInstance())
+        return Molecule(intostruct.getAtomContainer())
     elif format in informats:
         reader = _informats[format](java.io.StringReader(string))
         chemfile = reader.read(cdk.ChemFile())
@@ -190,15 +203,13 @@ class Outputfile(object):
        close()
     """
     def __init__(self, format, filename, overwrite=False):
-        self.format = format
+        self.format = format.lower()
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
         if not format in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
-        if self.format == "smi":
-            self._sg = cdk.smiles.SmilesGenerator()
-            self._sg.setUseAromaticityFlag(True)
+        if self.format in ('smi','inchi', 'inchikey'):
             self._outputfile = open(self.filename, "w")
         else:
             self._writer = java.io.FileWriter(java.io.File(self.filename))
@@ -213,8 +224,8 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-        if self.format == "smi":
-            self._outputfile.write("%s\n" % self._sg.createSMILES(molecule.Molecule))
+        if self.format in ('smi','inchi', 'inchikey'):
+            self._outputfile.write("%s\n" % molecule.write(format))
         else:
             self._molwriter.write(molecule.Molecule)
         self.total += 1
@@ -222,7 +233,7 @@ class Outputfile(object):
     def close(self):
         """Close the Outputfile to further writing."""
         self.filename = None
-        if self.format == "smi":
+        if self.format in ('smi','inchi', 'inchikey'):
             self._outputfile.close()
         else:
             self._molwriter.close()
@@ -328,6 +339,7 @@ class Molecule(object):
         To write multiple molecules to the same file you should use
         the Outputfile class.
         """
+        format = format.lower()
         if format not in outformats:
             raise ValueError,"%s is not a recognised CDK format" % format
 
@@ -346,6 +358,14 @@ class Molecule(object):
                 return
             else:
                 return smiles
+        elif format in ('inchi', 'inchikey'):
+            factory = cdk.inchi.InChIGeneratorFactory.getInstance()
+            gen = factory.getInChIGenerator(self.Molecule)
+            if format == 'inchi':
+                return gen.getInchi()
+            else:
+                return gen.getInchiKey()
+
         else:
             if filename is None:
                 writer = java.io.StringWriter()
@@ -367,12 +387,8 @@ class Molecule(object):
                      types.
         """
         fp = fp.lower()
-        if fp == "graph":
-            fingerprinter = cdk.fingerprint.GraphOnlyFingerprinter()
-        elif fp == "daylight":
-            fingerprinter = cdk.fingerprint.Fingerprinter()
-        elif fp == "maccs":
-            fingerprinter = cdk.fingerprint.MACCSFingerprinter()
+        if fp in _fingerprinters:
+            fingerprinter = _fingerprinters[fp]()
         else:
             raise ValueError, "%s is not a recognised CDK Fingerprint type" % fp
         return Fingerprint(fingerprinter.getFingerprint(self.Molecule))
