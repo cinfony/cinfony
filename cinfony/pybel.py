@@ -25,13 +25,14 @@ import tempfile
 
 if sys.platform[:4] == "java":
     import org.openbabel as ob
-
     import java.lang.System
     java.lang.System.loadLibrary("openbabel_java")
-
+    _obfuncs = ob.openbabel_java
+    _obconsts = ob.openbabel_javaConstants
     import javax
 else:
     import openbabel as ob
+    _obfuncs = _obconsts = ob
     try:
         import Tkinter as tk
         import Image as PIL
@@ -59,7 +60,7 @@ def _getpluginnames(ptype):
     plugins = ob.vectorString()
     ob.OBPlugin.ListAsVector(ptype, None, plugins)
     if sys.platform[:4] == "java":
-        return [plugins.get(i).split()[0] for i in range(plugins.size())]
+        plugins = [plugins.get(i) for i in range(plugins.size())]
     return [x.split()[0] for x in plugins]
 
 descs = _getpluginnames("descriptors")
@@ -253,11 +254,9 @@ class Molecule(object):
     title = property(_gettitle, _settitle)
     @property
     def unitcell(self):
-        unitcell = self.OBMol.GetData(ob.UnitCell)
+        unitcell = self.OBMol.GetData(_obconsts.UnitCell)
         if unitcell:
-            if sys.platform[:4] == "java":
-                return ob.openbabel_java.toUnitCell(unitcell)
-            return ob.toUnitCell(unitcell)
+            return _obfuncs.toUnitCell(unitcell)
         else:
             raise AttributeError("Molecule has no attribute 'unitcell'")
     @property
@@ -550,7 +549,7 @@ def _findbits(fp, bitsperint):
     ans = []
     start = 1
     if sys.platform[:4] == "java":
-           fp = [fp.get(i) for i in range(fp.size())]
+        fp = [fp.get(i) for i in range(fp.size())]
     for x in fp:
         i = start
         while x > 0:
@@ -584,9 +583,10 @@ class Fingerprint(object):
     def bits(self):
         return _findbits(self.fp, ob.OBFingerprint.Getbitsperint())
     def __str__(self):
+        fp = self.fp
         if sys.platform[:4] == "java":
-            return ", ".join([str(self.fp.get(i)) for i in range(self.fp.size())])
-        return ", ".join([str(x) for x in self.fp])
+            fp = [self.fp.get(i) for i in range(self.fp.size())]
+        return ", ".join([str(x) for x in fp])
 
 class Smarts(object):
     """A Smarts Pattern Matcher
@@ -620,10 +620,10 @@ class Smarts(object):
            molecule
         """
         self.obsmarts.Match(molecule.OBMol)
+        vector = self.obsmarts.GetUMapList()
         if sys.platform[:4] == "java":
-            vector = self.obsmarts.GetUMapList()
-            return [vector.get(i) for i in range(vector.size())]
-        return [x for x in self.obsmarts.GetUMapList()]
+            vector = [vector.get(i) for i in range(vector.size())]
+        return list(vector)
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
@@ -655,13 +655,12 @@ class MoleculeData(object):
     def __init__(self, obmol):
         self._mol = obmol
     def _data(self):
+        data = self._mol.GetData()
         if sys.platform[:4] == "java":
-            data = self._mol.GetData()
             data = [data.get(i) for i in range(data.size())]
-            return [ob.openbabel_java.toPairData(x) for x in data
-                    if x.GetDataType()==ob.openbabel_javaConstants.PairData or
-                    x.GetDataType()==ob.openbabel_javaConstants.CommentData]
-        return [ob.toPairData(x) for x in self._mol.GetData() if x.GetDataType()==ob.PairData or x.GetDataType()==ob.CommentData]
+        return [_obfuncs.toPairData(x) for x in data
+                if x.GetDataType()==_obconsts.PairData or
+                   x.GetDataType()==_obconsts.CommentData]
     def _testforkey(self, key):
         if not key in self:
             raise KeyError("'%s'" % key)
@@ -692,15 +691,10 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
-        if sys.platform[:4] == "java":
-            return ob.openbabel_java.toPairData(self._mol.GetData(key)).GetValue()
-        return ob.toPairData(self._mol.GetData(key)).GetValue()
+        return _obfuncs.toPairData(self._mol.GetData(key)).GetValue()
     def __setitem__(self, key, value):
         if key in self:
-            if sys.platform[:4] == "java":
-                pairdata = ob.openbabel_java.toPairData(self._mol.GetData(key))
-            else:
-                pairdata = ob.toPairData(self._mol.GetData(key))
+            pairdata = _obfuncs.toPairData(self._mol.GetData(key))
             pairdata.SetValue(str(value))
         else:
             pairdata = ob.OBPairData()
