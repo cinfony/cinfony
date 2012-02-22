@@ -1,5 +1,5 @@
 #-*. coding: utf-8 -*-
-## Copyright (c) 2008-2011, Noel O'Boyle; 2012, Adrià Cereto-Massagué
+## Copyright (c) 2008-2012, Noel O'Boyle; 2012, Adrià Cereto-Massagué
 ## All rights reserved.
 ##
 ##  This file is part of Cinfony.
@@ -7,10 +7,10 @@
 ##  which is included in the file LICENSE_GPLv2.txt.
 
 """
-pybel - A Cinfony module for accessing OpenBabel from CPython and Jython
+pybel - A Cinfony module for accessing Open Babel
 
 Global variables:
-  ob - the underlying SWIG bindings for OpenBabel
+  ob - the underlying SWIG bindings for Open Babel
   informats - a dictionary of supported input formats
   outformats - a dictionary of supported output formats
   descs - a list of supported descriptors
@@ -30,6 +30,24 @@ if sys.platform[:4] == "java":
     _obfuncs = ob.openbabel_java
     _obconsts = ob.openbabel_javaConstants
     import javax
+elif sys.platform[:3] == "cli":
+    import System
+    import clr
+    clr.AddReference('System.Windows.Forms')
+    clr.AddReference('System.Drawing')
+     
+    from System.Windows.Forms import (
+        Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
+        )
+    from System.Drawing import Image, Size
+
+    _obdotnet = os.environ["OBDOTNET"]
+    if _obdotnet[0] == '"': # Remove trailing quotes
+        _obdotnet = _obdotnet[1:-1]
+    clr.AddReferenceToFileAndPath(os.path.join(_obdotnet, "OBDotNet.dll"))
+    import OpenBabel as ob
+    _obfuncs = ob.openbabel_csharp
+    _obconsts = ob.openbabel_csharp
 else:
     import openbabel as ob
     _obfuncs = _obconsts = ob
@@ -57,7 +75,10 @@ def _getplugins(findplugin, names):
     plugins = dict([(x, findplugin(x)) for x in names if findplugin(x)])
     return plugins
 def _getpluginnames(ptype):
-    plugins = ob.vectorString()
+    if sys.platform[:4] == "cli":
+        plugins = ob.VectorString()
+    else:
+        plugins = ob.vectorString()
     ob.OBPlugin.ListAsVector(ptype, None, plugins)
     if sys.platform[:4] == "java":
         plugins = [plugins.get(i) for i in range(plugins.size())]
@@ -103,7 +124,7 @@ def readfile(format, filename):
     obconversion = ob.OBConversion()
     formatok = obconversion.SetInFormat(format)
     if not formatok:
-        raise ValueError("%s is not a recognised OpenBabel format" % format)
+        raise ValueError("%s is not a recognised Open Babel format" % format)
     if not os.path.isfile(filename):
         raise IOError("No such file: '%s'" % filename)
     def filereader():
@@ -134,7 +155,7 @@ def readstring(format, string):
 
     formatok = obconversion.SetInFormat(format)
     if not formatok:
-        raise ValueError("%s is not a recognised OpenBabel format" % format)
+        raise ValueError("%s is not a recognised Open Babel format" % format)
 
     success = obconversion.ReadString(obmol, string)
     if not success:
@@ -171,7 +192,7 @@ class Outputfile(object):
         self.obConversion = ob.OBConversion()
         formatok = self.obConversion.SetOutFormat(self.format)
         if not formatok:
-            raise ValueError("%s is not a recognised OpenBabel format" % format)
+            raise ValueError("%s is not a recognised Open Babel format" % format)
         self.total = 0 # The total number of molecules written to the file
 
     def write(self, molecule):
@@ -254,9 +275,15 @@ class Molecule(object):
     title = property(_gettitle, _settitle)
     @property
     def unitcell(self):
-        unitcell = self.OBMol.GetData(_obconsts.UnitCell)
+        unitcell_index = _obconsts.UnitCell
+        if sys.platform[:3] == "cli":
+            unitcell_index = System.UInt32(unitcell_index)
+        unitcell = self.OBMol.GetData(unitcell_index)
         if unitcell:
-            return _obfuncs.toUnitCell(unitcell)
+            if sys.platform[:3] != "cli":
+                return _obfuncs.toUnitCell(unitcell)
+            else:
+                return unitcell.Downcast[ob.OBUnitCell]()
         else:
             raise AttributeError("Molecule has no attribute 'unitcell'")
     @property
@@ -304,7 +331,10 @@ class Molecule(object):
                      fps variable for a list of of available fingerprint
                      types.
         """
-        fp = ob.vectorUnsignedInt()
+        if sys.platform[:3] == "cli":
+            fp = ob.VectorUInt()
+        else:
+            fp = ob.vectorUnsignedInt()
         fptype = fptype.lower()
         try:
             fingerprinter = _fingerprinters[fptype]
@@ -332,7 +362,7 @@ class Molecule(object):
         obconversion = ob.OBConversion()
         formatok = obconversion.SetOutFormat(format)
         if not formatok:
-            raise ValueError("%s is not a recognised OpenBabel format" % format)
+            raise ValueError("%s is not a recognised Open Babel format" % format)
 
         if filename:
             if not overwrite and os.path.isfile(filename):
@@ -443,6 +473,12 @@ class Molecule(object):
         if filename:
             filedes = None
         else:
+            if sys.platform[:3] == "cli":
+                errormessage = ("It is only possible to show the molecule if you "
+                                "provide a filename. The reason for this is that I kept "
+                                "having problems when using temporary files.")
+                raise RuntimeError(errormessage)
+            
             filedes, filename = tempfile.mkstemp()
 
         workingmol.write("png2", filename=filename, overwrite=True)
@@ -455,6 +491,10 @@ class Molecule(object):
                 frame.setSize(300,300)
                 frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
                 frame.show()
+            elif sys.platform[:3] == "cli":
+                form = _MyForm()
+                form.setup(filename, self.title)
+                Application.Run(form)                
             else:
                 if not tk:
                     errormessage = ("Tkinter or Python Imaging "
@@ -658,9 +698,12 @@ class MoleculeData(object):
         data = self._mol.GetData()
         if sys.platform[:4] == "java":
             data = [data.get(i) for i in range(data.size())]
-        return [_obfuncs.toPairData(x) for x in data
-                if x.GetDataType()==_obconsts.PairData or
+        answer = [x for x in data if
+                   x.GetDataType()==_obconsts.PairData or
                    x.GetDataType()==_obconsts.CommentData]
+        if sys.platform[:3] != "cli":
+            answer = [_obfuncs.toPairData(x) for x in answer]
+        return answer
     def _testforkey(self, key):
         if not key in self:
             raise KeyError("'%s'" % key)
@@ -691,10 +734,16 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
-        return _obfuncs.toPairData(self._mol.GetData(key)).GetValue()
+        answer = self._mol.GetData(key)
+        if sys.platform[:3] != "cli":
+            answer = _obfuncs.toPairData(answer)
+        return answer.GetValue()
     def __setitem__(self, key, value):
         if key in self:
-            pairdata = _obfuncs.toPairData(self._mol.GetData(key))
+            if sys.platform[:3] != "cli":
+                pairdata = _obfuncs.toPairData(self._mol.GetData(key))
+            else:
+                pairdata = self._mol.GetData(key).Downcast[ob.OBPairData]()
             pairdata.SetValue(str(value))
         else:
             pairdata = ob.OBPairData()
@@ -703,6 +752,28 @@ class MoleculeData(object):
             self._mol.CloneData(pairdata)
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
+
+if sys.platform[:3] == "cli":
+    class _MyForm(Form):
+        def __init__(self):
+            Form.__init__(self)
+
+        def setup(self, filename, title):
+            # adjust the form's client area size to the picture
+            self.ClientSize = Size(300, 300)
+            self.Text = title
+             
+            self.filename = filename
+            self.image = Image.FromFile(self.filename)
+            pictureBox = PictureBox()
+            # this will fit the image to the form
+            pictureBox.SizeMode = PictureBoxSizeMode.StretchImage
+            pictureBox.Image = self.image
+            # fit the picture box to the frame
+            pictureBox.Dock = DockStyle.Fill
+             
+            self.Controls.Add(pictureBox)
+            self.Show()
 
 if __name__=="__main__": #pragma: no cover
     import doctest
