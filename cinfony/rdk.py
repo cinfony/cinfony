@@ -50,13 +50,20 @@ fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
 descs = _descDict.keys()
 """A list of supported descriptors"""
 
-_formats = {'smi': "SMILES",
-            'can': "Canonical SMILES",
-            'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
-informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi']])
+_formats = {'smi': "SMILES"
+            ,'can': "Canonical SMILES"
+            ,'mol': "MDL MOL file", 'sdf': "MDL SDF file"
+            ,"inchi":"InChI"
+            ,"inchikey":"InChIKey"}
+_notinformats = ['can', 'inchikey']
+_notoutformats = []
+if not Chem.INCHI_AVAILABLE:
+    _notinformats += ['inchi']
+    _notoutformats += ['inchi', 'inchikey']
+
+informats = dict([(_x, _formats[_x]) for _x in _formats if _x not in _notinformats])
 """A dictionary of supported input formats"""
-outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'can', 'sdf',
-                                                 'smi']])
+outformats = dict([(_x, _formats[_x]) for _x in _formats if _x not in _notoutformats])
 """A dictionary of supported output formats"""
 
 _forcefields = {'uff': AllChem.UFFOptimizeMolecule}
@@ -110,6 +117,12 @@ def readfile(format, filename):
             for mol in iterator:
                 yield Molecule(mol)
         return smi_reader()
+    elif format=='inchi' and Chem.INCHI_AVAILABLE:
+        def  inchi_reader():
+            for line in open(filename, 'rb'):
+                mol = Chem.inchi.MolFromInchi(line.strip())
+                yield Molecule(mol)
+        return inchi_reader()
     else:
         raise ValueError, "%s is not a recognised RDKit format" % format
 
@@ -129,9 +142,11 @@ def readstring(format, string):
     """
     format = format.lower()
     if format=="mol":
-        return Molecule(Chem.MolFromMolBlock(string))
+        mol = Chem.MolFromMolBlock(string)
     elif format=="smi":
         mol = Chem.MolFromSmiles(string)
+    elif format=='inchi'and Chem.INCHI_AVAILABLE:
+        mol = Chem.inchi.MolFromInchi(string)
     else:
         raise ValueError,"%s is not a recognised RDKit format" % format
     if mol:
@@ -165,6 +180,8 @@ class Outputfile(object):
             self._writer = Chem.SDWriter(self.filename)
         elif format=="smi":
             self._writer = Chem.SmilesWriter(self.filename, isomericSmiles=True)
+        elif format in ('inchi', 'inchikey') and Chem.INCHI_AVAILABLE:
+            self._writer= open(filename, 'wb')
         else:
             raise ValueError,"%s is not a recognised RDKit format" % format
         self.total = 0 # The total number of molecules written to the file
@@ -177,8 +194,10 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-
-        self._writer.write(molecule.Mol)
+        if self.format in ('inchi', 'inchikey'):
+            self._writer.write(molecule.write(self.format) +'\n')
+        else:
+            self._writer.write(molecule.Mol)
         self.total += 1
 
     def close(self):
@@ -273,6 +292,10 @@ class Molecule(object):
             result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=True)
         elif format=="mol":
             result = Chem.MolToMolBlock(self.Mol)
+        elif format in ('inchi', 'inchikey') and Chem.INCHI_AVAILABLE:
+            result = Chem.inchi.MolToInchi(self.Mol)
+            if format == 'inchikey':
+                result = Chem.inchi.InchiToInchiKey(result)
         else:
             raise ValueError,"%s is not a recognised RDKit format" % format
         if filename:
