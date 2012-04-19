@@ -52,11 +52,13 @@ descs = _descDict.keys()
 
 _formats = {'smi': "SMILES"
             ,'can': "Canonical SMILES"
-            ,'mol': "MDL MOL file", 'sdf': "MDL SDF file"
+            ,'mol': "MDL MOL file"
+            ,'mol2': "Tripos MOL2 file"
+            , 'sdf': "MDL SDF file"
             ,"inchi":"InChI"
             ,"inchikey":"InChIKey"}
 _notinformats = ['can', 'inchikey']
-_notoutformats = []
+_notoutformats = ['mol2']
 if not Chem.INCHI_AVAILABLE:
     _notinformats += ['inchi']
     _notoutformats += ['inchi', 'inchikey']
@@ -143,6 +145,8 @@ def readstring(format, string):
     format = format.lower()
     if format=="mol":
         mol = Chem.MolFromMolBlock(string)
+    elif format=="mol2":
+        mol = Chem.MolFromMol2Block(string)
     elif format=="smi":
         mol = Chem.MolFromSmiles(string)
     elif format=='inchi'and Chem.INCHI_AVAILABLE:
