@@ -30,16 +30,16 @@ if sys.platform[:3] == "cli":
     from System.Windows.Forms import (
         Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
         )
-    from System.Drawing import Image, Size        
+    from System.Drawing import Image, Size
 elif sys.platform[:4] == "java":
     import java, javax
-    
+
 if sys.platform[:3] == "cli" or sys.platform[:4] == "java":
     from com.ggasoftware.indigo import Indigo, IndigoException, IndigoRenderer
 else:
     from indigo import Indigo, IndigoException
     from indigo_renderer import IndigoRenderer
-    
+
 indigo = Indigo()
 
 # PIL and Tkinter
@@ -74,10 +74,10 @@ def readfile(format, filename):
     You can access the first molecule in a file using the next() method
     of the iterator:
         mol = readfile("smi", "myfile.smi").next()
-        
+
     You can make a list of the molecules in a file using:
         mols = list(readfile("smi", "myfile.smi"))
-        
+
     You can iterate over the molecules in a file as shown in the
     following code snippet:
     >>> atomtotal = 0
@@ -104,7 +104,7 @@ def readfile(format, filename):
         def rdf_reader():
             for mol in iterator:
                 yield Molecule(mol)
-        return rdf_reader()    
+        return rdf_reader()
     elif format=="mol":
         def mol_reader():
             yield Molecule(indigo.loadMoleculeFromFile(filename))
@@ -120,8 +120,8 @@ def readfile(format, filename):
         def cml_reader():
             for mol in iterator:
                 yield Molecule(mol)
-        return cml_reader()    
-    
+        return cml_reader()
+
     else:
         raise ValueError, "%s is not a recognised Indigo format" % format
 
@@ -139,7 +139,7 @@ def readstring(format, string):
     >>> len(mymol.atoms)
     5
     """
-    format = format.lower()    
+    format = format.lower()
     if format not in informats:
         raise ValueError,"%s is not a recognised Indigo format" % format
 
@@ -154,7 +154,7 @@ def readstring(format, string):
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
-   
+
     Required parameters:
        format - see the outformats variable for a list of available
                 output formats
@@ -163,7 +163,7 @@ class Outputfile(object):
     Optional parameters:
        overwite -- if the output file already exists, should it
                    be overwritten? (default is False)
-                   
+
     Methods:
        write(molecule)
        close()
@@ -183,10 +183,10 @@ class Outputfile(object):
             self._writer.cmlHeader()
         elif self.format == "rdf":
             self._writer.rdfHeader()
-    
+
     def write(self, molecule):
         """Write a molecule to the output file.
-        
+
         Required parameters:
            molecule
         """
@@ -216,28 +216,28 @@ class Molecule(object):
 
     Required parameter:
        Mol -- an Indigo Mol or any type of cinfony Molecule
-      
+
     Attributes:
        atoms, data, molwt, title
-    
+
     Methods:
        addh(), calcfp(), draw(), localopt(), removeh(),
-       write() 
-      
+       write()
+
     The underlying Indigo Molecule can be accessed using the attribute:
        Mol
     """
     _cinfony = True
-    
+
     def __init__(self, Mol):
         if hasattr(Mol, "_cinfony"):
             a, b = Mol._exchange
             if a == 0:
                 molecule = readstring("smi", b)
             else:
-                molecule = readstring("mol", b)            
+                molecule = readstring("mol", b)
             Mol = molecule.Mol
-            
+
         self.Mol = Mol
 
     @property
@@ -262,14 +262,14 @@ class Molecule(object):
     def addh(self):
         """Add hydrogens."""
         self.Mol.unfoldHydrogens()
-        
+
     def removeh(self):
         """Remove hydrogens."""
         self.Mol.foldHydrogens()
-        
+
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
-        
+
         Optional parameters:
            format -- see the informats variable for a list of available
                      output formats (default is "smi")
@@ -311,7 +311,7 @@ class Molecule(object):
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
-        
+
         This allows constructions such as the following:
            for atom in mymol:
                print atom
@@ -344,7 +344,7 @@ class Molecule(object):
 
     def calcfp(self, fptype="sim"):
         """Calculate a molecular fingerprint.
-        
+
         Optional parameters:
            fptype -- the fingerprint type (default is "sim"). See the
                      fps variable for a list of of available fingerprint
@@ -390,9 +390,9 @@ class Molecule(object):
                 filedes = None
             else:
                 filedes, filename = tempfile.mkstemp()
-                
+
             renderer.renderToFile(mol, filename)
-                
+
             if show:
                 if sys.platform[:4] == "java":
                     image = javax.imageio.ImageIO.read(java.io.File(filename))
@@ -401,7 +401,7 @@ class Molecule(object):
                     frame.setSize(300,300)
                     frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE)
                     frame.show()
-                    
+
                 elif sys.platform[:3] == "cli":
                     if filedes:
                         errormessage = ("It is only possible to show the molecule if you "
@@ -420,14 +420,14 @@ class Molecule(object):
                     form.Show()
                     Application.Run(form)
 
-                else:                    
+                else:
                     if not PILtk:
                         errormessage = ("Tkinter or Python Imaging "
                                         "Library not found, but is required for image "
                                         "display. See installation instructions for "
                                         "more information.")
                         raise ImportError, errormessage
-                    
+
                     root = tk.Tk()
                     root.title((hasattr(self, "title") and self.title)
                                or self.__str__().rstrip())
@@ -441,21 +441,21 @@ class Molecule(object):
 
             if filedes:
                 os.close(filedes)
-                os.remove(filename)                
+                os.remove(filename)
 
 class Atom(object):
     """Represent an Indigo Atom.
 
     Required parameters:
        Atom -- an Indigo Atom
-     
+
     Attributes:
         atomicnum, coords, formalcharge
-    
+
     The original Indigo Atom can be accessed using the attribute:
        Atom
     """
-    
+
     def __init__(self, Atom):
         self.Atom = Atom
     @property
@@ -478,14 +478,14 @@ class Smarts(object):
 
     Required parameters:
        smartspattern
-    
+
     Methods:
        findall(molecule)
-    
+
     Example:
     >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
-    >>> print smarts.findall(mol) 
+    >>> print smarts.findall(mol)
     [(0, 1), (3, 4), (5, 6)]
 
     The numbers returned are the indices (starting from 0) of the atoms
@@ -501,7 +501,7 @@ class Smarts(object):
 
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
-        
+
         Required parameters:
            molecule
         """
@@ -517,9 +517,9 @@ class Smarts(object):
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
-    
+
     Required parameters:
-      Mol -- an Indigo Mol 
+      Mol -- an Indigo Mol
 
     Methods and accessor methods are like those of a dictionary except
     that the data is retrieved on-the-fly from the underlying Mol.
@@ -583,7 +583,7 @@ class MoleculeData(object):
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
-    
+
     Required parameters:
        fingerprint -- a vector calculated by one of the fingerprint methods
 
@@ -651,4 +651,4 @@ def _compressbits(bitvector, wordsize=32):
 if __name__=="__main__": #pragma: no cover
     import doctest
     doctest.testmod()
-    
+
