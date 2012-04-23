@@ -609,6 +609,16 @@ class Fingerprint(object):
     def __str__(self):
         return str(self._buffer_to_int())
 
+def _toint(string):
+    """
+    Some bits sometimes are a character. I haven't found what do they mean,
+    but they break cinfony fingerprints unless taken care of. This functions is just for that.
+    """
+    if string.isdigit():
+        return int(string)
+    else:
+        return 0
+
 def _findbits(fp, bitsperint):
     """Find which bits are set in a list/vector.
 
