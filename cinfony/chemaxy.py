@@ -380,7 +380,6 @@ class Molecule(object):
             reader.setInput(iis, True)
             param = reader.getDefaultReadParam()
             image = reader.read(0, param)
-            print 'drawn'
             frame = javax.swing.JFrame()
             frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
             imageIcon = javax.swing.ImageIcon(image)
