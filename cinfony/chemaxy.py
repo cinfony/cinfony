@@ -20,15 +20,13 @@ Global variables:
 import sys
 import os
 
-if sys.platform[:4] == "java":
+if sys.platform[:4] == "java" or sys.platform[:3] == "cli":
     import java
     import javax
     import chemaxon
     from chemaxon.util import MolHandler
     #Exceptions are handled differently in jpype and jython. We need to wrap them:
     JavaException = Exception
-    NullPointerException = java.lang.NullPointerException
-
 else:
     from jpype import *
 
@@ -46,9 +44,6 @@ else:
     except TypeError:
         raise ImportError, "jchem.jar file cannot be found."
 
-    #Exception wrappers for Jpype
-    NullPointerException = JavaException
-
 descs = [ 'HAcc', 'HDon', 'Heavy', 'LogP', 'TPSA']
 """A list of supported descriptors"""
 fps = ['ecfp']
@@ -60,7 +55,7 @@ informats = {
     ,'mol': "MDL MOL"
     ,'sdf': "MDL SDF"
     ,'inchi': "InChI"
-    ,'cml': "CML"
+    ,'cml': "Chemical Markup Language"
     , 'mrv':'Marvin Documents'
     , 'skc':'ISIS/Draw sketch file'
     , 'cdx':'ChemDraw sketch file'
@@ -70,10 +65,7 @@ informats = {
     , "sybyl":"Tripos SYBYL"
     , "pdb":"PDB"
     , "xyz":"XYZ"
-    , "xyz":"XYZ"
     , 'cube':'Gaussian cube'
-    , 'gout':'Gaussian output format'
-    #, 'gjf':'Gaussian input format'
     , 'gout':'Gaussian output format'
     }
 """A dictionary of supported input formats"""
@@ -95,10 +87,8 @@ outformats = {
     , "sybyl":"Tripos SYBYL"
     , "pdb":"PDB"
     , "xyz":"XYZ"
-    , "xyz":"XYZ"
     , 'cube':'Gaussian cube'
     , 'gjf':'Gaussian input format'
-    , 'gout':'Gaussian output format'
     }
 """A dictionary of supported output formats"""
 forcefields = []
@@ -129,30 +119,13 @@ def readfile(format, filename):
     >>> print atomtotal
     43
     """
-    format = format.lower()
     if not os.path.isfile(filename):
         raise IOError, "No such file: '%s'" % filename
-    builder = cdk.DefaultChemObjectBuilder.getInstance()
-    if format=="sdf":
-        return (Molecule(mol) for mol in cdk.io.iterator.IteratingMDLReader(
-               java.io.FileInputStream(java.io.File(filename)),
-               builder)
-               )
-    elif format=="smi":
-        return (Molecule(mol) for mol in cdk.io.iterator.IteratingSmilesReader(
-            java.io.FileInputStream(java.io.File(filename)),
-            builder
-            ))
-    elif format == 'inchi':
-        inputfile = open(filename, 'rb')
-        return (readstring('inchi', line.rstrip()) for line in inputfile)
-    elif format in informats:
-        reader = _informats[format](java.io.FileInputStream(java.io.File(filename)))
-        chemfile = reader.read(cdk.ChemFile())
-        manip = cdk.tools.manipulator.ChemFileManipulator
-        return iter(Molecule(manip.getAllAtomContainers(chemfile)[0]),)
-    else:
-        raise ValueError,"%s is not a recognised CDK format" % format
+    mi = chemaxon.formats.MolImporter(filename)
+    mol = mi.read()
+    while mol:
+        yield Molecule(MolHandler(mol))
+        mol = mi.read()
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -202,13 +175,9 @@ class Outputfile(object):
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
-        if not format in outformats:
-            raise ValueError,"%s is not a recognised CDK format" % format
-        if self.format in ('smi','inchi', 'inchikey'):
-            self._outputfile = open(self.filename, "w")
-        else:
-            self._writer = java.io.FileWriter(java.io.File(self.filename))
-            self._molwriter = _outformats[self.format](self._writer)
+        if format in ("smi", 'cxsmi'):
+            out = self.Molecule.toFormat(format +'les:a-H')
+        self._writer = chemaxon.formats.MolExporter(filename, format)
         self.total = 0 # The total number of molecules written to the file
 
     def write(self, molecule):
@@ -219,23 +188,16 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-        if self.format in ('smi','inchi', 'inchikey'):
-            self._outputfile.write("%s\n" % molecule.write(format))
-        else:
-            self._molwriter.write(molecule.Molecule)
+        self._writer.write(molecule.Molecule.molecule)
         self.total += 1
 
     def close(self):
         """Close the Outputfile to further writing."""
         self.filename = None
-        if self.format in ('smi','inchi', 'inchikey'):
-            self._outputfile.close()
-        else:
-            self._molwriter.close()
-            self._writer.close()
+        self._writer.close()
 
 class Molecule(object):
-    """Represent a cdkjpype Molecule.
+    """Represent a JChem Molecule.
 
     Required parameters:
        Molecule -- a JChem Molecule or any type of cinfony Molecule
@@ -262,6 +224,7 @@ class Molecule(object):
             Molecule = mol.Molecule
 
         self.Molecule = Molecule
+        self.Molecule.aromatize()
 
     @property
     def atoms(self): return [Atom(atom) for atom in self.Molecule.molecule.theAtoms]
@@ -329,7 +292,7 @@ class Molecule(object):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
 
         if format in ("smi", 'cxsmi'):
-            out = self.Molecule.toFormat(format +'les')
+            out = self.Molecule.toFormat(format +'les:a-H')
         elif format == 'inchikey':
             out = self.Molecule.toFormat('inchikey').replace('InChIKey=', '')
         else:
@@ -480,7 +443,11 @@ class Smarts(object):
     """
     def __init__(self, smartspattern):
         """Initialise with a SMARTS pattern."""
-        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
+        self.search = chemaxon.sss.search.MolSearch()
+        smarts = MolHandler(smartspattern)
+        smarts.setQueryMode(True)
+        smarts.aromatize()
+        self.search.setQuery(smarts.molecule)
 
     def findall(self, molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
@@ -488,14 +455,18 @@ class Smarts(object):
         Required parameters:
            molecule
         """
-        match = self.smarts.matches(molecule.Molecule)
-        return list(self.smarts.getUniqueMatchingAtoms())
+        self.search.setTarget(molecule.Molecule.molecule)
+        match = self.search.findAll()
+        result = []
+        for i in xrange(len(match)):
+            result.append(tuple([n+1 for n in match[i]]))
+        return result
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
 
     Required parameters:
-      Molecule -- a CDK Molecule
+      Molecule -- a JChem Molecule
 
     Methods and accessor methods are like those of a dictionary except
     that the data is retrieved on-the-fly from the underlying Molecule.
