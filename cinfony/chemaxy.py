@@ -21,8 +21,7 @@ import sys
 import os
 
 if sys.platform[:4] == "java" or sys.platform[:3] == "cli":
-    import java
-    import javax
+    import java, javax
     import chemaxon
     from chemaxon.util import MolHandler
     #Exceptions are handled differently in jpype and jython. We need to wrap them:
@@ -365,8 +364,29 @@ class Molecule(object):
              usecoords=False):
         """Create a 2D depiction of the molecule.
         """
-        raise NotImplementedError
-        return
+        bytearray = self.Molecule.molecule.toBinFormat('png')
+        if filename:
+            of = java.io.FileOutputStream(filename)
+            of.write(bytearray)
+            of.close()
+        if show:
+            source = java.io.ByteArrayInputStream(bytearray)
+            reader = javax.imageio.ImageIO.getImageReadersByFormatName('png').next()
+            iis = javax.imageio.ImageIO.createImageInputStream(source)
+            reader.setInput(iis, True)
+            param = reader.getDefaultReadParam()
+            image = reader.read(0, param)
+            print 'drawn'
+            frame = javax.swing.JFrame()
+            frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
+            imageIcon = javax.swing.ImageIcon(image)
+            label = javax.swing.JLabel()
+            label.setIcon(imageIcon)
+            frame.getContentPane().add(label, java.awt.BorderLayout.CENTER)
+            frame.pack()
+            frame.setVisible(True)
+            frame.show()
+
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
