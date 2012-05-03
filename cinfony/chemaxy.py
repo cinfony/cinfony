@@ -19,8 +19,15 @@ Global variables:
 """
 import sys
 import os
+from glob import glob
+classpath = []
+if 'JCHEMDIR' in os.environ:
+    for jar in glob(os.path.join(os.environ['JCHEMDIR'], '*.jar')):
+        classpath.append(jar)
 
 if sys.platform[:4] == "java" or sys.platform[:3] == "cli":
+    import sys
+    sys.path = classpath + sys.path
     import java, javax
     import chemaxon
     from chemaxon.util import MolHandler
@@ -33,7 +40,7 @@ else:
         _jvm = os.environ['JPYPE_JVM']
         if _jvm[0] == '"': # Remove trailing quotes
             _jvm = _jvm[1:-1]
-        _cp = os.environ['CLASSPATH']
+        _cp = os.pathsep.join(classpath + os.environ.get('CLASSPATH', '').split(os.pathsep))
         startJVM(_jvm, "-Djava.class.path=" + _cp)
 
     chemaxon = JPackage("chemaxon")
@@ -43,7 +50,7 @@ else:
     except TypeError:
         raise ImportError, "jchem.jar file cannot be found."
 
-descs = [ 'HAcc', 'HDon', 'Heavy', 'LogP', 'TPSA']
+descs = [ 'HAcc', 'HDon', 'Heavy', 'LogP', 'TPSA', 'RotatableBonds']
 """A list of supported descriptors"""
 fps = ['ecfp']
 """A list of supported fingerprint types"""
@@ -338,24 +345,21 @@ class Molecule(object):
         for descname in descnames:
             if descname not in descnames:
                 raise ValueError, "%s is not a recognised descriptor type" % descname
-            if descname == 'HAcc':
-                desc = chemaxon.descriptors.scalars.HAcc('')
-                desc.generate(self.Molecule.molecule)
-                ans[descname] = desc.toFloatArray()[0]
-            elif descname == 'HDon':
-                desc = chemaxon.descriptors.scalars.HDon('')
-                desc.generate(self.Molecule.molecule)
-                ans[descname] = desc.toFloatArray()[0]
-            elif descname == 'Heavy':
-                desc = chemaxon.descriptors.scalars.Heavy('')
-                desc.generate(self.Molecule.molecule)
-                ans[descname] = desc.toFloatArray()[0]
-            elif descname == 'LogP':
-                desc = chemaxon.descriptors.scalars.LogP('')
-                desc.generate(self.Molecule.molecule)
-                ans[descname] = desc.toFloatArray()[0]
-            elif descname == 'TPSA':
-                desc = chemaxon.descriptors.scalars.TPSA('')
+            if descname == 'RotatableBonds':
+                ta = chemaxon.calculations.TopologyAnalyser()
+                ta.setMolecule(self.Molecule.getMolecule())
+                ans[descname] = ta.rotatableBondCount()
+            else:
+                if descname == 'HAcc':
+                    desc = chemaxon.descriptors.scalars.HAcc('')
+                elif descname == 'HDon':
+                    desc = chemaxon.descriptors.scalars.HDon('')
+                elif descname == 'Heavy':
+                    desc = chemaxon.descriptors.scalars.Heavy('')
+                elif descname == 'LogP':
+                    desc = chemaxon.descriptors.scalars.LogP('')
+                elif descname == 'TPSA':
+                    desc = chemaxon.descriptors.scalars.TPSA('')
                 desc.generate(self.Molecule.molecule)
                 ans[descname] = desc.toFloatArray()[0]
         return ans
