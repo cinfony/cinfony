@@ -343,7 +343,7 @@ class Molecule(object):
             descnames = descs
         ans = {}
         for descname in descnames:
-            if descname not in descnames:
+            if descname not in descs:
                 raise ValueError, "%s is not a recognised descriptor type" % descname
             if descname == 'RotatableBondsCount':
                 ta = chemaxon.calculations.TopologyAnalyser()
