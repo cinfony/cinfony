@@ -602,7 +602,7 @@ ECFPConfiguration = """<?xml version="1.0" encoding="UTF-8"?>
 
 if __name__=="__main__": #pragma: no cover
     mol = readstring("smi", "CC(=O)Cl")
-    mol.title = "Adrià"
+    mol.title = u"Adrià"
     mol.draw()
 
     for mol in readfile("sdf", "head.sdf"):
