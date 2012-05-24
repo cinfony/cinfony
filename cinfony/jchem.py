@@ -151,10 +151,7 @@ def readstring(format, string):
     """
     format = format.lower()
     try:
-        if format in informats:
-            mh = MolHandler(string)
-        else:
-            raise ValueError,"%s is not a recognised format" % format
+        mh = MolHandler(string)
         return Molecule(mh)
     except JavaException, ex:
         if sys.platform[:4] != "java":
