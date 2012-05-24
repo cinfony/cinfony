@@ -131,6 +131,7 @@ def readfile(format, filename):
     mi = chemaxon.formats.MolImporter(filename)
     mol = mi.read()
     while mol:
+        mol.aromatize()
         yield Molecule(MolHandler(mol))
         mol = mi.read()
 
