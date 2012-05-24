@@ -177,13 +177,21 @@ class Outputfile(object):
        close()
     """
     def __init__(self, format, filename, overwrite=False):
+        if ':' in format:
+            format,  options = format.split(':')
+            if options:
+                options = ':' + options
+        else:
+            options = ''
         self.format = format.lower()
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
         if format in ("smi", 'cxsmi'):
-            out = self.Molecule.toFormat(format +'les:a-H')
-        self._writer = chemaxon.formats.MolExporter(filename, format)
+            if not options:
+                options = ':a-H'
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule.molecule,format +'les:a-H')
+        self._writer = chemaxon.formats.MolExporter(filename, format + options)
         self.total = 0 # The total number of molecules written to the file
 
     def write(self, molecule):
@@ -306,11 +314,13 @@ class Molecule(object):
         if format in ("smi", 'cxsmi'):
             if not options:
                 options = ':a-H'
-            out = self.Molecule.toFormat(format +'les' + options)
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule.molecule,format +'les' + options)
         elif format == 'inchikey':
-            out = self.Molecule.toFormat('inchikey').replace('InChIKey=', '')
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule.molecule,'inchikey').replace('InChIKey=', '')
         else:
-            out = self.Molecule.toFormat(format + options)
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule.molecule,format + options)
+            if format == 'inchi':
+                out = out.split('AuxInfo=')[0]
         if filename:
             output = open(filename, "w")
             print >> output, out
