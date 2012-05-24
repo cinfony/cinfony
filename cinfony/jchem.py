@@ -22,7 +22,7 @@ import os
 from glob import glob
 classpath = []
 if 'JCHEMDIR' in os.environ:
-    for jar in glob(os.path.join(os.environ['JCHEMDIR'], '*.jar')):
+    for jar in glob(os.path.join(os.path.join(os.environ['JCHEMDIR'],'lib'), '*.jar')):
         classpath.append(jar)
 
 if sys.platform[:4] == "java" or sys.platform[:3] == "cli":
@@ -290,6 +290,12 @@ class Molecule(object):
         To write multiple molecules to the same file you should use
         the Outputfile class.
         """
+        if ':' in format:
+            format,  options = format.split(':')
+            if options:
+                options = ':' + options
+        else:
+            options = ''
         format = format.lower()
         if format not in outformats:
             raise ValueError,"%s is not a recognised format" % format
@@ -298,11 +304,13 @@ class Molecule(object):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
 
         if format in ("smi", 'cxsmi'):
-            out = self.Molecule.toFormat(format +'les:a-H')
+            if not options:
+                options = ':a-H'
+            out = self.Molecule.toFormat(format +'les' + options)
         elif format == 'inchikey':
             out = self.Molecule.toFormat('inchikey').replace('InChIKey=', '')
         else:
-            out = self.Molecule.toFormat(format)
+            out = self.Molecule.toFormat(format + options)
         if filename:
             output = open(filename, "w")
             print >> output, out
