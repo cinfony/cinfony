@@ -49,8 +49,9 @@ else:
         _testmol = MolHandler()
     except TypeError:
         raise ImportError, "jchem.jar file cannot be found."
-
-descs = [ 'HAcc', 'HDon', 'Heavy', 'LogP', 'TPSA', 'RotatableBondsCount']
+_descset = set(['HAcc', 'HDon', 'Heavy', 'LogD', 'LogP', 'Mass', 'TPSA'])
+_descset.update(dir(chemaxon.descriptors.scalars))
+descs = [cls for cls in _descset if hasattr(getattr(chemaxon.descriptors.scalars, cls),'generate') and cls != 'LogD'] + ['RotatableBondsCount']
 """A list of supported descriptors"""
 fps = ['ecfp']
 """A list of supported fingerprint types"""
@@ -368,16 +369,7 @@ class Molecule(object):
                 ta.setMolecule(self.MolHandler.getMolecule())
                 ans[descname] = ta.rotatableBondCount()
             else:
-                if descname == 'HAcc':
-                    desc = chemaxon.descriptors.scalars.HAcc('')
-                elif descname == 'HDon':
-                    desc = chemaxon.descriptors.scalars.HDon('')
-                elif descname == 'Heavy':
-                    desc = chemaxon.descriptors.scalars.Heavy('')
-                elif descname == 'LogP':
-                    desc = chemaxon.descriptors.scalars.LogP('')
-                elif descname == 'TPSA':
-                    desc = chemaxon.descriptors.scalars.TPSA('')
+                desc = getattr(chemaxon.descriptors.scalars, descname)('')
                 desc.generate(self.MolHandler.molecule)
                 ans[descname] = desc.toFloatArray()[0]
         return ans
