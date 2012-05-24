@@ -386,7 +386,7 @@ class Molecule(object):
              usecoords=False):
         """Create a 2D depiction of the molecule.
         """
-        bytearray = self.Molecule.molecule.toBinFormat('png')
+        bytearray = chemaxon.formats.MolExporter.exportToBinFormat(self.Molecule.molecule, 'png')
         if filename:
             of = java.io.FileOutputStream(filename)
             of.write(bytearray)
@@ -399,7 +399,6 @@ class Molecule(object):
             param = reader.getDefaultReadParam()
             image = reader.read(0, param)
             frame = javax.swing.JFrame()
-            frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE)
             imageIcon = javax.swing.ImageIcon(image)
             label = javax.swing.JLabel()
             label.setIcon(imageIcon)
