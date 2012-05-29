@@ -106,8 +106,8 @@ def readfile(format, filename):
     """Iterate over the molecules in a file.
 
     Required parameters:
-       format - see the informats variable for a list of available
-                input formats
+       format - Ignored, but needed for compatibility with other cinfony
+                modules and also good for readability
        filename
 
     You can access the first molecule in a file using the next() method
@@ -139,8 +139,8 @@ def readstring(format, string):
     """Read in a molecule from a string.
 
     Required parameters:
-       format - see the informats variable for a list of available
-                input formats
+       format - Ignored, but needed for compatibility with other cinfony
+                modules and also good for readability
        string
 
     Example:
