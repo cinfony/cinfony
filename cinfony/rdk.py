@@ -14,7 +14,7 @@ import os
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
-from rdkit.Chem.Draw import MolDrawing
+from rdkit.Chem import Draw
 from rdkit.Chem import Descriptors
 
 _descDict = dict(Descriptors.descList)
@@ -31,13 +31,6 @@ try:
     import ImageTk as PILtk
 except:
     PILtk = None
-
-# Aggdraw
-try:
-    import aggdraw
-    from rdkit.Chem.Draw import aggCanvas
-except ImportError:
-    aggdraw = None
 
 fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
 """A list of supported fingerprint types"""
@@ -344,8 +337,7 @@ class Molecule(object):
           usecoords -- don't calculate 2D coordinates, just use
                        the current coordinates (default is False)
 
-        Aggdraw is used for 2D depiction. Tkinter and
-        Python Imaging Library are required for image display.
+        Tkinter and Python Imaging Library are required for image display.
         """
         if usecoords:
             confId = 0
@@ -357,21 +349,21 @@ class Molecule(object):
                 confId = self.Mol.GetNumConformers()
                 AllChem.Compute2DCoords(self.Mol, clearConfs = False)
         if show or filename:
-            if not aggdraw:
-                errormessage = ("Aggdraw not found, but is required for 2D "
-                                "structure depiction. "
-                                "See installation instructions for more "
-                                "information.")
-                raise ImportError, errormessage
-              
-            Chem.Kekulize(self.Mol)
-            img = PIL.new("RGBA",(300,300),"white")
-            canvas = aggCanvas.Canvas(img)                
-            drawer = MolDrawing(canvas)
-            drawer.wedgeDashedBonds = True
-            drawer.AddMol(self.Mol, confId = confId)
-            canvas.flush()
-        
+##            if not aggdraw:
+##                errormessage = ("Aggdraw not found, but is required for 2D "
+##                                "structure depiction. "
+##                                "See installation instructions for more "
+##                                "information.")
+##                raise ImportError, errormessage
+##              
+##            Chem.Kekulize(self.Mol)
+##            img = PIL.new("RGBA",(300,300),"white")
+##            canvas = aggCanvas.Canvas(img)                
+##            drawer = MolDrawing(canvas)
+##            drawer.wedgeDashedBonds = True
+##            drawer.AddMol(self.Mol, confId = confId)
+##            canvas.flush()
+            img = Draw.MolToImage(self.Mol, size=(300, 300))
             if filename: # Note: overwrite is allowed          
                 img.save(filename)
             if show:
@@ -389,7 +381,6 @@ class Molecule(object):
                 label = tk.Label(frame, image=imagedata).pack()
                 quitbutton = tk.Button(root, text="Close", command=root.destroy).pack(fill=tk.X)
                 root.mainloop()
-            Chem.SanitizeMol(self.Mol)
 
     def localopt(self, forcefield = "uff", steps = 500):
         """Locally optimize the coordinates.
