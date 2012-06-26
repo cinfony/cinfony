@@ -97,13 +97,18 @@ operations = _getpluginnames("ops")
 """A list of supported operations"""
 _operations = _getplugins(ob.OBOp.FindType, operations)
 
-def readfile(format, filename):
+def readfile(format, filename, opt=None):
     """Iterate over the molecules in a file.
 
     Required parameters:
        format - see the informats variable for a list of available
                 input formats
        filename
+
+    Optional parameters:
+       opt    - a dictionary of format-specific options
+                For format options with no parameters, specify the
+                value as None.
 
     You can access the first molecule in a file using the next() method
     of the iterator:
@@ -121,8 +126,15 @@ def readfile(format, filename):
     >>> print atomtotal
     43
     """
+    if opt == None:
+        opt = {}
     obconversion = ob.OBConversion()
     formatok = obconversion.SetInFormat(format)
+    for k, v in opt.iteritems():
+        if v == None:
+            obconversion.AddOption(k, obconversion.INOPTIONS)
+        else:
+            obconversion.AddOption(k, obconversion.INOPTIONS, v)
     if not formatok:
         raise ValueError("%s is not a recognised Open Babel format" % format)
     if not os.path.isfile(filename):
@@ -136,7 +148,7 @@ def readfile(format, filename):
             notatend = obconversion.Read(obmol)
     return filereader()
 
-def readstring(format, string):
+def readstring(format, string, opt=None):
     """Read in a molecule from a string.
 
     Required parameters:
@@ -144,18 +156,31 @@ def readstring(format, string):
                 input formats
        string
 
+    Optional parameters:
+       opt    - a dictionary of format-specific options
+                For format options with no parameters, specify the
+                value as None.
+
     Example:
     >>> input = "C1=CC=CS1"
     >>> mymol = readstring("smi", input)
     >>> len(mymol.atoms)
     5
     """
+    if opt == None:
+        opt = {}
+
     obmol = ob.OBMol()
     obconversion = ob.OBConversion()
 
     formatok = obconversion.SetInFormat(format)
     if not formatok:
         raise ValueError("%s is not a recognised Open Babel format" % format)
+    for k, v in opt.iteritems():
+        if v == None:
+            obconversion.AddOption(k, obconversion.INOPTIONS)
+        else:
+            obconversion.AddOption(k, obconversion.INOPTIONS, v)
 
     success = obconversion.ReadString(obmol, string)
     if not success:
@@ -179,20 +204,32 @@ class Outputfile(object):
     Optional parameters:
        overwrite -- if the output file already exists, should it
                    be overwritten? (default is False)
+       opt -- a dictionary of format-specific options
+              For format options with no parameters, specify the
+              value as None.
 
     Methods:
        write(molecule)
        close()
     """
-    def __init__(self, format, filename, overwrite=False):
+    def __init__(self, format, filename, overwrite=False, opt=None):
+        if opt == None:
+            opt = {}
         self.format = format
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
             raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
+
         self.obConversion = ob.OBConversion()
         formatok = self.obConversion.SetOutFormat(self.format)
         if not formatok:
             raise ValueError("%s is not a recognised Open Babel format" % format)
+
+        for k, v in opt.iteritems():
+            if v == None:
+                self.obConversion.AddOption(k, self.obConversion.OUTOPTIONS)
+            else:
+                self.obConversion.AddOption(k, self.obConversion.OUTOPTIONS, v)
         self.total = 0 # The total number of molecules written to the file
 
     def write(self, molecule):
@@ -343,7 +380,7 @@ class Molecule(object):
         fingerprinter.GetFingerprint(self.OBMol, fp)
         return Fingerprint(fp)
 
-    def write(self, format="smi", filename=None, overwrite=False):
+    def write(self, format="smi", filename=None, overwrite=False, opt=None):
         """Write the molecule to a file or return a string.
 
         Optional parameters:
@@ -352,6 +389,9 @@ class Molecule(object):
            filename -- default is None
            overwite -- if the output file already exists, should it
                        be overwritten? (default is False)
+           opt -- a dictionary of format specific options
+                  For format options with no parameters, specify the
+                  value as None.
 
         If a filename is specified, the result is written to a file.
         Otherwise, a string is returned containing the result.
@@ -359,10 +399,17 @@ class Molecule(object):
         To write multiple molecules to the same file you should use
         the Outputfile class.
         """
+        if opt == None:
+            opt = {}
         obconversion = ob.OBConversion()
         formatok = obconversion.SetOutFormat(format)
         if not formatok:
             raise ValueError("%s is not a recognised Open Babel format" % format)
+        for k, v in opt.iteritems():
+            if v == None:
+                obconversion.AddOption(k, obconversion.OUTOPTIONS)
+            else:
+                obconversion.AddOption(k, obconversion.OUTOPTIONS, v)
 
         if filename:
             if not overwrite and os.path.isfile(filename):
