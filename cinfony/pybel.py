@@ -134,7 +134,7 @@ def readfile(format, filename, opt=None):
         if v == None:
             obconversion.AddOption(k, obconversion.INOPTIONS)
         else:
-            obconversion.AddOption(k, obconversion.INOPTIONS, v)
+            obconversion.AddOption(k, obconversion.INOPTIONS, str(v))
     if not formatok:
         raise ValueError("%s is not a recognised Open Babel format" % format)
     if not os.path.isfile(filename):
@@ -180,7 +180,7 @@ def readstring(format, string, opt=None):
         if v == None:
             obconversion.AddOption(k, obconversion.INOPTIONS)
         else:
-            obconversion.AddOption(k, obconversion.INOPTIONS, v)
+            obconversion.AddOption(k, obconversion.INOPTIONS, str(v))
 
     success = obconversion.ReadString(obmol, string)
     if not success:
@@ -229,7 +229,7 @@ class Outputfile(object):
             if v == None:
                 self.obConversion.AddOption(k, self.obConversion.OUTOPTIONS)
             else:
-                self.obConversion.AddOption(k, self.obConversion.OUTOPTIONS, v)
+                self.obConversion.AddOption(k, self.obConversion.OUTOPTIONS, str(v))
         self.total = 0 # The total number of molecules written to the file
 
     def write(self, molecule):
@@ -409,7 +409,7 @@ class Molecule(object):
             if v == None:
                 obconversion.AddOption(k, obconversion.OUTOPTIONS)
             else:
-                obconversion.AddOption(k, obconversion.OUTOPTIONS, v)
+                obconversion.AddOption(k, obconversion.OUTOPTIONS, str(v))
 
         if filename:
             if not overwrite and os.path.isfile(filename):
