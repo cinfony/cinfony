@@ -111,8 +111,9 @@ def readfile(format, filename, opt=None):
                 value as None.
 
     You can access the first molecule in a file using the next() method
-    of the iterator:
-        mol = readfile("smi", "myfile.smi").next()
+    of the iterator (or the next() keyword in Python 3):
+        mol = readfile("smi", "myfile.smi").next() # Python 2
+        mol = next(readfile("smi", "myfile.smi"))  # Python 3
 
     You can make a list of the molecules in a file using:
         mols = list(readfile("smi", "myfile.smi"))
@@ -130,7 +131,7 @@ def readfile(format, filename, opt=None):
         opt = {}
     obconversion = ob.OBConversion()
     formatok = obconversion.SetInFormat(format)
-    for k, v in opt.iteritems():
+    for k, v in opt.items():
         if v == None:
             obconversion.AddOption(k, obconversion.INOPTIONS)
         else:
@@ -176,7 +177,7 @@ def readstring(format, string, opt=None):
     formatok = obconversion.SetInFormat(format)
     if not formatok:
         raise ValueError("%s is not a recognised Open Babel format" % format)
-    for k, v in opt.iteritems():
+    for k, v in opt.items():
         if v == None:
             obconversion.AddOption(k, obconversion.INOPTIONS)
         else:
@@ -225,7 +226,7 @@ class Outputfile(object):
         if not formatok:
             raise ValueError("%s is not a recognised Open Babel format" % format)
 
-        for k, v in opt.iteritems():
+        for k, v in opt.items():
             if v == None:
                 self.obConversion.AddOption(k, self.obConversion.OUTOPTIONS)
             else:
@@ -405,7 +406,7 @@ class Molecule(object):
         formatok = obconversion.SetOutFormat(format)
         if not formatok:
             raise ValueError("%s is not a recognised Open Babel format" % format)
-        for k, v in opt.iteritems():
+        for k, v in opt.items():
             if v == None:
                 obconversion.AddOption(k, obconversion.OUTOPTIONS)
             else:
@@ -520,7 +521,7 @@ class Molecule(object):
         if filename:
             filedes = None
         else:
-            if sys.platform[:3] == "cli":
+            if sys.platform[:3] == "cli" and show:
                 errormessage = ("It is only possible to show the molecule if you "
                                 "provide a filename. The reason for this is that I kept "
                                 "having problems when using temporary files.")
@@ -722,7 +723,8 @@ class MoleculeData(object):
     that the data is retrieved on-the-fly from the underlying OBMol.
 
     Example:
-    >>> mol = readfile("sdf", 'head.sdf').next()
+    >>> mol = readfile("sdf", 'head.sdf').next() # Python 2
+    >>> # mol = next(readfile("sdf", 'head.sdf')) # Python 3
     >>> data = mol.data
     >>> print data
     {'Comment': 'CORINA 2.61 0041  25.10.2001', 'NSC': '1'}
@@ -731,7 +733,7 @@ class MoleculeData(object):
     >>> print data['Comment']
     CORINA 2.61 0041  25.10.2001
     >>> data['Comment'] = 'This is a new comment'
-    >>> for k,v in data.iteritems():
+    >>> for k,v in data.items():
     ...    print k, "-->", v
     Comment --> This is a new comment
     NSC --> 1
@@ -759,11 +761,11 @@ class MoleculeData(object):
     def values(self):
         return [x.GetValue() for x in self._data()]
     def items(self):
-        return zip(self.keys(), self.values())
+        return iter(zip(self.keys(), self.values()))
     def __iter__(self):
         return iter(self.keys())
-    def iteritems(self):
-        return iter(self.items())
+    def iteritems(self): # Can remove for Python 3
+        return self.items()
     def __len__(self):
         return len(self._data())
     def __contains__(self, key):
@@ -777,7 +779,7 @@ class MoleculeData(object):
     def has_key(self, key):
         return key in self
     def update(self, dictionary):
-        for k, v in dictionary.iteritems():
+        for k, v in dictionary.items():
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
@@ -798,7 +800,7 @@ class MoleculeData(object):
             pairdata.SetValue(str(value))
             self._mol.CloneData(pairdata)
     def __repr__(self):
-        return dict(self.iteritems()).__repr__()
+        return dict(self.items()).__repr__()
 
 if sys.platform[:3] == "cli":
     class _MyForm(Form):
