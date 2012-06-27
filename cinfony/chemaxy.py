@@ -50,7 +50,7 @@ else:
     except TypeError:
         raise ImportError, "jchem.jar file cannot be found."
 
-descs = [ 'HAcc', 'HDon', 'Heavy', 'LogP', 'TPSA', 'RotatableBonds']
+descs = [ 'HAcc', 'HDon', 'Heavy', 'LogP', 'TPSA', 'RotatableBondsCount']
 """A list of supported descriptors"""
 fps = ['ecfp']
 """A list of supported fingerprint types"""
@@ -345,7 +345,7 @@ class Molecule(object):
         for descname in descnames:
             if descname not in descnames:
                 raise ValueError, "%s is not a recognised descriptor type" % descname
-            if descname == 'RotatableBonds':
+            if descname == 'RotatableBondsCount':
                 ta = chemaxon.calculations.TopologyAnalyser()
                 ta.setMolecule(self.Molecule.getMolecule())
                 ans[descname] = ta.rotatableBondCount()
