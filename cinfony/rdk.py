@@ -50,13 +50,22 @@ fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
 descs = _descDict.keys()
 """A list of supported descriptors"""
 
-_formats = {'smi': "SMILES",
-            'can': "Canonical SMILES",
-            'mol': "MDL MOL file", 'sdf': "MDL SDF file"}
-informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi']])
+_formats = {'smi': "SMILES"
+            ,'can': "Canonical SMILES"
+            ,'mol': "MDL MOL file"
+            ,'mol2': "Tripos MOL2 file"
+            , 'sdf': "MDL SDF file"
+            ,"inchi":"InChI"
+            ,"inchikey":"InChIKey"}
+_notinformats = ['can', 'inchikey']
+_notoutformats = ['mol2']
+if not Chem.INCHI_AVAILABLE:
+    _notinformats += ['inchi']
+    _notoutformats += ['inchi', 'inchikey']
+
+informats = dict([(_x, _formats[_x]) for _x in _formats if _x not in _notinformats])
 """A dictionary of supported input formats"""
-outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'can', 'sdf',
-                                                 'smi']])
+outformats = dict([(_x, _formats[_x]) for _x in _formats if _x not in _notoutformats])
 """A dictionary of supported output formats"""
 
 _forcefields = {'uff': AllChem.UFFOptimizeMolecule}
@@ -74,10 +83,10 @@ def readfile(format, filename):
     You can access the first molecule in a file using the next() method
     of the iterator:
         mol = readfile("smi", "myfile.smi").next()
-        
+
     You can make a list of the molecules in a file using:
         mols = list(readfile("smi", "myfile.smi"))
-        
+
     You can iterate over the molecules in a file as shown in the
     following code snippet:
     >>> atomtotal = 0
@@ -109,7 +118,13 @@ def readfile(format, filename):
         def smi_reader():
             for mol in iterator:
                 yield Molecule(mol)
-        return smi_reader()    
+        return smi_reader()
+    elif format=='inchi' and Chem.INCHI_AVAILABLE:
+        def  inchi_reader():
+            for line in open(filename, 'rb'):
+                mol = Chem.inchi.MolFromInchi(line.strip())
+                yield Molecule(mol)
+        return inchi_reader()
     else:
         raise ValueError, "%s is not a recognised RDKit format" % format
 
@@ -127,11 +142,15 @@ def readstring(format, string):
     >>> len(mymol.atoms)
     5
     """
-    format = format.lower()    
+    format = format.lower()
     if format=="mol":
-        return Molecule(Chem.MolFromMolBlock(string))
+        mol = Chem.MolFromMolBlock(string)
+    elif format=="mol2":
+        mol = Chem.MolFromMol2Block(string)
     elif format=="smi":
-        mol = Chem.MolFromSmiles(string)        
+        mol = Chem.MolFromSmiles(string)
+    elif format=='inchi'and Chem.INCHI_AVAILABLE:
+        mol = Chem.inchi.MolFromInchi(string)
     else:
         raise ValueError,"%s is not a recognised RDKit format" % format
     if mol:
@@ -142,7 +161,7 @@ def readstring(format, string):
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
-   
+
     Required parameters:
        format - see the outformats variable for a list of available
                 output formats
@@ -151,7 +170,7 @@ class Outputfile(object):
     Optional parameters:
        overwite -- if the output file already exists, should it
                    be overwritten? (default is False)
-                   
+
     Methods:
        write(molecule)
        close()
@@ -165,20 +184,24 @@ class Outputfile(object):
             self._writer = Chem.SDWriter(self.filename)
         elif format=="smi":
             self._writer = Chem.SmilesWriter(self.filename, isomericSmiles=True)
+        elif format in ('inchi', 'inchikey') and Chem.INCHI_AVAILABLE:
+            self._writer= open(filename, 'wb')
         else:
             raise ValueError,"%s is not a recognised RDKit format" % format
         self.total = 0 # The total number of molecules written to the file
-    
+
     def write(self, molecule):
         """Write a molecule to the output file.
-        
+
         Required parameters:
            molecule
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-
-        self._writer.write(molecule.Mol)
+        if self.format in ('inchi', 'inchikey'):
+            self._writer.write(molecule.write(self.format) +'\n')
+        else:
+            self._writer.write(molecule.Mol)
         self.total += 1
 
     def close(self):
@@ -192,28 +215,28 @@ class Molecule(object):
 
     Required parameter:
        Mol -- an RDKit Mol or any type of cinfony Molecule
-      
+
     Attributes:
        atoms, data, formula, molwt, title
-    
+
     Methods:
        addh(), calcfp(), calcdesc(), draw(), localopt(), make3D(), removeh(),
-       write() 
-      
+       write()
+
     The underlying RDKit Mol can be accessed using the attribute:
        Mol
     """
     _cinfony = True
-    
+
     def __init__(self, Mol):
         if hasattr(Mol, "_cinfony"):
             a, b = Mol._exchange
             if a == 0:
                 molecule = readstring("smi", b)
             else:
-                molecule = readstring("mol", b)            
+                molecule = readstring("mol", b)
             Mol = molecule.Mol
-            
+
         self.Mol = Mol
 
     @property
@@ -223,7 +246,7 @@ class Molecule(object):
     @property
     def molwt(self): return Descriptors.MolWt(self.Mol)
     @property
-    def formula(self): return Descriptors.MolecularFormula(self.Mol)    
+    def formula(self): return Descriptors.MolecularFormula(self.Mol)
     def _gettitle(self):
         # Note to self: maybe should implement the get() method for self.data
         if "_Name" in self.data:
@@ -242,14 +265,14 @@ class Molecule(object):
     def addh(self):
         """Add hydrogens."""
         self.Mol = Chem.AddHs(self.Mol)
-        
+
     def removeh(self):
         """Remove hydrogens."""
         self.Mol = Chem.RemoveHs(self.Mol)
-        
+
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
-        
+
         Optional parameters:
            format -- see the informats variable for a list of available
                      output formats (default is "smi")
@@ -273,6 +296,10 @@ class Molecule(object):
             result = Chem.MolToSmiles(self.Mol, isomericSmiles=True, canonical=True)
         elif format=="mol":
             result = Chem.MolToMolBlock(self.Mol)
+        elif format in ('inchi', 'inchikey') and Chem.INCHI_AVAILABLE:
+            result = Chem.inchi.MolToInchi(self.Mol)
+            if format == 'inchikey':
+                result = Chem.inchi.InchiToInchiKey(result)
         else:
             raise ValueError,"%s is not a recognised RDKit format" % format
         if filename:
@@ -282,7 +309,7 @@ class Molecule(object):
 
     def __iter__(self):
         """Iterate over the Atoms of the Molecule.
-        
+
         This allows constructions such as the following:
            for atom in mymol:
                print atom
@@ -315,7 +342,7 @@ class Molecule(object):
 
     def calcfp(self, fptype="rdkit"):
         """Calculate a molecular fingerprint.
-        
+
         Optional parameters:
            fptype -- the fingerprint type (default is "rdkit"). See the
                      fps variable for a list of of available fingerprint
@@ -325,7 +352,7 @@ class Molecule(object):
         if fptype=="rdkit":
             fp = Fingerprint(Chem.RDKFingerprint(self.Mol))
         elif fptype=="layered":
-            fp = Fingerprint(Chem.LayeredFingerprint(self.Mol))            
+            fp = Fingerprint(Chem.LayeredFingerprint(self.Mol))
         elif fptype=="maccs":
             fp = Fingerprint(Chem.MACCSkeys.GenMACCSKeys(self.Mol))
         elif fptype=="atompairs":
@@ -359,8 +386,8 @@ class Molecule(object):
         mol = Chem.Mol(self.Mol.ToBinary()) # Clone
         if not usecoords:
             AllChem.Compute2DCoords(mol)
-               
-        if filename: # Note: overwrite is allowed          
+
+        if filename: # Note: overwrite is allowed
             Draw.MolToFile(mol, filename)
         if show:
             if not tk:
@@ -381,7 +408,7 @@ class Molecule(object):
 
     def localopt(self, forcefield = "uff", steps = 500):
         """Locally optimize the coordinates.
-        
+
         Optional parameters:
            forcefield -- default is "uff". See the forcefields variable
                          for a list of available forcefields.
@@ -389,7 +416,7 @@ class Molecule(object):
 
         If the molecule does not have any coordinates, make3D() is
         called before the optimization.
-        """        
+        """
         forcefield = forcefield.lower()
         if self.Mol.GetNumConformers() == 0:
             self.make3D(forcefield)
@@ -397,7 +424,7 @@ class Molecule(object):
 
     def make3D(self, forcefield = "uff", steps = 50):
         """Generate 3D coordinates.
-        
+
         Optional parameters:
            forcefield -- default is "uff". See the forcefields variable
                          for a list of available forcefields.
@@ -407,7 +434,7 @@ class Molecule(object):
         local optimization is carried out with 50 steps and the
         UFF forcefield. Call localopt() if you want
         to improve the coordinates further.
-        """        
+        """
         forcefield = forcefield.lower()
         success = AllChem.EmbedMolecule(self.Mol)
         if success == -1: # Failed
@@ -416,20 +443,20 @@ class Molecule(object):
             if success == -1:
                 raise Error, "Embedding failed!"
         self.localopt(forcefield, steps)
-        
+
 class Atom(object):
     """Represent an rdkit Atom.
 
     Required parameters:
        Atom -- an RDKit Atom
-     
+
     Attributes:
         atomicnum, coords, formalcharge
-    
+
     The original RDKit Atom can be accessed using the attribute:
        Atom
     """
-    
+
     def __init__(self, Atom):
         self.Atom = Atom
     @property
@@ -457,14 +484,14 @@ class Smarts(object):
 
     Required parameters:
        smartspattern
-    
+
     Methods:
        findall(molecule)
-    
+
     Example:
     >>> mol = readstring("smi","CCN(CC)CC") # triethylamine
     >>> smarts = Smarts("[#6][#6]") # Matches an ethyl group
-    >>> print smarts.findall(mol) 
+    >>> print smarts.findall(mol)
     [(0, 1), (3, 4), (5, 6)]
 
     The numbers returned are the indices (starting from 0) of the atoms
@@ -479,7 +506,7 @@ class Smarts(object):
 
     def findall(self,molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
-        
+
         Required parameters:
            molecule
         """
@@ -487,9 +514,9 @@ class Smarts(object):
 
 class MoleculeData(object):
     """Store molecule data in a dictionary-type object
-    
+
     Required parameters:
-      Mol -- an RDKit Mol 
+      Mol -- an RDKit Mol
 
     Methods and accessor methods are like those of a dictionary except
     that the data is retrieved on-the-fly from the underlying Mol.
@@ -552,7 +579,7 @@ class MoleculeData(object):
 
 class Fingerprint(object):
     """A Molecular Fingerprint.
-    
+
     Required parameters:
        fingerprint -- a vector calculated by one of the fingerprint methods
 
@@ -595,9 +622,9 @@ def _compressbits(bitvector, wordsize=32):
         ans.append(compressed)
 
     return ans
-            
+
 
 if __name__=="__main__": #pragma: no cover
     import doctest
     doctest.testmod()
-    
+
