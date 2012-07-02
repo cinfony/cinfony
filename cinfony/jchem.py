@@ -240,7 +240,7 @@ class Molecule(object):
         self.MolHandler.aromatize()
 
     @property
-    def atoms(self): return [Atom(atom) for atom in self.MolHandler.molecule.theAtoms]
+    def atoms(self): return [Atom(atom) for atom in self.MolHandler.molecule.atomArray]
     @property
     def data(self): return MoleculeData(self.MolHandler)
     @property
@@ -425,7 +425,7 @@ class Fingerprint(object):
         else:
             raise AttributeError, "Fingerprint has no attribute %s" % attr
     def __str__(self):
-        return self.fp.toString()
+        return ", ".join([str(x) for x in self.fp.toIntArray()])
 
 class Atom(object):
     """Represent an Atom.
@@ -538,7 +538,7 @@ class MoleculeData(object):
     def iteritems(self):
         return iter(self.items())
     def __len__(self):
-        return len(self._data())
+        return len(self._data().keys)
     def __contains__(self, key):
         return key in self.keys()
     def __delitem__(self, key):
