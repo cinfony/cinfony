@@ -128,12 +128,17 @@ def readfile(format, filename):
     """
     if not os.path.isfile(filename):
         raise IOError, "No such file: '%s'" % filename
-    mi = chemaxon.formats.MolImporter(filename)
-    mol = mi.read()
-    while mol:
-        mol.aromatize()
-        yield Molecule(MolHandler(mol))
+    if not format in outformats:
+        raise ValueError("%s is not a recognised JChem format" % format)
+    try:
+        mi = chemaxon.formats.MolImporter(filename)
         mol = mi.read()
+        while mol:
+            mol.aromatize()
+            yield Molecule(MolHandler(mol))
+            mol = mi.read()
+    except chemaxon.formats.MolFormatException:
+        raise ValueError("%s is not a recognised JChem format" % format)
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -150,6 +155,8 @@ def readstring(format, string):
     5
     """
     format = format.lower()
+    if format not in informats:
+        raise ValueError("%s is not a recognised JChem format" % format)
     try:
         mh = MolHandler(string)
         return Molecule(mh)
@@ -158,6 +165,8 @@ def readstring(format, string):
             #Jpype exception
             ex = ex.message()
         raise IOError, ex
+    except chemaxon.formats.MolFormatException, e:
+        raise IOError("%s is not a recognised JChem format" % format)
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
@@ -190,7 +199,10 @@ class Outputfile(object):
             if not options:
                 options = ':a-H'
             out = chemaxon.formats.MolExporter.exportToFormat(self.MolHandler.molecule,format +'les:a-H')
-        self._writer = chemaxon.formats.MolExporter(filename, format + options)
+        try:
+            self._writer = chemaxon.formats.MolExporter(filename, format + options)
+        except chemaxon.marvin.io.MolExportException,  e:
+            raise ValueError(e)
         self.total = 0 # The total number of molecules written to the file
 
     def write(self, molecule):
@@ -305,7 +317,7 @@ class Molecule(object):
             options = ''
         format = format.lower()
         if format not in outformats:
-            raise ValueError,"%s is not a recognised format" % format
+            raise ValueError("%s is not a recognised format" % format)
 
         if filename is not None and not overwrite and os.path.isfile(filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
@@ -530,9 +542,9 @@ class MoleculeData(object):
         return list(self._data().keys)
     def values(self):
         p = self._data()
-        return [p.get(k).propValue for k in p.keys]
+        return [p.get(k) for k in p.keys]
     def items(self):
-        return [(k, self[k].propValue) for k in self._data().keys]
+        return [(k, self[k]) for k in self._data().keys]
     def __iter__(self):
         return iter(self.keys())
     def iteritems(self):
@@ -554,7 +566,7 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
-        return self._data().get(key)
+        return self._data().get(key).propValue
     def __setitem__(self, key, value):
         self._data().setString(key, str(value))
     def __repr__(self):
