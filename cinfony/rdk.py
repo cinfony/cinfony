@@ -45,7 +45,7 @@ try:
 except ImportError:
     aggdraw = None
 
-fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions']
+fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions', 'morgan']
 """A list of supported fingerprint types"""
 descs = _descDict.keys()
 """A list of supported descriptors"""
@@ -340,13 +340,15 @@ class Molecule(object):
             ans[descname] = desc(self.Mol)
         return ans
 
-    def calcfp(self, fptype="rdkit"):
+    def calcfp(self, fptype="rdkit", opt=dict()):
         """Calculate a molecular fingerprint.
 
         Optional parameters:
            fptype -- the fingerprint type (default is "rdkit"). See the
                      fps variable for a list of of available fingerprint
                      types.
+           opt -- a dictionary of options for fingerprints. Currently only used
+                     for radius and bitInfo in Morgan fingerprints.
         """
         fptype = fptype.lower()
         if fptype=="rdkit":
@@ -361,6 +363,10 @@ class Molecule(object):
         elif fptype=="torsions":
             # Going to leave as-is.
             fp = Chem.AtomPairs.Torsions.GetTopologicalTorsionFingerprintAsIntVect(self.Mol)
+        elif fptype == "morgan":
+            info = opt.get('bitInfo', None)
+            radius = opt.get('radius', 4)
+            fp = Fingerprint(Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(self.Mol,radius,bitInfo=info))
         else:
             raise ValueError, "%s is not a recognised RDKit Fingerprint type" % fptype
         return fp
