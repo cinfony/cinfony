@@ -100,6 +100,13 @@ _bondtypes = {1: cdk.CDKConstants.BONDORDER_SINGLE,
               3: cdk.CDKConstants.BONDORDER_TRIPLE}
 _revbondtypes = dict([(_y,_x) for (_x,_y) in _bondtypes.iteritems()])
 
+def _intvalue(integer):
+    """Paper over some differences between JPype and Jython"""
+    # Jython automagically converts Integer to ints
+    if type(integer) != type(42): # Is it a Python int?
+        integer = integer.intValue()
+    return integer
+
 def readfile(format, filename):
     """Iterate over the molecules in a file.
 
@@ -419,7 +426,7 @@ class Molecule(object):
                 elif hasattr(value, "doubleValue"):
                     ans[descname] = value.doubleValue()
                 else:
-                    ans[descname] = value.intValue()
+                    ans[descname] = _intvalue(value)
             except CDKException, ex:
                 # Can happen if molecule has no 3D coordinates
                 pass
@@ -579,7 +586,7 @@ class Atom(object):
     @property
     def atomicnum(self):
         _isofact.configure(self.Atom)
-        return self.Atom.getAtomicNumber().intValue()
+        return _intvalue(self.Atom.getAtomicNumber())
     @property
     def coords(self):
         coords = self.Atom.point3d
@@ -592,7 +599,7 @@ class Atom(object):
     @property
     def formalcharge(self):
         _isofact.configure(self.Atom)
-        return self.Atom.getFormalCharge().intValue()
+        return _intvalue(self.Atom.getFormalCharge())
 
     def __str__(self):
         c = self.coords
