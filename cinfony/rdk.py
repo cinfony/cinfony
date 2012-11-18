@@ -112,6 +112,10 @@ def readfile(format, filename):
         def mol_reader():
             yield Molecule(Chem.MolFromMolFile(filename))
         return mol_reader()
+    elif format=="mol2":
+        def mol_reader():
+            yield Molecule(Chem.MolFromMol2File(filename))
+        return mol_reader()
     elif format=="smi":
         iterator = Chem.SmilesMolSupplier(filename, delimiter=" \t",
                                           titleLine=False)
