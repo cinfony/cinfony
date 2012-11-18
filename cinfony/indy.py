@@ -25,8 +25,9 @@ if sys.platform[:3] == "cli":
     import clr
     clr.AddReference('System.Windows.Forms')
     clr.AddReference('System.Drawing')
-    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-cs.dll")
-    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-renderer-cs.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-dotnet.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-inchi-dotnet.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-renderer-dotnet.dll")
     from System.Windows.Forms import (
         Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
         )
