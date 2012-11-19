@@ -368,7 +368,8 @@ class TestOBabel(TestToolkit):
     Natoms = 15
     tpsaname = "TPSA"
     Nfpbits = 32
-    datakeys = ['NSC', 'Comment', 'OpenBabel Symmetry Classes']
+    datakeys = ['NSC', 'Comment', 'OpenBabel Symmetry Classes',
+		'MOL Chiral Flag']
 
     def testFP_FP3(self):
         "Checking the results from FP3"
@@ -379,7 +380,7 @@ class TestOBabel(TestToolkit):
         """Testing unit cell access"""
         mol = next(self.toolkit.readfile("cif", "hashizume.cif"))
         cell = mol.unitcell
-        self.assertAlmostEqual(cell.GetAlpha(), 92.9, 1)
+        self.assertAlmostEqual(cell.GetAlpha(), 93.0, 1)
 
     def testMDcomment(self):
         """Mess about with the comment field"""
