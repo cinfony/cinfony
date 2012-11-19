@@ -25,8 +25,9 @@ if sys.platform[:3] == "cli":
     import clr
     clr.AddReference('System.Windows.Forms')
     clr.AddReference('System.Drawing')
-    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-cs.dll")
-    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-renderer-cs.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-dotnet.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-inchi-dotnet.dll")
+    clr.AddReferenceToFileAndPath(_indigonet + "\\indigo-renderer-dotnet.dll")
     from System.Windows.Forms import (
         Application, DockStyle, Form, PictureBox, PictureBoxSizeMode
         )
@@ -35,12 +36,14 @@ elif sys.platform[:4] == "java":
     import java, javax
 
 if sys.platform[:3] == "cli" or sys.platform[:4] == "java":
-    from com.ggasoftware.indigo import Indigo, IndigoException, IndigoRenderer
+    from com.ggasoftware.indigo import Indigo, IndigoException, IndigoRenderer, IndigoInchi
 else:
     from indigo import Indigo, IndigoException
     from indigo_renderer import IndigoRenderer
+    from indigo_inchi import IndigoInchi
 
 indigo = Indigo()
+indigoInchi = IndigoInchi(indigo)
 
 # PIL and Tkinter
 try:
@@ -55,12 +58,13 @@ fps = ["sim", "sub", "sub-res", "sub-tau", "full"]
 
 _formats = {'smi': "SMILES", 'can': "Canonical SMILES", "rdf": "MDL RDF file",
             'mol': "MDL MOL file", 'sdf': "MDL SDF file",
-            'cml': "Chemical Markup Language"}
+            'cml': "Chemical Markup Language",
+            'inchi': "InChI", 'inchikey': "InChIKey"}
 informats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'rdf', 'smi',
-                                                'cml']])
+                                                'cml', 'inchi']])
 """A dictionary of supported input formats"""
 outformats = dict([(_x, _formats[_x]) for _x in ['mol', 'sdf', 'smi', 'can',
-                                                 'cml']])
+                                                 'cml', 'inchi', 'inchikey']])
 """A dictionary of supported output formats"""
 
 def readfile(format, filename):
@@ -143,8 +147,9 @@ def readstring(format, string):
     if format not in informats:
         raise ValueError,"%s is not a recognised Indigo format" % format
 
+    module = indigo if format != "inchi" else indigoInchi
     try:
-        mol = indigo.loadMolecule(string)
+        mol = module.loadMolecule(string)
     except IndigoException:
         raise IOError, "Failed to convert '%s' to format '%s'" % (
             string, format)
@@ -293,6 +298,10 @@ class Molecule(object):
             result = self.Mol.canonicalSmiles()
         elif format=="mol":
             result = self.Mol.molfile()
+        elif format=="inchi":
+            result = indigoInchi.getInchi(self.Mol)
+        elif format=="inchikey":
+            result = indigoInchi.getInchiKey(self.write("inchi"))
         elif format=="cml":
             result = self.Mol.cml()
         elif format=="sdf":

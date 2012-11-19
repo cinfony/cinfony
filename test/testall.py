@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-pybel = indy = ironable = rdk = cdk = obabel = webel = opsin = None
+pybel = indy = ironable = rdk = cdk = webel = opsin = None
 try:
     import pybel # From Open Babel
 except ImportError:
@@ -13,7 +13,7 @@ try:
 except (RuntimeError, ImportError, KeyError):
     pass
 try:
-    from cinfony import obabel
+    from cinfony import pybel
 except (ImportError, AttributeError, KeyError):
     pass
 try:
@@ -101,6 +101,15 @@ class TestToolkit(myTestCase):
         self.assertNotEqual(len(self.toolkit.descs), 0)
         self.assertNotEqual(len(self.toolkit.forcefields), 0)
         self.assertNotEqual(len(self.toolkit.fps), 0)
+
+    def testInChI(self):
+        """Test InChI generation"""
+        inchi = self.mols[0].write("inchi").rstrip()
+        inchikey = self.mols[0].write("inchikey").rstrip()
+        self.assertEqual(inchi, "InChI=1S/C4H10/c1-3-4-2/h3-4H2,1-2H3")
+        self.assertEqual(inchikey, "IJDNQMDRQITEOD-UHFFFAOYSA-N")
+        mol = self.toolkit.readstring("inchi", inchi)
+        self.assertEqual("CCCC", mol.write("smi").rstrip())
 
     def FPaccesstest(self):
         # Should raise AttributeError
@@ -354,7 +363,7 @@ M  END
         self.assertEqual(len(self.mols[0].atoms),4)
         
 class TestOBabel(TestToolkit):
-    toolkit = obabel
+    toolkit = pybel
     tanimotoresult = 1/3.
     Natoms = 15
     tpsaname = "TPSA"
