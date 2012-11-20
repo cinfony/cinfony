@@ -1,4 +1,4 @@
-## Copyright (c) 2011, Noel O'Boyle
+## Copyright (c) 2011, Noel O'Boyle; 2012, Adrià Cereto-Massagué
 ## All rights reserved.
 ##
 ##  This file is part of Cinfony.
