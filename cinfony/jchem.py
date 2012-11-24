@@ -22,6 +22,7 @@ import os
 from glob import glob
 classpath = []
 if 'JCHEMDIR' in os.environ:
+    assert os.path.isdir(os.path.join(os.environ['JCHEMDIR'], 'lib'))
     for jar in glob(os.path.join(os.path.join(os.environ['JCHEMDIR'],'lib'), '*.jar')):
         classpath.append(jar)
 
@@ -532,30 +533,27 @@ class MoleculeData(object):
     1 ['Comment'] False
     """
     def __init__(self, Molecule):
-        self._mol = Molecule
-    def _data(self):
-        return self._mol.molecule.properties()
+        self._data = Molecule.molecule.properties()
     def _testforkey(self, key):
         if not key in self:
             raise KeyError, "'%s'" % key
     def keys(self):
-        return list(self._data().keys)
+        return list(self._data.keys)
     def values(self):
-        p = self._data()
-        return [p.get(k) for k in p.keys]
+        return [self[k] for k in self._data.keys]
     def items(self):
-        return [(k, self[k]) for k in self._data().keys]
+        return [(k, self[k]) for k in self._data.keys]
     def __iter__(self):
         return iter(self.keys())
     def iteritems(self):
         return iter(self.items())
     def __len__(self):
-        return len(self._data().keys)
+        return len(self._data.keys)
     def __contains__(self, key):
         return key in self.keys()
     def __delitem__(self, key):
         self._testforkey(key)
-        self._data().setString(key, None)
+        self._data.setString(key, None)
     def clear(self):
         for key in self:
             del self[key]
@@ -566,9 +564,9 @@ class MoleculeData(object):
             self[k] = v
     def __getitem__(self, key):
         self._testforkey(key)
-        return self._data().get(key).propValue
+        return self._data.get(key).propValue
     def __setitem__(self, key, value):
-        self._data().setString(key, str(value))
+        self._data.setString(key, str(value))
     def __repr__(self):
         return dict(self.iteritems()).__repr__()
 
