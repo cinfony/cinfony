@@ -136,7 +136,7 @@ def readfile(format, filename):
         mol = mi.read()
         while mol:
             mol.aromatize()
-            yield Molecule(MolHandler(mol))
+            yield Molecule(MolHandler(mol).molecule)
             mol = mi.read()
     except chemaxon.formats.MolFormatException:
         raise ValueError("%s is not a recognised JChem format" % format)
@@ -160,7 +160,7 @@ def readstring(format, string):
         raise ValueError("%s is not a recognised JChem format" % format)
     try:
         mh = MolHandler(string)
-        return Molecule(mh)
+        return Molecule(mh.molecule)
     except JavaException, ex:
         if sys.platform[:4] != "java":
             #Jpype exception
@@ -199,7 +199,7 @@ class Outputfile(object):
         if format in ("smi", 'cxsmi'):
             if not options:
                 options = ':a-H'
-            out = chemaxon.formats.MolExporter.exportToFormat(self.MolHandler.molecule,format +'les:a-H')
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule,format +'les:a-H')
         try:
             self._writer = chemaxon.formats.MolExporter(filename, format + options)
         except chemaxon.marvin.io.MolExportException,  e:
@@ -214,7 +214,7 @@ class Outputfile(object):
         """
         if not self.filename:
             raise IOError, "Outputfile instance is closed."
-        self._writer.write(molecule.MolHandler.molecule)
+        self._writer.write(molecule.Molecule)
         self.total += 1
 
     def close(self):
@@ -235,7 +235,9 @@ class Molecule(object):
        addh(), calcfp(), calcdesc(), draw(), removeh(), write()
 
     The underlying JChem Molecule can be accessed using the attribute:
-       MolHandler.molecule
+       Molecule
+    The associated JChem MolHandler can be accessed using the attribute:
+       MolHandler
     """
     _cinfony = True
 
@@ -247,15 +249,16 @@ class Molecule(object):
                 mol = readstring("smi", b)
             else:
                 mol = readstring("sdf", b)
-            Molecule = mol.MolHandler
+            Molecule = mol.Molecule
 
-        self.MolHandler = Molecule
+        self.Molecule = Molecule
+        self.MolHandler = chemaxon.util.MolHandler(self.Molecule)
         self.MolHandler.aromatize()
 
     @property
-    def atoms(self): return [Atom(atom) for atom in self.MolHandler.molecule.atomArray]
+    def atoms(self): return [Atom(atom) for atom in self.Molecule.atomArray]
     @property
-    def data(self): return MoleculeData(self.MolHandler)
+    def data(self): return MoleculeData(self)
     @property
     def formula(self): return self.MolHandler.calcMolFormula()
     @property
@@ -264,12 +267,12 @@ class Molecule(object):
     @property
     def molwt(self):
         return self.MolHandler.calcMolWeight()
-    def _gettitle(self): return self.MolHandler.molecule.getName()
-    def _settitle(self, val): self.MolHandler.molecule.setName(val)
+    def _gettitle(self): return self.Molecule.getName()
+    def _settitle(self, val): self.Molecule.setName(val)
     title = property(_gettitle, _settitle)
     @property
     def _exchange(self):
-        if self.MolHandler.molecule.dim > 1:
+        if self.Molecule.dim > 1:
             return (1, self.write("mol"))
         else:
             return (0, self.write("smi"))
@@ -326,11 +329,11 @@ class Molecule(object):
         if format in ("smi", 'cxsmi'):
             if not options:
                 options = ':a-H'
-            out = chemaxon.formats.MolExporter.exportToFormat(self.MolHandler.molecule,format +'les' + options)
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule,format +'les' + options)
         elif format == 'inchikey':
-            out = chemaxon.formats.MolExporter.exportToFormat(self.MolHandler.molecule,'inchikey').replace('InChIKey=', '')
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule,'inchikey').replace('InChIKey=', '')
         else:
-            out = chemaxon.formats.MolExporter.exportToFormat(self.MolHandler.molecule,format + options)
+            out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule,format + options)
             if format == 'inchi':
                 out = out.split('AuxInfo=')[0]
         if filename:
@@ -354,7 +357,7 @@ class Molecule(object):
         if fp in fps:
             if fp == 'ecfp':
                 fp = chemaxon.descriptors.ECFP(ECFPConfiguration)
-                fp.generate(self.MolHandler.molecule)
+                fp.generate(self.Molecule)
         else:
             raise ValueError, "%s is not a recognised fingerprint type" % fp
         return Fingerprint(fp)
@@ -381,7 +384,7 @@ class Molecule(object):
                 ans[descname] = ta.rotatableBondCount()
             else:
                 desc = getattr(chemaxon.descriptors.scalars, descname)('')
-                desc.generate(self.MolHandler.molecule)
+                desc.generate(self.Molecule)
                 ans[descname] = desc.toFloatArray()[0]
         return ans
 
@@ -389,7 +392,7 @@ class Molecule(object):
              usecoords=False):
         """Create a 2D depiction of the molecule.
         """
-        bytearray = chemaxon.formats.MolExporter.exportToBinFormat(self.MolHandler.molecule, 'png')
+        bytearray = chemaxon.formats.MolExporter.exportToBinFormat(self.Molecule, 'png')
         if filename:
             of = java.io.FileOutputStream(filename)
             of.write(bytearray)
@@ -498,7 +501,7 @@ class Smarts(object):
         Required parameters:
            molecule
         """
-        self.search.setTarget(molecule.MolHandler.molecule)
+        self.search.setTarget(molecule.Molecule)
         match = self.search.findAll()
         result = []
         for i in xrange(len(match)):
@@ -533,7 +536,7 @@ class MoleculeData(object):
     1 ['Comment'] False
     """
     def __init__(self, Molecule):
-        self._data = Molecule.molecule.properties()
+        self._data = Molecule.Molecule.properties()
     def _testforkey(self, key):
         if not key in self:
             raise KeyError, "'%s'" % key
