@@ -33,7 +33,8 @@ if sys.platform[:4] == "java" or sys.platform[:3] == "cli":
     import chemaxon
     from chemaxon.util import MolHandler
     #Exceptions are handled differently in jpype and jython. We need to wrap them:
-    JavaException = Exception
+    MolExportException = chemaxon.marvin.io.MolExportException
+    MolFormatException = chemaxon.formats.MolFormatException
 else:
     from jpype import *
 
@@ -50,6 +51,11 @@ else:
         _testmol = MolHandler()
     except TypeError:
         raise ImportError, "jchem.jar file cannot be found."
+
+    # Exception wrappers for JPype
+    MolExportException = JavaException
+    MolFormatException = JavaException
+
 _descset = set(['HAcc', 'HDon', 'Heavy', 'LogD', 'LogP', 'Mass', 'TPSA'])
 _descset.update(dir(chemaxon.descriptors.scalars))
 descs = [cls for cls in _descset if hasattr(getattr(chemaxon.descriptors.scalars, cls),'generate') and cls != 'LogD'] + ['RotatableBondsCount']
@@ -161,13 +167,13 @@ def readstring(format, string):
     try:
         mh = MolHandler(string)
         return Molecule(mh.molecule)
-    except JavaException, ex:
+    except MolFormatException, ex:
         if sys.platform[:4] != "java":
             #Jpype exception
             ex = ex.message()
-        raise IOError, ex
-    except chemaxon.formats.MolFormatException, e:
-        raise IOError("%s is not a recognised JChem format" % format)
+            raise IOError, ex
+        else:
+            raise IOError("Problem reading the supplied string")
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
@@ -202,7 +208,7 @@ class Outputfile(object):
             out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule,format +'les:a-H')
         try:
             self._writer = chemaxon.formats.MolExporter(filename, format + options)
-        except chemaxon.marvin.io.MolExportException,  e:
+        except MolExportException,  e:
             raise ValueError(e)
         self.total = 0 # The total number of molecules written to the file
 
