@@ -105,9 +105,6 @@ outformats = {
     , 'gjf':'Gaussian input format'
     }
 """A dictionary of supported output formats"""
-forcefields = []
-"""A list of supported forcefields"""
-
 
 def readfile(format, filename):
     """Iterate over the molecules in a file.
@@ -393,6 +390,18 @@ class Molecule(object):
                 desc.generate(self.Molecule)
                 ans[descname] = desc.toFloatArray()[0]
         return ans
+
+    def make3D(self):
+        self.addh()
+        cp = chemaxon.marvin.calculations.ConformerPlugin()
+        cp.setMolecule(self.Molecule)
+        cp.setLowestEnergyConformerCalculation(True)
+        cp.setMMFF94Optimization(True)
+        success = cp.run()
+        optmol = cp.getMMFF94OptimizedStrucutre()
+        self.Molecule = optmol
+        self.MolHandler = chemaxon.util.MolHandler(self.Molecule)
+        self.MolHandler.aromatize()
 
     def draw(self, show=True, filename=None, update=False,
              usecoords=False):
