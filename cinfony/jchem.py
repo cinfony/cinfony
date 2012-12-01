@@ -398,7 +398,16 @@ class Molecule(object):
              usecoords=False):
         """Create a 2D depiction of the molecule.
         """
-        bytearray = chemaxon.formats.MolExporter.exportToBinFormat(self.Molecule, 'png')
+        if not usecoords:
+            molecule = self.Molecule.clone()
+            molecule.setDim(0)
+        else:
+            molecule = self.Molecule
+        if update:
+            myMolecule = readstring("mol", Molecule(molecule).write("mol"))
+            self.Molecule = myMolecule.Molecule
+            self.MolHandler = myMolecule.MolHandler
+        bytearray = chemaxon.formats.MolExporter.exportToBinFormat(molecule, 'png')
         if filename:
             of = java.io.FileOutputStream(filename)
             of.write(bytearray)
