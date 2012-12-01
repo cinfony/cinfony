@@ -451,8 +451,14 @@ class Fingerprint(object):
     def __getattr__(self, attr):
         if attr == "bits":
             # Create a bits attribute on-the-fly
-            bits = str(self.fp.toBitSet())[1:-1].split(',')
-            return bits
+            bs = self.fp.toBitSet()
+            bits = [-1]
+            while True:
+                setbit = bs.nextSetBit(bits[-1] + 1)
+                if setbit == -1:
+                    break
+                bits.append(setbit)
+            return bits[1:] # Leave out the initial '-1'
         else:
             raise AttributeError, "Fingerprint has no attribute %s" % attr
     def __str__(self):
