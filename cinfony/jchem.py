@@ -62,6 +62,8 @@ descs = [cls for cls in _descset if hasattr(getattr(chemaxon.descriptors.scalars
 """A list of supported descriptors"""
 fps = ['ecfp']
 """A list of supported fingerprint types"""
+forcefields = ["mmff94"]
+"""A list of supported forcefields"""
 
 informats = {
     'smi': "SMILES"
@@ -139,7 +141,7 @@ def readfile(format, filename):
         mol = mi.read()
         while mol:
             mol.aromatize()
-            yield Molecule(MolHandler(mol).molecule)
+            yield Molecule(mol)
             mol = mi.read()
     except chemaxon.formats.MolFormatException:
         raise ValueError("%s is not a recognised JChem format" % format)
@@ -383,7 +385,7 @@ class Molecule(object):
                 raise ValueError, "%s is not a recognised descriptor type" % descname
             if descname == 'RotatableBondsCount':
                 ta = chemaxon.calculations.TopologyAnalyser()
-                ta.setMolecule(self.MolHandler.getMolecule())
+                ta.setMolecule(self.Molecule)
                 ans[descname] = ta.rotatableBondCount()
             else:
                 desc = getattr(chemaxon.descriptors.scalars, descname)('')
@@ -392,6 +394,11 @@ class Molecule(object):
         return ans
 
     def make3D(self):
+        """Generate 3D coordinates.
+
+        Hydrogens are added, and a low energy conformer is found
+        using the MMFF94 forcefield.
+        """
         self.addh()
         cp = chemaxon.marvin.calculations.ConformerPlugin()
         cp.setMolecule(self.Molecule)
