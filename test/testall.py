@@ -152,7 +152,7 @@ class TestToolkit(myTestCase):
 
     def testselfconversion(self):
         """Test that the toolkit can eat its own dog-food."""
-        newmol = self.toolkit.Molecule(self.head0])
+        newmol = self.toolkit.Molecule(self.head[0])
         self.assertEqual(newmol._exchange,
                          self.head[0]._exchange)
         newmol = self.toolkit.Molecule(self.mols[0])
@@ -166,7 +166,7 @@ class TestToolkit(myTestCase):
         newcoords = self.head[0].atoms[0].coords
         self.assertNotEqual(oldcoords, newcoords)
 
-    def notestMake3D(self):
+    def testMake3D(self):
         """Test that 3D coordinate generation does something"""
         mol = self.mols[0]
         mol.make3D()
@@ -613,8 +613,9 @@ class TestJchem(TestToolkit):
     def testLocalOpt(self):
         """No local opt testing done"""
         pass
-    def testMake3D(self):
-        """No 3D coordinate generation done"""
+    if sys.platform[:4] == "java":
+        def testInChI(self):
+            """Not supported with Jython"""
         pass
 
     def testRSgetprops(self):
