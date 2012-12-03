@@ -1,4 +1,5 @@
-## Copyright (c) 2008-2011, Noel O'Boyle
+#-*. coding: utf-8 -*-
+## Copyright (c) 2008-2011, Noel O'Boyle; 2012, Adrià Cereto-Massagué
 ## All rights reserved.
 ##
 ##  This file is part of Cinfony.
