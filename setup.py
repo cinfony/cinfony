@@ -1,3 +1,4 @@
+#-*. coding: utf-8 -*-
 """cinfony: a common API to several cheminformatics toolkits
 
 cinfony is a Python library that provides a common API to several
@@ -31,15 +32,15 @@ Topic :: Software Development :: Libraries :: Python Modules
 from distutils.core import setup
 setup(
     name = "cinfony",
-    version = "1.1",
+    version = "1.2",
     url = "http://cinfony.googlecode.com",
-    author = "Noel O'Boyle",
+    author = "Noel O'Boyle, Adrià Cereto-Massagué",
     author_email = "baoilleach@gmail.com",
     maintainer = "Noel O'Boyle",
     maintainer_email = "baoilleach@gmail.com",
     license = "BSD",
     description = doclines[0],
-    long_description = "\n".join(doclines[2:]),      
+    long_description = "\n".join(doclines[2:]),
     classifiers = filter(None, classifiers.split("\n")),
     platforms = ["Any."],
     packages = ['cinfony'],

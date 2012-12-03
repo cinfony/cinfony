@@ -542,7 +542,8 @@
        x1="-839.89136"
        y1="-2773.7053"
        x2="-808.43115"
-       y2="-2815.4976" />
+       y2="-2815.4976"
+       gradientTransform="translate(345.43061,0)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3595"
@@ -552,7 +553,8 @@
        x1="-839.89136"
        y1="-2773.7053"
        x2="-808.43115"
-       y2="-2815.4976" />
+       y2="-2815.4976"
+       gradientTransform="translate(345.43061,0)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3595"
@@ -562,7 +564,8 @@
        x1="-839.89136"
        y1="-2773.7053"
        x2="-808.43115"
-       y2="-2815.4976" />
+       y2="-2815.4976"
+       gradientTransform="translate(345.43061,0)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3595"
@@ -644,7 +647,7 @@
        y1="-2773.7053"
        x2="-774.83252"
        y2="-2874.2952"
-       gradientTransform="translate(29.273781,0)" />
+       gradientTransform="translate(611.82199,-459.69454)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3937"
@@ -655,7 +658,7 @@
        y1="-2773.7053"
        x2="-774.83252"
        y2="-2874.2952"
-       gradientTransform="translate(29.273781,0)" />
+       gradientTransform="translate(611.82199,-459.69454)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3937"
@@ -666,7 +669,7 @@
        y1="-2773.7053"
        x2="-774.83252"
        y2="-2874.2952"
-       gradientTransform="translate(29.273781,0)" />
+       gradientTransform="translate(29.273781,-459.69454)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3937-7"
@@ -919,7 +922,7 @@
        xlink:href="#linearGradient3937-7"
        id="linearGradient5220"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-507.2807,-433.09672)"
+       gradientTransform="translate(447.04457,-433.09672)"
        spreadMethod="repeat"
        x1="-839.89136"
        y1="-2773.7053"
@@ -930,7 +933,7 @@
        xlink:href="#linearGradient3937-7"
        id="linearGradient5222"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-507.2807,-433.09672)"
+       gradientTransform="translate(447.04457,-433.09672)"
        spreadMethod="repeat"
        x1="-839.89136"
        y1="-2773.7053"
@@ -941,7 +944,7 @@
        xlink:href="#linearGradient3937-7"
        id="linearGradient5224"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-507.2807,-433.09672)"
+       gradientTransform="translate(447.04457,-433.09672)"
        spreadMethod="repeat"
        x1="-839.89136"
        y1="-2773.7053"
@@ -1184,7 +1187,7 @@
        xlink:href="#linearGradient3016"
        id="linearGradient3941"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-13.327072,-18.22025)"
+       gradientTransform="translate(-75.787518,-19.707404)"
        x1="57.073624"
        y1="27.309885"
        x2="103.28809"
@@ -1194,7 +1197,7 @@
        xlink:href="#linearGradient3016"
        id="linearGradient3943"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.998424,0.05612358,-0.05612358,0.998424,-11.400102,-7.493561)"
+       gradientTransform="matrix(0.998424,0.05612358,-0.05612358,0.998424,-73.860548,-8.9807146)"
        x1="57.073624"
        y1="27.309885"
        x2="103.28809"
@@ -1204,7 +1207,7 @@
        xlink:href="#linearGradient10765"
        id="radialGradient3945"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.277654,1.814482,-1.554691,2.313904,132.3066,-174.3013)"
+       gradientTransform="matrix(2.277654,1.814482,-1.554691,2.313904,69.846152,-175.78845)"
        cx="16.073729"
        cy="98.385017"
        fx="16.073729"
@@ -1215,7 +1218,7 @@
        xlink:href="#linearGradient10794"
        id="linearGradient3947"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-1.3566856,-6.4121)"
+       gradientTransform="translate(-63.817128,-7.8992536)"
        x1="46.517174"
        y1="14.790077"
        x2="46.517174"
@@ -1229,7 +1232,7 @@
        y1="73.249695"
        x2="-5.0262937"
        y2="73.249695"
-       gradientTransform="translate(3.1100656e-6,3.890644e-8)" />
+       gradientTransform="translate(-39.891481,7.7529247)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3016-9"
@@ -1379,6 +1382,329 @@
        y1="73.249695"
        x2="-5.0262938"
        y2="73.249695" />
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-17"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path44316-40"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-4"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path44316-8"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       x="-0.062274203"
+       width="1.1245484"
+       y="-0.11183198"
+       height="1.223664"
+       id="filter4413-7-3">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="13.008273"
+         id="feGaussianBlur4415-5-9" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       x="-0.062274203"
+       width="1.1245484"
+       y="-0.11183198"
+       height="1.223664"
+       id="filter4413-7-8-8">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="13.008273"
+         id="feGaussianBlur4415-5-4-6" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       x="-0.062274203"
+       width="1.1245484"
+       y="-0.11183198"
+       height="1.223664"
+       id="filter4413-7-8-6-0">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="13.008273"
+         id="feGaussianBlur4415-5-4-5-5" />
+    </filter>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-58"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path44316-9"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker3720"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path3722"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker3724"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path3726"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595"
+       id="linearGradient3835"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(927.97883,-459.69454)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595"
+       id="linearGradient3837"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(927.97883,-459.69454)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595"
+       id="linearGradient3839"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(927.97883,-459.69454)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-45"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path44316-88"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3937"
+       id="linearGradient3875"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(611.82199,-459.69454)"
+       spreadMethod="repeat"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-774.83252"
+       y2="-2874.2952" />
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend-53"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc"
+         id="path44316-28"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(-1.1,0,0,-1.1,5.5,0)" />
+    </marker>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       x="-0.062274203"
+       width="1.1245484"
+       y="-0.11183198"
+       height="1.223664"
+       id="filter4413-9">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="13.008273"
+         id="feGaussianBlur4415-7" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient3839-1"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-480.86267)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       id="linearGradient3595-0">
+      <stop
+         style="stop-color:#b1ff62;stop-opacity:0.68235296;"
+         offset="0"
+         id="stop3597-7" />
+      <stop
+         id="stop3935-1"
+         offset="0.5"
+         style="stop-color:#b3e79d;stop-opacity:0.83921569;" />
+      <stop
+         style="stop-color:#b6cfd8;stop-opacity:1;"
+         offset="1"
+         id="stop3599-4" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3897">
+      <stop
+         style="stop-color:#b1ff62;stop-opacity:0.68235296;"
+         offset="0"
+         id="stop3899" />
+      <stop
+         id="stop3901"
+         offset="0.5"
+         style="stop-color:#b3e79d;stop-opacity:0.83921569;" />
+      <stop
+         style="stop-color:#b6cfd8;stop-opacity:1;"
+         offset="1"
+         id="stop3903" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3910">
+      <stop
+         style="stop-color:#b1ff62;stop-opacity:0.68235296;"
+         offset="0"
+         id="stop3912" />
+      <stop
+         id="stop3914"
+         offset="0.5"
+         style="stop-color:#b3e79d;stop-opacity:0.83921569;" />
+      <stop
+         style="stop-color:#b6cfd8;stop-opacity:1;"
+         offset="1"
+         id="stop3916" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient4054"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-459.69457)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient4056"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-459.69457)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient4058"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-459.69457)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient4077"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-459.69457)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient4079"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-459.69457)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3595-0"
+       id="linearGradient4081"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1877.4649,-459.69457)"
+       spreadMethod="reflect"
+       x1="-839.89136"
+       y1="-2773.7053"
+       x2="-808.43115"
+       y2="-2815.4976" />
   </defs>
   <sodipodi:namedview
      inkscape:window-y="24"
@@ -1389,7 +1715,7 @@
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
      inkscape:cy="2866.215"
-     inkscape:cx="736.8371"
+     inkscape:cx="547.36342"
      inkscape:zoom="0.19"
      inkscape:pageshadow="2"
      inkscape:pageopacity="1"
@@ -1407,7 +1733,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
       <cc:Work
          rdf:about="">
@@ -1432,55 +1758,8 @@
          id="tspan32544"
          sodipodi:role="line" /></text>
     <g
-       id="g3741"
-       transform="translate(-565.99997,0)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.9416646,0,0,0.6832052,-1261.0695,-740.52205)"
-         id="g4427"
-         style="fill:#b1ff62;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect4429"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="57.565521"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect4431"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="57.565521"
-           ry="62.706177" />
-      </g>
-      <text
-         sodipodi:linespacing="125%"
-         id="text4433"
-         y="-2105.2266"
-         x="-1301.4777"
-         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           id="tspan4437"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2105.2266"
-           x="-1301.4777"
-           sodipodi:role="line">SWIG Python</tspan><tspan
-           id="tspan3727"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2035.2266"
-           x="-1301.4777"
-           sodipodi:role="line">bindings</tspan></text>
-    </g>
-    <g
        id="g3871"
-       transform="translate(-267.70155,0)"
+       transform="translate(-665.70155,0)"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
        inkscape:export-ydpi="79.201706">
@@ -1489,7 +1768,7 @@
          id="g4439"
          style="fill:#fffa05;fill-opacity:1">
         <rect
-           style="opacity:1;fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
+           style="fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)"
            id="rect4441"
            width="493.32886"
            height="271.16751"
@@ -1498,7 +1777,7 @@
            rx="63.855072"
            ry="62.706177" />
         <rect
-           style="opacity:1;fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           style="fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
            id="rect4443"
            width="493.32886"
            height="271.16751"
@@ -1512,7 +1791,7 @@
          id="text4445"
          y="-1768.7979"
          x="-1101.9573"
-         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
+         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
          xml:space="preserve"><tspan
            style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
            y="-1768.7979"
@@ -1526,139 +1805,14 @@
            sodipodi:role="line">C++ Toolkit</tspan></text>
     </g>
     <g
-       id="g2393"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
+       id="g3508"
+       transform="translate(-398,0)">
       <g
-         transform="matrix(0.6832052,0,0,0.6832052,-193.44199,-1163.5944)"
-         id="g2498"
-         style="fill:#b1ff62;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect2500"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect2502"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
-      </g>
-      <text
-         id="text2504"
-         y="-2493.051"
-         x="-268.16165"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1"
-           y="-2493.051"
-           x="-268.16165"
-           id="tspan2506"
-           sodipodi:role="line">rdk</tspan></text>
-    </g>
-    <g
-       id="g2594"
-       transform="translate(-529.99996,0)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,-1308.2579,-1163.5944)"
-         id="g2544"
-         style="fill:#b1ff62;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect2546"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect2548"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
-      </g>
-      <text
-         id="text2550"
-         y="-2493.0513"
-         x="-1410.9912"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1"
-           y="-2493.0513"
-           x="-1410.9912"
-           id="tspan2552"
-           sodipodi:role="line">pybel</tspan></text>
-    </g>
-    <g
-       id="g3930"
-       transform="translate(-472.29274,0)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,-848.061,-1163.5944)"
-         id="g2558"
-         style="fill:#b6cfd8;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#b6cfd8;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect2560"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#b6cfd8;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect2562"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
-      </g>
-      <text
-         id="text2564"
-         y="-2493.0513"
-         x="-938.2572"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1"
-           y="-2493.0513"
-           x="-938.2572"
-           id="tspan2566"
-           sodipodi:role="line">jybel</tspan></text>
-    </g>
-    <g
-       id="g3995"
-       transform="translate(-20,0)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,-1300.3537,-1477.6601)"
+         transform="matrix(0.6832052,0,0,0.6832052,-1320.3537,-1163.5944)"
          id="g4417"
-         style="fill:url(#linearGradient4139);fill-opacity:1">
+         style="fill:url(#linearGradient3875);fill-opacity:1">
         <rect
-           style="opacity:1;fill:url(#linearGradient4135);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
+           style="fill:url(#linearGradient4135);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)"
            id="rect3258"
            width="493.32886"
            height="271.16751"
@@ -1667,7 +1821,7 @@
            rx="79.342804"
            ry="62.706177" />
         <rect
-           style="opacity:1;fill:url(#linearGradient4137);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           style="fill:url(#linearGradient4137);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
            id="rect3241"
            width="493.32886"
            height="271.16751"
@@ -1678,15 +1832,15 @@
       </g>
       <text
          id="text4421"
-         y="-2807.1169"
-         x="-1419.4249"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
+         y="-2493.0513"
+         x="-1423.087"
+         style="font-size:28px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
          xml:space="preserve"><tspan
            style="font-size:56px;font-weight:bold;fill:#000000;fill-opacity:1"
-           y="-2807.1169"
-           x="-1419.4249"
+           y="-2493.0513"
+           x="-1423.087"
            id="tspan4423"
-           sodipodi:role="line">obabel</tspan></text>
+           sodipodi:role="line">pybel</tspan></text>
     </g>
     <flowRoot
        xml:space="preserve"
@@ -1699,13 +1853,13 @@
            x="-449.88071"
            y="-2945.9106" /></flowRegion><flowPara
          id="flowPara3675" /></flowRoot>    <rect
-       style="fill:none;stroke:#000000;stroke-width:7.90499973;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:7.90499926;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect3697"
-       width="4240.0688"
+       width="4413.7529"
        height="704.2171"
-       x="-2148.6841"
+       x="-2353.9473"
        y="-3036.9644"
-       rx="70.472961"
+       rx="70.472969"
        ry="62.574486"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
@@ -1714,7 +1868,8 @@
        id="g3922"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
+       inkscape:export-ydpi="79.201706"
+       transform="translate(221.05263,5.2631583)">
       <g
          transform="matrix(3.5390819,0,0,3.5390819,-284.56099,-3006.318)"
          id="g2410">
@@ -1825,109 +1980,12 @@
            id="tspan3701"
            sodipodi:role="line">Cinfony</tspan></text>
     </g>
-    <g
-       id="g3849"
-       transform="translate(-523.30741,0)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.9416646,0,0,0.6832052,-785.85794,-740.52205)"
-         id="g3729"
-         style="fill:#138bff;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect3731"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="57.565521"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3733"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="57.565521"
-           ry="62.706177" />
-      </g>
-      <text
-         sodipodi:linespacing="125%"
-         id="text3735"
-         y="-2105.2263"
-         x="-826.26611"
-         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           id="tspan3737"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2105.2263"
-           x="-826.26611"
-           sodipodi:role="line">SWIG Java</tspan><tspan
-           id="tspan3739"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2035.2263"
-           x="-826.26611"
-           sodipodi:role="line">bindings</tspan></text>
-    </g>
-    <g
-       id="g3862"
-       transform="translate(0,-55.36735)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.8489132,0,0,0.6832052,-176.97629,-354.72613)"
-         id="g3777"
-         style="fill:#fffa05;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect3779"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="63.855072"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3781"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="63.855072"
-           ry="62.706177" />
-      </g>
-      <g
-         id="g3857">
-        <text
-           xml:space="preserve"
-           style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-           x="-214.68178"
-           y="-1713.4305"
-           id="text3783"
-           sodipodi:linespacing="125%"><tspan
-             sodipodi:role="line"
-             id="tspan3785"
-             x="-214.68178"
-             y="-1713.4305"
-             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial">RDKit</tspan><tspan
-             sodipodi:role="line"
-             x="-214.68178"
-             y="-1643.4305"
-             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-             id="tspan3787">C++ Toolkit</tspan></text>
-      </g>
-    </g>
     <rect
-       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:none;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect3789"
-       width="1588.1013"
+       width="1224.9434"
        height="766.57184"
-       x="-2147.9922"
+       x="-2361.7817"
        y="-2259.1968"
        rx="66.717239"
        ry="62.57156"
@@ -1936,8 +1994,8 @@
        inkscape:export-ydpi="79.201706" />
     <text
        xml:space="preserve"
-       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-       x="-1796.7617"
+       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
+       x="-2194.7617"
        y="-1562.4473"
        id="text3791"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
@@ -1945,115 +2003,21 @@
        inkscape:export-ydpi="79.201706"><tspan
          sodipodi:role="line"
          id="tspan3793"
-         x="-1796.7617"
+         x="-2194.7617"
          y="-1562.4473"
          style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold">OpenBabel</tspan></text>
     <g
-       id="g3821"
-       transform="translate(1078.8159,4.6461906)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
+       id="g3757"
+       transform="translate(-560,0)">
       <g
-         transform="matrix(0.9416646,0,0,0.6832052,-1261.0695,-740.52205)"
-         id="g3823"
-         style="fill:#b1ff62;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect3825"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="57.565521"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3827"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="57.565521"
-           ry="62.706177" />
-      </g>
-      <text
-         sodipodi:linespacing="125%"
-         id="text3829"
-         y="-2105.2266"
-         x="-1301.4777"
-         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           id="tspan3831"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2105.2266"
-           x="-1301.4777"
-           sodipodi:role="line">Boost.Python</tspan><tspan
-           id="tspan3833"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2035.2266"
-           x="-1301.4777"
-           sodipodi:role="line">bindings</tspan></text>
-    </g>
-    <rect
-       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="rect3835"
-       width="569.5752"
-       height="769.36127"
-       x="-505.48166"
-       y="-2265.6841"
-       rx="65.714417"
-       ry="62.706177"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <text
-       xml:space="preserve"
-       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-       x="-453.82629"
-       y="-1552.0566"
-       id="text3837"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706"><tspan
-         sodipodi:role="line"
-         id="tspan3839"
-         x="-453.82629"
-         y="-1552.0566"
-         style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold">RDKit</tspan></text>
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -227.73384,-1970.4065 L -227.73384,-1895.684"
-       id="path3903"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -1867.9035,-2381.3943 L -1867.9035,-2225.3857"
-       id="path3919"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -1349.9994,-2381.3943 L -1349.9994,-2225.3857"
-       id="path3921"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <g
-       id="g3711"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="translate(0,-27.8771)"
-         id="g3881">
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="g2393">
         <g
            style="fill:#b1ff62;fill-opacity:1"
-           id="g2572"
-           transform="matrix(0.6832052,0,0,0.6832052,314.0631,-1135.7173)">
+           id="g2498"
+           transform="matrix(0.6832052,0,0,0.6832052,-193.44199,-1163.5944)">
           <rect
              ry="62.706177"
              rx="79.342804"
@@ -2061,8 +2025,8 @@
              x="-285.86938"
              height="271.16751"
              width="493.32886"
-             id="rect2574"
-             style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)" />
+             id="rect2500"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)" />
           <rect
              ry="62.706177"
              rx="79.342804"
@@ -2070,348 +2034,161 @@
              x="-294.03705"
              height="271.16751"
              width="493.32886"
-             id="rect2576"
-             style="opacity:1;fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+             id="rect2502"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
         </g>
         <text
            xml:space="preserve"
-           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-           x="162.91766"
-           y="-2465.1741"
-           id="text2578"><tspan
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-268.16165"
+           y="-2493.051"
+           id="text2504"><tspan
              sodipodi:role="line"
-             id="tspan2580"
-             x="162.91766"
-             y="-2465.1741"
-             style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1">cdkjpype</tspan></text>
+             id="tspan2506"
+             x="-268.16165"
+             y="-2493.051"
+             style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1">rdk</tspan></text>
       </g>
       <g
-         transform="translate(0,-27.8771)"
-         id="g3888">
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(0,-55.36735)"
+         id="g3862">
         <g
-           style="fill:#b6cfd8;fill-opacity:1"
-           id="g2586"
-           transform="matrix(0.6832052,0,0,0.6832052,746.7353,-1135.7173)">
+           style="fill:#fffa05;fill-opacity:1"
+           id="g3777"
+           transform="matrix(0.8489132,0,0,0.6832052,-176.97629,-354.72613)">
           <rect
              ry="62.706177"
-             rx="79.342804"
+             rx="63.855072"
              y="-2096.6304"
              x="-285.86938"
              height="271.16751"
              width="493.32886"
-             id="rect2588"
-             style="opacity:1;fill:#b6cfd8;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)" />
+             id="rect3779"
+             style="fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)" />
           <rect
              ry="62.706177"
-             rx="79.342804"
+             rx="63.855072"
              y="-2103.8665"
              x="-294.03705"
              height="271.16751"
              width="493.32886"
-             id="rect2590"
-             style="opacity:1;fill:#b6cfd8;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+             id="rect3781"
+             style="fill:#fffa05;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
         </g>
-        <text
-           xml:space="preserve"
-           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-           x="585.55475"
-           y="-2465.1741"
-           id="text2592"><tspan
-             sodipodi:role="line"
-             id="tspan2594"
-             x="585.55475"
-             y="-2465.1741"
-             style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1">cdkjython</tspan></text>
-      </g>
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,520.5656,-1477.6601)"
-         id="g3653"
-         style="fill:url(#linearGradient3693);fill-opacity:1">
-        <rect
-           style="opacity:1;fill:url(#linearGradient3689);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect3655"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:url(#linearGradient3691);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3657"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
-      </g>
-      <text
-         id="text3659"
-         y="-2807.1172"
-         x="441.82642"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;fill:#000000;fill-opacity:1"
-           y="-2807.1172"
-           x="441.82642"
-           id="tspan3661"
-           sodipodi:role="line">cdk</tspan></text>
-      <g
-         transform="translate(-24.736683,0)"
-         id="g8834">
         <g
-           id="g3841"
-           transform="translate(732.59245,185.84763)">
-          <g
-             transform="matrix(0.8489132,0,0,0.6832052,-176.97635,-740.35995)"
-             id="g3759"
-             style="fill:#138bff;fill-opacity:1">
-            <rect
-               style="opacity:1;fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-               id="rect3761"
-               width="493.32886"
-               height="271.16751"
-               x="-285.86938"
-               y="-2096.6304"
-               rx="63.855072"
-               ry="62.706177" />
-            <rect
-               style="opacity:1;fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-               id="rect3763"
-               width="493.32886"
-               height="271.16751"
-               x="-294.03705"
-               y="-2103.8665"
-               rx="63.855072"
-               ry="62.706177" />
-          </g>
+           id="g3857">
           <text
              sodipodi:linespacing="125%"
-             id="text3765"
-             y="-2099.0645"
-             x="-214.68181"
-             style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
+             id="text3783"
+             y="-1713.4305"
+             x="-214.68178"
+             style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
              xml:space="preserve"><tspan
-               id="tspan3769"
                style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-               y="-2099.0645"
-               x="-214.68181"
-               sodipodi:role="line">CDK</tspan><tspan
+               y="-1713.4305"
+               x="-214.68178"
+               id="tspan3785"
+               sodipodi:role="line">RDKit</tspan><tspan
+               id="tspan3787"
                style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-               y="-2029.0645"
-               x="-214.68181"
-               sodipodi:role="line"
-               id="tspan3773">Java Toolkit</tspan></text>
+               y="-1643.4305"
+               x="-214.68178"
+               sodipodi:role="line">C++ Toolkit</tspan></text>
         </g>
-        <rect
-           style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3895"
-           width="570.38116"
-           height="426.34918"
-           x="230.53658"
-           y="-2061.6545"
-           rx="79.342804"
-           ry="62.706173" />
+      </g>
+      <g
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1078.8159,4.6461906)"
+         id="g3821">
+        <g
+           style="fill:#b1ff62;fill-opacity:1"
+           id="g3823"
+           transform="matrix(0.9416646,0,0,0.6832052,-1261.0695,-740.52205)">
+          <rect
+             ry="62.706177"
+             rx="57.565521"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect3825"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)" />
+          <rect
+             ry="62.706177"
+             rx="57.565521"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect3827"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
         <text
            xml:space="preserve"
-           style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-           x="278.2547"
-           y="-1689.3793"
-           id="text3897"><tspan
+           style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-1301.4777"
+           y="-2105.2266"
+           id="text3829"
+           sodipodi:linespacing="125%"><tspan
              sodipodi:role="line"
-             id="tspan3899"
-             x="278.2547"
-             y="-1689.3793"
-             style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold">CDK</tspan></text>
+             x="-1301.4777"
+             y="-2105.2266"
+             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
+             id="tspan3831">Python</tspan><tspan
+             sodipodi:role="line"
+             x="-1301.4777"
+             y="-2035.2266"
+             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
+             id="tspan3833">bindings</tspan></text>
       </g>
-      <path
-         sodipodi:nodetypes="cc"
-         id="path3915"
-         d="M 409.60316,-2699.7876 L 379.81886,-2653.7166"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         sodipodi:nodetypes="cc"
-         id="path3917"
-         d="M 575.27079,-2703.3994 L 605.05509,-2657.3284"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         ry="62.706177"
+         rx="65.714417"
+         y="-2265.6841"
+         x="-505.48166"
+         height="769.36127"
+         width="569.5752"
+         id="rect3835"
+         style="fill:none;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
       <text
-         id="text8846"
-         y="-2215.5286"
-         x="274.12521"
-         style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="text3837"
+         y="-1552.0566"
+         x="-453.82629"
+         style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
          xml:space="preserve"><tspan
-           style="font-size:48px;text-align:center;text-anchor:middle"
-           y="-2215.5286"
-           x="274.12521"
-           id="tspan8848"
-           sodipodi:role="line">via</tspan><tspan
-           style="font-size:48px;text-align:center;text-anchor:middle"
-           id="tspan8850"
-           y="-2155.5286"
-           x="274.12521"
-           sodipodi:role="line">JPype</tspan></text>
-      <g
-         transform="translate(7.21484,0)"
-         id="g8856">
-        <path
-           style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           d="M 283.34714,-2386.0988 L 396.72095,-2035.9983"
-           id="path8852"
-           sodipodi:nodetypes="cc" />
-        <path
-           style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           d="M 684.20413,-2386.1423 L 570.83032,-2036.0418"
-           id="path8854"
-           sodipodi:nodetypes="cc" />
-      </g>
-    </g>
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -227.73384,-2381.3943 L -227.73384,-2225.3857"
-       id="path2735"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <g
-       id="g3863"
-       transform="translate(-19.999977,2.289)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.9416646,0,0,0.6832052,-771.2612,-742.81105)"
-         id="g2878"
-         style="fill:#ff2613;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect2880"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="57.565521"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect2882"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="57.565521"
-           ry="62.706177" />
-      </g>
-      <text
-         sodipodi:linespacing="125%"
-         id="text2884"
-         y="-2107.5154"
-         x="-811.9837"
-         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           id="tspan2886"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2107.5154"
-           x="-811.9837"
-           sodipodi:role="line">SWIG CSharp</tspan><tspan
-           id="tspan2888"
-           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
-           y="-2037.5154"
-           x="-811.9837"
-           sodipodi:role="line">bindings</tspan></text>
-    </g>
-    <g
-       id="g3873"
-       transform="translate(-45.824031,3.8798)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,-756.62554,-1167.4742)"
-         id="g3829"
-         style="fill:#d8b8b6;fill-opacity:1">
-        <rect
-           style="opacity:1;fill:#d8b8b6;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;filter:url(#filter4413)"
-           id="rect3831"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="opacity:1;fill:#d8b8b6;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3833"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
-      </g>
-      <text
-         id="text3835"
-         y="-2496.9312"
-         x="-896.09521"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;fill:#2b0000;fill-opacity:1"
-           y="-2496.9312"
-           x="-896.09521"
-           id="tspan3837"
-           sodipodi:role="line">ironable</tspan></text>
-    </g>
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -832.09523,-2381.3943 L -832.09523,-2225.3857"
-       id="path3871"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <g
-       id="g3967"
-       transform="translate(-18.292243,0)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
+           style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold"
+           y="-1552.0566"
+           x="-453.82629"
+           id="tspan3839"
+           sodipodi:role="line">RDKit</tspan></text>
       <path
-         sodipodi:nodetypes="cc"
-         id="path3909"
-         d="M -1535.7414,-2693.6959 L -1638.8132,-2643.5631"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="path3903"
+         d="m -227.73384,-1970.4065 0,74.7225"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
       <path
-         id="path3958"
-         d="M -1331.7224,-2705.5643 L -1331.7224,-2649.4727"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         sodipodi:nodetypes="cc"
-         id="path3960"
-         d="M -1127.5934,-2693.6325 L -1024.5216,-2643.4997"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="path2735"
+         d="m -227.73384,-2381.3943 0,156.0086"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
     </g>
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -1683.4691,-1951.5172 L -1580.3973,-1901.3844"
-       id="path3974"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -1350.0146,-1963.3856 L -1350.0146,-1907.294"
-       id="path3976"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;marker-end:url(#Arrow2Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="M -1016.1421,-1951.4538 L -1119.2139,-1901.321"
-       id="path3978"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
     <flowRoot
        xml:space="preserve"
        id="flowRoot4054"
@@ -2424,7 +2201,7 @@
            y="-2176.9102" /></flowRegion><flowPara
          id="flowPara4060" /></flowRoot>    <g
        id="g3995-5"
-       transform="translate(2811.2429,314.0657)"
+       transform="translate(2159.2429,314.0657)"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
        inkscape:export-ydpi="79.201706">
@@ -2465,7 +2242,7 @@
     </g>
     <g
        id="g3519"
-       transform="translate(378.28638,-817.32399)"
+       transform="translate(-273.71362,-817.32399)"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
        inkscape:export-ydpi="79.201706">
@@ -2496,7 +2273,7 @@
     <text
        xml:space="preserve"
        style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
-       x="1484.6394"
+       x="832.6394"
        y="-1765.0632"
        id="text4445-1"
        sodipodi:linespacing="125%"
@@ -2504,13 +2281,13 @@
        inkscape:export-xdpi="79.201706"
        inkscape:export-ydpi="79.201706"><tspan
          sodipodi:role="line"
-         x="1484.6394"
+         x="832.6394"
          y="-1765.0632"
          style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
          id="tspan4449-2">Indigo C</tspan><tspan
          id="tspan3493"
          sodipodi:role="line"
-         x="1484.6394"
+         x="832.6394"
          y="-1695.0632"
          style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial">Toolkit</tspan></text>
     <rect
@@ -2518,7 +2295,7 @@
        id="rect3789-2"
        width="1233.7633"
        height="766.57184"
-       x="860.19092"
+       x="208.19092"
        y="-2255.4622"
        rx="66.717239"
        ry="62.57156"
@@ -2528,7 +2305,7 @@
     <text
        xml:space="preserve"
        style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
-       x="1079.6804"
+       x="427.68042"
        y="-1563.1582"
        id="text3791-1"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
@@ -2536,177 +2313,185 @@
        inkscape:export-ydpi="79.201706"><tspan
          sodipodi:role="line"
          id="tspan3793-6"
-         x="1079.6804"
+         x="427.68042"
          y="-1563.1582"
          style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold">Indigo</tspan></text>
-    <path
-       inkscape:connector-curvature="0"
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
-       d="m 1270.0585,-1947.7827 103.0718,50.1328"
-       id="path3974-2"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <path
-       inkscape:connector-curvature="0"
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
-       d="m 1492.667,-1959.6511 0,56.0916"
-       id="path3976-7"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
-    <path
-       inkscape:connector-curvature="0"
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
-       d="m 1715.3855,-1947.7193 -103.0718,50.1328"
-       id="path3978-9"
-       sodipodi:nodetypes="cc"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706" />
     <g
-       id="g3701"
-       transform="translate(1187.8201,-1012.6642)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
+       id="g3703"
+       transform="translate(-652,0)">
+      <path
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         sodipodi:nodetypes="cc"
+         id="path3974-2"
+         d="m 1270.0585,-1947.7827 103.0718,50.1328"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="path3976-7"
+         d="m 1492.667,-1959.6511 0,56.0916"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         sodipodi:nodetypes="cc"
+         id="path3978-9"
+         d="m 1715.3855,-1947.7193 -103.0718,50.1328"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="g3581"
+       transform="translate(-652,0)">
       <g
-         transform="matrix(0.6832052,0,0,0.6832052,-70.721486,280.4021)"
-         id="g2498-8"
-         style="fill:#b1ff62;fill-opacity:1">
-        <rect
-           style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7)"
-           id="rect2500-3"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-           id="rect2502-5"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
-      </g>
-      <text
-         id="text2504-9"
-         y="-1085.3969"
-         x="-97.985031"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1"
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1187.8201,-1012.6642)"
+         id="g3701">
+        <g
+           style="fill:#b1ff62;fill-opacity:1"
+           id="g2498-8"
+           transform="matrix(0.6832052,0,0,0.6832052,-70.721486,280.4021)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect2500-3"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect2502-5"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-97.985031"
            y="-1085.3969"
-           x="-97.985031"
-           id="tspan2506-7"
-           sodipodi:role="line">Python</tspan><tspan
-           style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1"
-           y="-1015.3969"
-           x="-97.985031"
-           sodipodi:role="line"
-           id="tspan3693">bindings</tspan></text>
-    </g>
-    <g
-       id="g4735"
-       transform="translate(1629.4736,-867.29477)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,-118.58441,135.0327)"
-         id="g2498-8-0"
-         style="fill:#138bff;fill-opacity:1">
-        <rect
-           style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-8)"
-           id="rect2500-3-7"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-           id="rect2502-5-9"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
+           id="text2504-9"><tspan
+             sodipodi:role="line"
+             id="tspan2506-7"
+             x="-97.985031"
+             y="-1085.3969"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">Python</tspan><tspan
+             id="tspan3693"
+             sodipodi:role="line"
+             x="-97.985031"
+             y="-1015.3969"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">bindings</tspan></text>
       </g>
-      <text
-         id="text2504-9-9"
-         y="-1230.7662"
-         x="-145.84795"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1"
+      <g
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1629.4736,-867.29477)"
+         id="g4735">
+        <g
+           style="fill:#138bff;fill-opacity:1"
+           id="g2498-8-0"
+           transform="matrix(0.6832052,0,0,0.6832052,-118.58441,135.0327)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect2500-3-7"
+             style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-8)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect2502-5-9"
+             style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-145.84795"
            y="-1230.7662"
-           x="-145.84795"
-           id="tspan2506-7-8"
-           sodipodi:role="line">Java</tspan><tspan
-           style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1"
-           y="-1160.7662"
-           x="-145.84795"
-           sodipodi:role="line"
-           id="tspan3693-4">bindings</tspan></text>
-    </g>
-    <g
-       id="g4743"
-       transform="translate(1968.7507,-1139.8625)"
-       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
-       inkscape:export-xdpi="79.201706"
-       inkscape:export-ydpi="79.201706">
-      <g
-         transform="matrix(0.6832052,0,0,0.6832052,-64.070872,407.60039)"
-         id="g2498-8-0-4"
-         style="fill:#ff2613;fill-opacity:1">
-        <rect
-           style="fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-8-6)"
-           id="rect2500-3-7-0"
-           width="493.32886"
-           height="271.16751"
-           x="-285.86938"
-           y="-2096.6304"
-           rx="79.342804"
-           ry="62.706177" />
-        <rect
-           style="fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
-           id="rect2502-5-9-2"
-           width="493.32886"
-           height="271.16751"
-           x="-294.03705"
-           y="-2103.8665"
-           rx="79.342804"
-           ry="62.706177" />
+           id="text2504-9-9"><tspan
+             sodipodi:role="line"
+             id="tspan2506-7-8"
+             x="-145.84795"
+             y="-1230.7662"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">Java</tspan><tspan
+             id="tspan3693-4"
+             sodipodi:role="line"
+             x="-145.84795"
+             y="-1160.7662"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">bindings</tspan></text>
       </g>
-      <text
-         id="text2504-9-9-2"
-         y="-958.19861"
-         x="-91.334404"
-         style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
-         xml:space="preserve"><tspan
-           style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1"
+      <g
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1968.7507,-1139.8625)"
+         id="g4743">
+        <g
+           style="fill:#ff2613;fill-opacity:1"
+           id="g2498-8-0-4"
+           transform="matrix(0.6832052,0,0,0.6832052,-64.070872,407.60039)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect2500-3-7-0"
+             style="fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-8-6)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect2502-5-9-2"
+             style="fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-91.334404"
            y="-958.19861"
-           x="-91.334404"
-           id="tspan2506-7-8-5"
-           sodipodi:role="line">.NET</tspan><tspan
-           style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1"
-           y="-888.19861"
-           x="-91.334404"
-           sodipodi:role="line"
-           id="tspan3693-4-3">bindings</tspan></text>
+           id="text2504-9-9-2"><tspan
+             sodipodi:role="line"
+             id="tspan2506-7-8-5"
+             x="-91.334404"
+             y="-958.19861"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">.NET</tspan><tspan
+             id="tspan3693-4-3"
+             sodipodi:role="line"
+             x="-91.334404"
+             y="-888.19861"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">bindings</tspan></text>
+      </g>
     </g>
     <path
        inkscape:connector-curvature="0"
        style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
-       d="m 1492.6669,-2381.3943 0,156.0086"
+       d="m 840.6669,-2381.3943 0,156.0086"
        id="path2735-0"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
@@ -2714,7 +2499,7 @@
     <path
        inkscape:connector-curvature="0"
        style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
-       d="m 1669.7248,-2376.0328 86.2388,156.0905"
+       d="m 1017.7248,-2376.0328 86.2388,156.0905"
        id="path2735-0-3"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
@@ -2722,7 +2507,7 @@
     <path
        inkscape:connector-curvature="0"
        style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
-       d="m 1300.247,-2376.0669 -86.2388,156.0905"
+       d="m 648.247,-2376.0669 -86.2388,156.0905"
        id="path2735-0-3-1"
        inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
        inkscape:export-xdpi="79.201706"
@@ -3150,5 +2935,420 @@
          x="2569.6536"
          y="-2873.8191"
          style="font-size:91.1304245px;font-weight:bold;-inkscape-font-specification:Arial Bold">Cinfony</tspan></text>
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+       d="m -1745.2402,-2381.3943 0,156.0086"
+       id="path3921"
+       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+       inkscape:export-xdpi="79.201706"
+       inkscape:export-ydpi="79.201706"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+       d="m -1919.669,-2377.5512 -86.2388,156.0905"
+       id="path2735-0-3-1-9"
+       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+       inkscape:export-xdpi="79.201706"
+       inkscape:export-ydpi="79.201706" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+       d="m -1570.732,-2377.483 86.2388,156.0905"
+       id="path2735-0-3-8"
+       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+       inkscape:export-xdpi="79.201706"
+       inkscape:export-ydpi="79.201706" />
+    <g
+       transform="translate(-3229.2429,-4.8988089)"
+       id="g3581-6">
+      <g
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1187.8201,-1012.6642)"
+         id="g3701-3">
+        <g
+           style="fill:#b1ff62;fill-opacity:1"
+           id="g2498-8-8"
+           transform="matrix(0.6832052,0,0,0.6832052,-70.721486,280.4021)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect2500-3-9"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-3)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect2502-5-6"
+             style="fill:#b1ff62;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-97.985031"
+           y="-1085.3969"
+           id="text2504-9-0"><tspan
+             sodipodi:role="line"
+             id="tspan2506-7-5"
+             x="-97.985031"
+             y="-1085.3969"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">Python</tspan><tspan
+             id="tspan3693-9"
+             sodipodi:role="line"
+             x="-97.985031"
+             y="-1015.3969"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">bindings</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1629.4736,-867.29477)"
+         id="g4735-9">
+        <g
+           style="fill:#138bff;fill-opacity:1"
+           id="g2498-8-0-1"
+           transform="matrix(0.6832052,0,0,0.6832052,-118.58441,135.0327)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect2500-3-7-7"
+             style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-8-8)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect2502-5-9-5"
+             style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-145.84795"
+           y="-1230.7662"
+           id="text2504-9-9-4"><tspan
+             sodipodi:role="line"
+             id="tspan2506-7-8-8"
+             x="-145.84795"
+             y="-1230.7662"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">Java</tspan><tspan
+             id="tspan3693-4-8"
+             sodipodi:role="line"
+             x="-145.84795"
+             y="-1160.7662"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">bindings</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         transform="translate(1968.7507,-1139.8625)"
+         id="g4743-4">
+        <g
+           style="fill:#ff2613;fill-opacity:1"
+           id="g2498-8-0-4-1"
+           transform="matrix(0.6832052,0,0,0.6832052,-64.070872,407.60039)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect2500-3-7-0-1"
+             style="fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-7-8-6-0)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect2502-5-9-2-7"
+             style="fill:#ff2613;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-91.334404"
+           y="-958.19861"
+           id="text2504-9-9-2-0"><tspan
+             sodipodi:role="line"
+             id="tspan2506-7-8-5-2"
+             x="-91.334404"
+             y="-958.19861"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">CSharp</tspan><tspan
+             id="tspan3693-4-3-5"
+             sodipodi:role="line"
+             x="-91.334404"
+             y="-888.19861"
+             style="font-size:56px;font-weight:bold;text-align:center;text-anchor:middle;fill:#2b0000;fill-opacity:1">bindings</tspan></text>
+      </g>
+    </g>
+    <g
+       transform="translate(-3237.8607,0)"
+       id="g3703-9">
+      <path
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         sodipodi:nodetypes="cc"
+         id="path3974-2-8"
+         d="m 1270.0585,-1947.7827 103.0718,50.1328"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="path3976-7-6"
+         d="m 1492.667,-1959.6511 0,56.0916"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         sodipodi:nodetypes="cc"
+         id="path3978-9-3"
+         d="m 1715.3855,-1947.7193 -103.0718,50.1328"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+         inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="g4016">
+      <g
+         transform="translate(-398,314.0657)"
+         id="g3828">
+        <g
+           style="fill:url(#linearGradient3839);fill-opacity:1"
+           id="g3653"
+           transform="matrix(0.6832052,0,0,0.6832052,284.5656,-1477.6601)">
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect3655"
+             style="fill:url(#linearGradient3835);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)" />
+          <rect
+             ry="62.706177"
+             rx="79.342804"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect3657"
+             style="fill:url(#linearGradient3837);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="205.82642"
+           y="-2807.1172"
+           id="text3659"><tspan
+             sodipodi:role="line"
+             id="tspan3661"
+             x="205.82642"
+             y="-2807.1172"
+             style="font-size:56px;font-weight:bold;fill:#000000;fill-opacity:1">cdk</tspan></text>
+      </g>
+      <g
+         transform="translate(73.85577,8.09786)"
+         id="g3841">
+        <g
+           style="fill:#138bff;fill-opacity:1"
+           id="g3759"
+           transform="matrix(0.8489132,0,0,0.6832052,-176.97635,-740.35995)">
+          <rect
+             ry="62.706177"
+             rx="63.855072"
+             y="-2096.6304"
+             x="-285.86938"
+             height="271.16751"
+             width="493.32886"
+             id="rect3761"
+             style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413)" />
+          <rect
+             ry="62.706177"
+             rx="63.855072"
+             y="-2103.8665"
+             x="-294.03705"
+             height="271.16751"
+             width="493.32886"
+             id="rect3763"
+             style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+           x="-214.68181"
+           y="-2099.0645"
+           id="text3765"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             x="-214.68181"
+             y="-2099.0645"
+             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
+             id="tspan3769">CDK</tspan><tspan
+             id="tspan3773"
+             sodipodi:role="line"
+             x="-214.68181"
+             y="-2029.0645"
+             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial">Java Toolkit</tspan></text>
+      </g>
+      <rect
+         ry="62.706173"
+         rx="79.342804"
+         y="-2255.4622"
+         x="-428.2001"
+         height="426.34918"
+         width="570.38116"
+         id="rect3895"
+         style="fill:none;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+      <text
+         id="text3897"
+         y="-1883.1869"
+         x="-380.48199"
+         style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
+         xml:space="preserve"><tspan
+           style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold"
+           y="-1883.1869"
+           x="-380.48199"
+           id="tspan3899"
+           sodipodi:role="line">CDK</tspan></text>
+      <path
+         inkscape:connector-curvature="0"
+         inkscape:export-ydpi="79.201706"
+         inkscape:export-xdpi="79.201706"
+         inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+         id="path3921-1"
+         d="m -145.43893,-2381.3943 0,156.0086"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)" />
+    </g>
+    <g
+       style="fill:url(#linearGradient4081);fill-opacity:1"
+       id="g3653-6"
+       transform="matrix(0.6832052,0,0,0.6832052,1803.2593,-1163.5944)">
+      <rect
+         ry="62.706177"
+         rx="79.342804"
+         y="-2096.6304"
+         x="-285.86938"
+         height="271.16751"
+         width="493.32886"
+         id="rect3655-9"
+         style="fill:url(#linearGradient4077);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-9)" />
+      <rect
+         ry="62.706177"
+         rx="79.342804"
+         y="-2103.8665"
+         x="-294.03705"
+         height="271.16751"
+         width="493.32886"
+         id="rect3657-8"
+         style="fill:url(#linearGradient4079);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:28px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
+       x="1698.6266"
+       y="-2493.0515"
+       id="text3659-39"><tspan
+         sodipodi:role="line"
+         id="tspan3661-9"
+         x="1698.6266"
+         y="-2493.0515"
+         style="font-size:56px;font-weight:bold;fill:#000000;fill-opacity:1">jchem</tspan></text>
+    <g
+       id="g3841-4"
+       transform="translate(1990.5495,8.097827)">
+      <g
+         transform="matrix(0.8489132,0,0,0.6832052,-176.97635,-740.35995)"
+         id="g3759-5"
+         style="fill:#138bff;fill-opacity:1">
+        <rect
+           style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter4413-9)"
+           id="rect3761-6"
+           width="493.32886"
+           height="271.16751"
+           x="-285.86938"
+           y="-2096.6304"
+           rx="63.855072"
+           ry="62.706177" />
+        <rect
+           style="fill:#138bff;fill-opacity:1;stroke:#000000;stroke-width:8;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect3763-6"
+           width="493.32886"
+           height="271.16751"
+           x="-294.03705"
+           y="-2103.8665"
+           rx="63.855072"
+           ry="62.706177" />
+      </g>
+      <text
+         sodipodi:linespacing="125%"
+         id="text3765-4"
+         y="-2099.0645"
+         x="-214.68181"
+         style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;stroke:none;font-family:Arial"
+         xml:space="preserve"><tspan
+           id="tspan3769-5"
+           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
+           y="-2099.0645"
+           x="-214.68181"
+           sodipodi:role="line">JChem</tspan><tspan
+           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#2b0000;fill-opacity:1;font-family:Arial"
+           y="-2029.0645"
+           x="-214.68181"
+           sodipodi:role="line"
+           id="tspan3773-1">Java Toolkit</tspan></text>
+    </g>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:6.4000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect3895-8"
+       width="570.38116"
+       height="426.34918"
+       x="1488.4937"
+       y="-2255.4622"
+       rx="79.342804"
+       ry="62.706173" />
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial"
+       x="1536.2118"
+       y="-1883.1869"
+       id="text3897-5"><tspan
+         sodipodi:role="line"
+         id="tspan3899-8"
+         x="1536.2118"
+         y="-1883.1869"
+         style="font-size:56px;font-weight:bold;-inkscape-font-specification:Arial Bold">JChem</tspan></text>
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:4.00444841;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lend)"
+       d="m 1771.2548,-2381.3943 0,156.0086"
+       id="path3921-1-6"
+       inkscape:export-filename="C:\Tools\cinfony\repo\toolkits.png"
+       inkscape:export-xdpi="79.201706"
+       inkscape:export-ydpi="79.201706"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>
