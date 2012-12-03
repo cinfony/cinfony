@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-pybel = indy = ironable = rdk = cdk = webel = opsin = None
+pybel = indy = ironable = rdk = cdk = webel = opsin = jchem = None
 try:
     import pybel # From Open Babel
 except ImportError:
@@ -31,6 +31,10 @@ except (IOError, ImportError, KeyError):
 try:
     from cinfony import webel
 except ImportError:
+    pass
+try:
+    from cinfony import jchem
+except (RuntimeError, ImportError, KeyError):
     pass
 
 try: # Define next() for Jython 2.5
@@ -162,7 +166,7 @@ class TestToolkit(myTestCase):
         newcoords = self.head[0].atoms[0].coords
         self.assertNotEqual(oldcoords, newcoords)
 
-    def notestMake3D(self):
+    def testMake3D(self):
         """Test that 3D coordinate generation does something"""
         mol = self.mols[0]
         mol.make3D()
@@ -598,6 +602,25 @@ class TestCDK(TestToolkit):
         self.assertEqual(len(self.mols[0].atoms), 4)
         self.assertRaises(AttributeError, self.RSaccesstest)
 
+class TestJchem(TestToolkit):
+    toolkit = jchem
+    tanimotoresult = 0.444
+    Natoms = 15
+    tpsaname = "TPSA"
+    Nfpbits = 5
+    datakeys = ['NSC']
+
+    def testLocalOpt(self):
+        """No local opt testing done"""
+        pass
+    def testRSgetprops(self):
+        """Get the values of the properties."""
+        # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
+        # Only OpenBabel has a working exactmass
+        self.assertAlmostEqual(self.mols[0].molwt, 58.12, 2)
+        self.assertEqual(len(self.mols[0].atoms), 4)
+        self.assertRaises(AttributeError, self.RSaccesstest)
+
 class TestCDKJPype(TestCDK):
     def testDraw(self):
         """No depiction supported I'm afraid"""
@@ -609,7 +632,7 @@ if __name__=="__main__":
 
     lookup = {'cdk': TestCDK, 'obabel':TestOBabel, 'rdk':TestRDKit,
               'webel': TestWebel, 'opsin': TestOpsin, 'indy': TestIndigo,
-              'pybel':TestPybel}
+              'pybel':TestPybel, 'jchem':TestJchem}
     if sys.platform[:4] == "java":
         lookup['obabel'] = TestJybel
         del lookup['rdk']
@@ -617,6 +640,7 @@ if __name__=="__main__":
         lookup['obabel'] = TestIronable
         del lookup['rdk']
         del lookup['cdk']
+        del lookup['jchem']
         del lookup['opsin']
     else:
         lookup['cdk'] = TestCDKJPype
