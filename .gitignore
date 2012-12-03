@@ -2,3 +2,4 @@
 *.class
 test/*.png
 *.bak
+*~
