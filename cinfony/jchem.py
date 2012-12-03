@@ -20,11 +20,13 @@ Global variables:
 import sys
 import os
 from glob import glob
-classpath = []
-if 'JCHEMDIR' in os.environ:
-    assert os.path.isdir(os.path.join(os.environ['JCHEMDIR'], 'lib'))
-    for jar in glob(os.path.join(os.path.join(os.environ['JCHEMDIR'],'lib'), '*.jar')):
-        classpath.append(jar)
+
+if sys.platform[:4] == "java":
+    classpath = []
+    if 'JCHEMDIR' in os.environ:
+        assert os.path.isdir(os.path.join(os.environ['JCHEMDIR'], 'lib'))
+        for jar in glob(os.path.join(os.path.join(os.environ['JCHEMDIR'],'lib'), '*.jar')):
+            classpath.append(jar)
 
 if sys.platform[:4] == "java" or sys.platform[:3] == "cli":
     import sys
@@ -42,7 +44,7 @@ else:
         _jvm = os.environ['JPYPE_JVM']
         if _jvm[0] == '"': # Remove trailing quotes
             _jvm = _jvm[1:-1]
-        _cp = os.pathsep.join(classpath + os.environ.get('CLASSPATH', '').split(os.pathsep))
+        _cp = os.pathsep.join(os.environ.get('CLASSPATH', '').split(os.pathsep))
         startJVM(_jvm, "-Djava.class.path=" + _cp)
 
     chemaxon = JPackage("chemaxon")

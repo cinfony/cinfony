@@ -613,11 +613,6 @@ class TestJchem(TestToolkit):
     def testLocalOpt(self):
         """No local opt testing done"""
         pass
-    if sys.platform[:4] == "java":
-        def testInChI(self):
-            """Not supported with Jython"""
-        pass
-
     def testRSgetprops(self):
         """Get the values of the properties."""
         # self.assertAlmostEqual(self.mols[0].exactmass, 58.078, 3)
