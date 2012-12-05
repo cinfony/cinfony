@@ -7,7 +7,7 @@
 ##  which is included in the file LICENSE_BSD.txt.
 
 """
-chemaxy - A Cinfony module for accessing ChemAxon's JChem from CPython and Jython
+jchem - A Cinfony module for accessing ChemAxon's JChem from CPython and Jython
 
 Global variables:
   chemaxon - the underlying JChem Java library
