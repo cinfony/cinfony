@@ -34,7 +34,7 @@ except ImportError:
     pass
 try:
     from cinfony import jchem
-except (RuntimeError, ImportError, KeyError):
+except (NameError, RuntimeError, ImportError, KeyError):
     pass
 
 try: # Define next() for Jython 2.5
@@ -451,6 +451,9 @@ class TestIndigo(TestToolkit):
         self.assertNotEqual(len(self.toolkit.fps), 0)
 
     def testLocalOpt(self):
+        """No forcefields"""
+        pass
+    def testMake3D(self):
         """No forcefields"""
         pass
 
