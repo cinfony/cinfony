@@ -1,5 +1,5 @@
 #-*. coding: utf-8 -*-
-## Copyright (c) 2008-2011, Noel O'Boyle; 2012, Adrià Cereto-Massagué
+## Copyright (c) 2008-2015, Noel O'Boyle; 2012, Adrià Cereto-Massagué
 ## All rights reserved.
 ##
 ##  This file is part of Cinfony.
@@ -51,8 +51,11 @@ else:
     CDKException = JavaException
     NullPointerException = JavaException
 
+_chemobjbuilder = cdk.silent.SilentChemObjectBuilder.getInstance()
+_aromaticityperceptor = cdk.aromaticity.Aromaticity(cdk.aromaticity.ElectronDonation.daylight(), cdk.graph.Cycles.or(cdk.graph.Cycles.all(), cdk.graph.Cycles.all(6)))
+
 def _getdescdict():
-    de = cdk.qsar.DescriptorEngine(cdk.qsar.DescriptorEngine.MOLECULAR)
+    de = cdk.qsar.DescriptorEngine(cdk.qsar.IMolecularDescriptor, _chemobjbuilder)
     descdict = {}
     for desc in de.getDescriptorInstances():
         spec = desc.getSpecification()
@@ -78,7 +81,7 @@ _fingerprinters = {"daylight":cdk.fingerprint.Fingerprinter
                             }
 fps = _fingerprinters.keys()
 """A list of supported fingerprint types"""
-_formats = {'smi': "SMILES" , 'sdf': "MDL SDF",
+_formats = {'smi': "SMILES" , 'can': "Canonical SMILES", 'sdf': "MDL SDF",
             'mol2': "MOL2", 'mol': "MDL MOL",
             "inchi":"InChI",
             "inchikey":"InChIKey"}
@@ -88,12 +91,12 @@ informats = dict([(_x, _formats[_x]) for _x in ['smi', 'sdf', 'mol', 'inchi']])
 _outformats = {'mol': cdk.io.MDLV2000Writer,
                'mol2': cdk.io.Mol2Writer,
                'sdf': cdk.io.SDFWriter}
-outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['smi', 'inchi', 'inchikey']])
+outformats = dict([(_x, _formats[_x]) for _x in _outformats.keys() + ['can', 'smi', 'inchi', 'inchikey']])
 """A dictionary of supported output formats"""
-forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance().getFfTypes())
+forcefields = list(cdk.modeling.builder3d.ModelBuilder3D.getInstance(_chemobjbuilder).getFfTypes())
 """A list of supported forcefields"""
 
-_isofact = cdk.config.IsotopeFactory.getInstance(cdk.ChemObject().getBuilder())
+_isofact = cdk.config.Isotopes.getInstance()
 
 _bondtypes = {1: cdk.CDKConstants.BONDORDER_SINGLE,
               2: cdk.CDKConstants.BONDORDER_DOUBLE,
@@ -136,7 +139,7 @@ def readfile(format, filename):
         raise IOError, "No such file: '%s'" % filename
     builder = cdk.DefaultChemObjectBuilder.getInstance()
     if format=="sdf":
-        return (Molecule(mol) for mol in cdk.io.iterator.IteratingMDLReader(
+        return (Molecule(mol) for mol in cdk.io.iterator.IteratingSDFReader(
                java.io.FileInputStream(java.io.File(filename)),
                builder)
                )
@@ -240,7 +243,7 @@ class Outputfile(object):
     def close(self):
         """Close the Outputfile to further writing."""
         self.filename = None
-        if self.format in ('smi','inchi', 'inchikey'):
+        if self.format in ('can', 'smi', 'inchi', 'inchikey'):
             self._outputfile.close()
         else:
             self._molwriter.close()
@@ -274,6 +277,7 @@ class Molecule(object):
             Molecule = mol.Molecule
 
         self.Molecule = Molecule
+        _aromaticityperceptor.apply(self.Molecule)
 
     @property
     def atoms(self): return [Atom(self.Molecule.getAtom(i)) for i in range(self.Molecule.getAtomCount())]
@@ -328,7 +332,7 @@ class Molecule(object):
     def removeh(self):
         """Remove hydrogens."""
         atommanip = cdk.tools.manipulator.AtomContainerManipulator
-        self.Molecule = atommanip.removeHydrogens(self.Molecule)
+        self.Molecule = atommanip.suppressHydrogens(self.Molecule)
 
     def write(self, format="smi", filename=None, overwrite=False):
         """Write the molecule to a file or return a string.
@@ -353,11 +357,13 @@ class Molecule(object):
         if filename is not None and not overwrite and os.path.isfile(filename):
             raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
 
-        if format == "smi":
-            sg = cdk.smiles.SmilesGenerator()
+        if format in ("smi", "can"):
+            if format == "can":
+                sg = cdk.smiles.SmilesGenerator.absolute().aromatic()
+            else:
+                sg = cdk.smiles.SmilesGenerator.isomeric().aromatic()
             # Set flag or else c1ccccc1 will be written as C1CCCCC1
-            sg.setUseAromaticityFlag(True)
-            smiles = sg.createSMILES(self.Molecule)
+            smiles = sg.create(self.Molecule)
             if filename:
                 output = open(filename, "w")
                 print >> output, smiles
@@ -398,7 +404,7 @@ class Molecule(object):
             fingerprinter = _fingerprinters[fp]()
         else:
             raise ValueError, "%s is not a recognised CDK Fingerprint type" % fp
-        return Fingerprint(fingerprinter.getFingerprint(self.Molecule))
+        return Fingerprint(fingerprinter.getBitFingerprint(self.Molecule).asBitSet())
 
     def calcdesc(self, descnames=[]):
         """Calculate descriptor values.
@@ -456,11 +462,11 @@ class Molecule(object):
             usecoords=False
 
         mol = Molecule(self.Molecule.clone())
-        cdk.aromaticity.CDKHueckelAromaticityDetector.detectAromaticity(mol.Molecule)
 
         if not usecoords:
             # Do the SDG
             sdg = cdk.layout.StructureDiagramGenerator()
+            sdg.setUseTemplates(False) # According to JM
             sdg.setMolecule(mol.Molecule)
             sdg.generateCoordinates()
             mol = Molecule(sdg.getMolecule())
@@ -501,12 +507,11 @@ if sys.platform[:4] == "java":
             self.frame = javax.swing.JFrame()
             generators = []
             generators.append(cdk.renderer.generators.BasicSceneGenerator())
-            generators.append(cdk.renderer.generators.BasicBondGenerator())
-            generators.append(cdk.renderer.generators.RingGenerator())
-            generators.append(cdk.renderer.generators.BasicAtomGenerator())
+            generators.append(cdk.renderer.generators.standard.StandardGenerator(java.awt.Font("Verdana", java.awt.Font.PLAIN, 18)))
             self.renderer = cdk.renderer.AtomContainerRenderer(generators,
                                             cdk.renderer.font.AWTFontManager())
-
+            model = self.renderer.getRenderer2DModel()
+            model.set(cdk.renderer.generators.standard.StandardGenerator.AtomColor, cdk.renderer.color.CDK2DAtomColors())
             drawArea = java.awt.Rectangle(300, 300)
             self.renderer.setup(mol, drawArea)
             image = java.awt.image.BufferedImage(300, 300,
@@ -622,7 +627,7 @@ class Smarts(object):
     """
     def __init__(self, smartspattern):
         """Initialise with a SMARTS pattern."""
-        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern)
+        self.smarts = cdk.smiles.smarts.SMARTSQueryTool(smartspattern, _chemobjbuilder)
 
     def findall(self, molecule):
         """Find all matches of the SMARTS pattern to a particular molecule.
