@@ -29,7 +29,8 @@ if sys.platform[:4] == "java":
     InvalidSmilesException = cdk.exception.InvalidSmilesException
     CDKException = cdk.exception.CDKException
     NullPointerException = java.lang.NullPointerException
-
+    # The 'or' method is not allowed in Python and is renamed to or_ by JPype
+    cdk.graph.Cycles.or_ = getattr(cdk.graph.Cycles, "or")
 else:
     from jpype import *
 
@@ -42,9 +43,9 @@ else:
 
     cdk = JPackage("org").openscience.cdk
     try:
-        _testmol = cdk.Molecule()
+        _testmol = cdk.Atom()
     except TypeError:
-        raise ImportError, "The CDK Jar file cannot be found."
+        raise ImportError("The CDK Jar file cannot be found.")
 
     #Exception wrappers for Jpype
     InvalidSmilesException = JavaException
@@ -52,7 +53,7 @@ else:
     NullPointerException = JavaException
 
 _chemobjbuilder = cdk.silent.SilentChemObjectBuilder.getInstance()
-_aromaticityperceptor = cdk.aromaticity.Aromaticity(cdk.aromaticity.ElectronDonation.daylight(), cdk.graph.Cycles.or(cdk.graph.Cycles.all(), cdk.graph.Cycles.all(6)))
+_aromaticityperceptor = cdk.aromaticity.Aromaticity(cdk.aromaticity.ElectronDonation.daylight(), cdk.graph.Cycles.or_(cdk.graph.Cycles.all(), cdk.graph.Cycles.all(6)))
 
 def _getdescdict():
     de = cdk.qsar.DescriptorEngine(cdk.qsar.IMolecularDescriptor, _chemobjbuilder)
@@ -136,7 +137,7 @@ def readfile(format, filename):
     """
     format = format.lower()
     if not os.path.isfile(filename):
-        raise IOError, "No such file: '%s'" % filename
+        raise IOError("No such file: '%s'" % filename)
     builder = cdk.DefaultChemObjectBuilder.getInstance()
     if format=="sdf":
         return (Molecule(mol) for mol in cdk.io.iterator.IteratingSDFReader(
@@ -157,7 +158,7 @@ def readfile(format, filename):
         manip = cdk.tools.manipulator.ChemFileManipulator
         return iter(Molecule(manip.getAllAtomContainers(chemfile)[0]),)
     else:
-        raise ValueError,"%s is not a recognised CDK format" % format
+        raise ValueError("%s is not a recognised CDK format" % format)
 
 def readstring(format, string):
     """Read in a molecule from a string.
@@ -178,11 +179,11 @@ def readstring(format, string):
         sp = cdk.smiles.SmilesParser(cdk.DefaultChemObjectBuilder.getInstance())
         try:
             ans = sp.parseSmiles(string)
-        except InvalidSmilesException, ex:
+        except InvalidSmilesException as ex:
             if sys.platform[:4] != "java":
                 #Jpype exception
                 ex = ex.message()
-            raise IOError, ex
+            raise IOError(ex)
         return Molecule(ans)
     elif format == 'inchi':
         factory = cdk.inchi.InChIGeneratorFactory.getInstance()
@@ -194,7 +195,7 @@ def readstring(format, string):
         manip = cdk.tools.manipulator.ChemFileManipulator
         return Molecule(manip.getAllAtomContainers(chemfile)[0])
     else:
-        raise ValueError,"%s is not a recognised CDK format" % format
+        raise ValueError("%s is not a recognised CDK format" % format)
 
 class Outputfile(object):
     """Represent a file to which *output* is to be sent.
@@ -216,9 +217,9 @@ class Outputfile(object):
         self.format = format.lower()
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         if not format in outformats:
-            raise ValueError,"%s is not a recognised CDK format" % format
+            raise ValueError("%s is not a recognised CDK format" % format)
         if self.format in ('smi','inchi', 'inchikey'):
             self._outputfile = open(self.filename, "w")
         else:
@@ -233,7 +234,7 @@ class Outputfile(object):
            molecule
         """
         if not self.filename:
-            raise IOError, "Outputfile instance is closed."
+            raise IOError("Outputfile instance is closed.")
         if self.format in ('smi','inchi', 'inchikey'):
             self._outputfile.write("%s\n" % molecule.write(format))
         else:
@@ -352,10 +353,10 @@ class Molecule(object):
         """
         format = format.lower()
         if format not in outformats:
-            raise ValueError,"%s is not a recognised CDK format" % format
+            raise ValueError("%s is not a recognised CDK format" % format)
 
         if filename is not None and not overwrite and os.path.isfile(filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
 
         if format in ("smi", "can"):
             if format == "can":
@@ -403,7 +404,7 @@ class Molecule(object):
         if fp in _fingerprinters:
             fingerprinter = _fingerprinters[fp]()
         else:
-            raise ValueError, "%s is not a recognised CDK Fingerprint type" % fp
+            raise ValueError("%s is not a recognised CDK Fingerprint type" % fp)
         return Fingerprint(fingerprinter.getBitFingerprint(self.Molecule).asBitSet())
 
     def calcdesc(self, descnames=[]):
@@ -423,7 +424,7 @@ class Molecule(object):
             try:
                 desc = _descdict[descname]
             except KeyError:
-                raise ValueError, "%s is not a recognised CDK descriptor type" % descname
+                raise ValueError("%s is not a recognised CDK descriptor type" % descname)
             try:
                 value = desc.calculate(self.Molecule).getValue()
                 if hasattr(value, "get"): # Instead of array
@@ -433,10 +434,10 @@ class Molecule(object):
                     ans[descname] = value.doubleValue()
                 else:
                     ans[descname] = _intvalue(value)
-            except CDKException, ex:
+            except CDKException as ex:
                 # Can happen if molecule has no 3D coordinates
                 pass
-            except NullPointerException, ex:
+            except NullPointerException as ex:
                 # Happens with moment of inertia descriptor
                 pass
         return ans
@@ -568,7 +569,7 @@ class Fingerprint(object):
                 idx = self.fp.nextSetBit(idx + 1)
             return bits
         else:
-            raise AttributeError, "Fingerprint has no attribute %s" % attr
+            raise AttributeError("Fingerprint has no attribute %s" % attr)
     def __str__(self):
         return self.fp.toString()
 
@@ -671,7 +672,7 @@ class MoleculeData(object):
         return self._mol.getProperties()
     def _testforkey(self, key):
         if not key in self:
-            raise KeyError, "'%s'" % key
+            raise KeyError("'%s'" % key)
     def keys(self):
         return list(self._data().keySet())
     def values(self):
