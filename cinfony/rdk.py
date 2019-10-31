@@ -1,5 +1,6 @@
 #-*. coding: utf-8 -*-
-## Copyright (c) 2008-2011, Noel O'Boyle; 2012, Adrià Cereto-Massagué
+## Copyright (c) 2008-2011, Noel O'Boyle; 2012-2019, Adrià Cereto-Massagué
+##               2014-2017, Maciej Wójcikowski;
 ## All rights reserved.
 ##
 ##  This file is part of Cinfony.
@@ -30,6 +31,7 @@ import rdkit.DataStructs
 import rdkit.Chem.MACCSkeys
 import rdkit.Chem.AtomPairs.Pairs
 import rdkit.Chem.AtomPairs.Torsions
+from rdkit.Chem.Pharm2D import Gobbi_Pharm2D, Generate
 
 # PIL and Tkinter
 try:
@@ -46,7 +48,7 @@ try:
 except ImportError:
     aggdraw = None
 
-fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions', 'morgan']
+fps = ['rdkit', 'layered', 'maccs', 'atompairs', 'torsions', 'morgan', 'pharm2d']
 """A list of supported fingerprint types"""
 descs = list(_descDict.keys())
 """A list of supported descriptors"""
@@ -323,9 +325,11 @@ class Molecule(object):
         return iter(self.atoms)
 
     def __str__(self):
+        
+        
         return self.write()
 
-    def calcdesc(self, descnames=[]):
+    def calcdesc(self, descnames=None):
         """Calculate descriptor values.
 
         Optional parameter:
@@ -335,8 +339,7 @@ class Molecule(object):
         calculated. See the descs variable for a list of available
         descriptors.
         """
-        if not descnames:
-            descnames = descs
+        descnames = descnames or descs
         ans = {}
         for descname in descnames:
             try:
@@ -375,6 +378,8 @@ class Molecule(object):
             info = opt.get('bitInfo', None)
             radius = opt.get('radius', 4)
             fp = Fingerprint(Chem.rdMolDescriptors.GetMorganFingerprintAsBitVect(self.Mol,radius,bitInfo=info))
+        elif fptype == "pharm2d":
+            fp = Fingerprint(Generate.Gen2DFingerprint(self.Mol, Gobbi_Pharm2D.factory))
         else:
             raise ValueError("%s is not a recognised RDKit Fingerprint type" % fptype)
         return fp
@@ -436,11 +441,11 @@ class Molecule(object):
             self.make3D(forcefield)
         _forcefields[forcefield](self.Mol, maxIters = steps)
 
-    def make3D(self, forcefield = "uff", steps = 50):
+    def make3D(self, forcefield = "mmff94", steps = 50):
         """Generate 3D coordinates.
 
         Optional parameters:
-           forcefield -- default is "uff". See the forcefields variable
+           forcefield -- default is "mmff94". See the forcefields variable
                          for a list of available forcefields.
            steps -- default is 50
 
@@ -514,7 +519,10 @@ class Smarts(object):
     """
     def __init__(self,smartspattern):
         """Initialise with a SMARTS pattern."""
-        self.rdksmarts = Chem.MolFromSmarts(smartspattern)
+        if isinstance(smartspattern, Molecule):
+            self.rdksmarts = smartspattern.Mol
+        else:
+            self.rdksmarts = Chem.MolFromSmarts(smartspattern)
         if not self.rdksmarts:
             raise IOError("Invalid SMARTS pattern.")
 
