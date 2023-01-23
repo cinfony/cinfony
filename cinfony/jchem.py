@@ -52,7 +52,7 @@ else:
     try:
         _testmol = MolHandler()
     except TypeError:
-        raise ImportError, "jchem.jar file cannot be found."
+        raise ImportError("jchem.jar file cannot be found.")
 
     # Exception wrappers for JPype
     MolExportException = JavaException
@@ -135,7 +135,7 @@ def readfile(format, filename):
     43
     """
     if not os.path.isfile(filename):
-        raise IOError, "No such file: '%s'" % filename
+        raise IOError("No such file: '%s'" % filename)
     if not format in outformats:
         raise ValueError("%s is not a recognised JChem format" % format)
     try:
@@ -168,11 +168,11 @@ def readstring(format, string):
     try:
         mh = MolHandler(string)
         return Molecule(mh.molecule)
-    except MolFormatException, ex:
+    except MolFormatException as ex:
         if sys.platform[:4] != "java":
             #Jpype exception
             ex = ex.message()
-            raise IOError, ex
+            raise IOError( ex)
         else:
             raise IOError("Problem reading the supplied string")
 
@@ -202,14 +202,14 @@ class Outputfile(object):
         self.format = format.lower()
         self.filename = filename
         if not overwrite and os.path.isfile(self.filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % self.filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % self.filename)
         if format in ("smi", 'cxsmi'):
             if not options:
                 options = ':a-H'
             out = chemaxon.formats.MolExporter.exportToFormat(self.Molecule,format +'les:a-H')
         try:
             self._writer = chemaxon.formats.MolExporter(filename, format + options)
-        except MolExportException,  e:
+        except MolExportException as e:
             raise ValueError(e)
         self.total = 0 # The total number of molecules written to the file
 
@@ -220,7 +220,7 @@ class Outputfile(object):
            molecule
         """
         if not self.filename:
-            raise IOError, "Outputfile instance is closed."
+            raise IOError("Outputfile instance is closed.")
         self._writer.write(molecule.Molecule)
         self.total += 1
 
@@ -331,7 +331,7 @@ class Molecule(object):
             raise ValueError("%s is not a recognised format" % format)
 
         if filename is not None and not overwrite and os.path.isfile(filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
 
         if format in ("smi", 'cxsmi'):
             if not options:
@@ -366,7 +366,7 @@ class Molecule(object):
                 fp = chemaxon.descriptors.ECFP(ECFPConfiguration)
                 fp.generate(self.Molecule)
         else:
-            raise ValueError, "%s is not a recognised fingerprint type" % fp
+            raise ValueError("%s is not a recognised fingerprint type" % fp)
         return Fingerprint(fp)
 
     def calcdesc(self, descnames=[]):
@@ -384,7 +384,7 @@ class Molecule(object):
         ans = {}
         for descname in descnames:
             if descname not in descs:
-                raise ValueError, "%s is not a recognised descriptor type" % descname
+                raise ValueError("%s is not a recognised descriptor type" % descname)
             if descname == 'RotatableBondsCount':
                 ta = chemaxon.calculations.TopologyAnalyser()
                 ta.setMolecule(self.Molecule)
@@ -478,7 +478,7 @@ class Fingerprint(object):
                 bits.append(setbit)
             return bits[1:] # Leave out the initial '-1'
         else:
-            raise AttributeError, "Fingerprint has no attribute %s" % attr
+            raise AttributeError("Fingerprint has no attribute %s" % attr)
     def __str__(self):
         return ", ".join([str(x) for x in self.fp.toIntArray()])
 
@@ -578,7 +578,7 @@ class MoleculeData(object):
         self._data = Molecule.Molecule.properties()
     def _testforkey(self, key):
         if not key in self:
-            raise KeyError, "'%s'" % key
+            raise KeyError("'%s'" % key)
     def keys(self):
         return list(self._data.keys)
     def values(self):

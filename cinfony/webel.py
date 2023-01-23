@@ -156,7 +156,7 @@ class Outputfile(object):
         if self.file.closed:
             raise IOError("Outputfile instance is closed.")
         output = molecule.write(self.format)
-        print >> self.file, output
+        print(output,self.file)
 
     def close(self):
         """Close the Outputfile to further writing."""
@@ -264,7 +264,7 @@ class Molecule(object):
         elif format == "names":
             try:
                 output = nci(_quo(self.smiles), "%s" % format).rstrip().split("\n")
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 if e.code == 404:
                     output = []
         elif format in ['inchi', 'inchikey']:
@@ -274,7 +274,7 @@ class Molecule(object):
             format = format + "_name"
             try:
                 output = nci(_quo(self.smiles), "%s" % format).rstrip()
-            except urllib2.URLError, e:
+            except urllib2.URLError as e:
                 if e.code == 404:
                     output = ""
         else:
@@ -283,9 +283,9 @@ class Molecule(object):
         if filename:
             if not overwrite and os.path.isfile(filename):
                 raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
-            outputfile = open(filename, "w")
-            print >> outputfile, output
-            outputfile.close()
+            with open(filename, "w") as outputfile:
+                print(output,outputfile)
+
         else:
             return output
 
@@ -304,14 +304,15 @@ class Molecule(object):
         """
         imagedata = nci(_quo(self.smiles), "image")
         if filename:
-            print >> open(filename, "wb"), imagedata
+            with open(filename, "wb") as fp:
+                print(imagedata,fp)
         if show:
             if not tk:
                 errormessage = ("Tkinter or Python Imaging "
                                 "Library not found, but is required for image "
                                 "display. See installation instructions for "
                                 "more information.")
-                raise ImportError, errormessage                 
+                raise ImportError(errormessage)                 
             root = tk.Tk()
             root.title(self.smiles)
             frame = tk.Frame(root, colormap="new", visual='truecolor').pack()
