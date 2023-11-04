@@ -80,7 +80,7 @@ class Molecule(object):
     
     def __init__(self, OpsinResult):
         if hasattr(OpsinResult, "_cinfony"):
-            raise IOError, "An opsin Molecule cannot be created from another Cinfony Molecule"
+            raise IOError("An opsin Molecule cannot be created from another Cinfony Molecule")
             
         self.OpsinResult = OpsinResult
         
@@ -103,10 +103,10 @@ class Molecule(object):
         Otherwise, a string is returned containing the result.
         """        
         if format not in outformats:
-            raise ValueError,"%s is not a recognised OPSIN format" % format
+            raise ValueError("%s is not a recognised OPSIN format" % format)
         
         if filename is not None and not overwrite and os.path.isfile(filename):
-            raise IOError, "%s already exists. Use 'overwrite=True' to overwrite it." % filename
+            raise IOError("%s already exists. Use 'overwrite=True' to overwrite it." % filename)
 
         if format == "cml":
             result = str(self.OpsinResult.getCml().toXML())
@@ -117,11 +117,11 @@ class Molecule(object):
 
         if filename:
             outputfile = open(filename, "w")
-            print >> outputfile, result
-            outputfile.close()
+            with open(outputfile,'w') as fp:
+                print(result,file=fp)
         else:
             return result
 
 if __name__=="__main__": #pragma: no cover
     mol = readstring("iupac", "propane")
-    print mol.write("inchi")
+    print(mol.write("inchi"))
